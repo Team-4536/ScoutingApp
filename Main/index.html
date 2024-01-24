@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <title>Minutebots Scouting</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="minutebots-logo.ico" type="image/x-icon">
+    <link rel="icon" href="minutebots-logo.png" type="image/x-icon">
 
     <style>
       body:not(#team) {
@@ -16,7 +16,7 @@
 
       h1, h2, label, th {
         font-family: Arial, sans-serif;
-        color: #b02c35;
+        color: #BB4536;
       }
 
       input, button, textarea {
@@ -49,32 +49,32 @@
       }
 
       #overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
       }
 
       #camera {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #00000080;
-      justify-content: center;
-      align-items: center;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
+        align-items: center;
       }
 
       #cameraStream {
-      width: 80%;
-      max-width: 600px;
-      height: auto;
-      border: 2px solid #ffffff;
-      border-radius: 8px;
+        width: 80%;
+        max-width: 600px;
+        height: auto;
+        border: 2px solid #ffffff;
+        border-radius: 8px;
       }
     </style>
   </head>
@@ -188,24 +188,23 @@
 
     <hr style="margin: 15px;">
 
-    
-
-    <div id="overlay" onclick="closeCamera()"></div>
+    <div id="overlay"></div>
   
     <div id="camera">
       <video id="cameraStream" autoplay></video>
-      <button style="height: 60px; font-size: larger;" onclick="closeCamera()">Close Camera</button>
+      <button style="height: 60px; font-size: larger; background-color: #b02c35;" onclick="closeCamera()">Close Camera</button>
     </div>
+
     <br><br>
 
     <div id="qrcode-container">
-      <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block"></div>
+      <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
     </div>
+
     <br><br>
 
     <script>
-      // crude offline support
-      navigator.serviceWorker.register("sw.js").then((r) => r.update());
+      navigator.serviceWorker.register("sw.js").then((r) => r.update()); // crude offline support
 
       numInputs = 'input:not([type="text"], [type="checkbox"])';
 
@@ -224,6 +223,106 @@
         reasonInput.disabled = !document.getElementById("e-stop").checked;
       }
 
+      // function openQRCode() {
+      //   const qrCodeContainer = document.getElementById('qrcode-container');
+      //   const overlay = document.getElementById('overlay');
+
+      //   qrCodeContainer.style.display = 'block';
+      //   overlay.style.display = 'block';
+      // }
+
+      // function closeQRCode() {
+      //   const qrCodeContainer = document.getElementById('qrcode-container');
+      //   const overlay = document.getElementById('overlay');
+
+      //   qrCodeContainer.style.display = 'none';
+      //   overlay.style.display = 'none';
+      // }
+
+      function openCamera() {
+        const modal = document.getElementById('camera');
+        const videoElement = document.getElementById('cameraStream');
+        const overlay = document.getElementById('overlay');
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(function (stream) {
+            videoElement.srcObject = stream;
+
+            modal.style.display = 'flex';
+            overlay.style.display = 'block';
+          })
+          .catch();
+      }
+
+      function closeCamera() {
+        const modal = document.getElementById('camera');
+        const videoElement = document.getElementById('cameraStream');
+        const overlay = document.getElementById('overlay');
+
+        const stream = videoElement.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+
+        modal.style.display = 'none';
+        overlay.style.display = 'none';
+      }
+
+      function func() {
+        var teamData = {
+          "team": document.getElementById("team").value,
+          "auto": {
+            "left-zone": document.getElementById("left-zone").checked,
+            "a-stop": document.getElementById("a-stop").checked,
+            "a-reason": document.getElementById("a-reason").value,
+            "succeed": {},
+            "fail": {},
+            "method": {}
+          },
+          "teleop": {
+            "e-stop": document.getElementById("e-stop").checked,
+            "e-reason": document.getElementById("e-reason").value,
+            "succeed": {},
+            "fail": {},
+            "method": {}
+          }
+        }
+
+        for (let inputField of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
+          let tr = inputField.closest("tr");
+          let sec = tr.closest("table").dataset['sec'];
+          let cat = tr.dataset['cat'];
+          let con = inputField.getAttribute('con');
+
+          teamData[sec][cat][con] = inputField.value;
+        }
+        
+        // console.log(JSON.stringify(teamData, null, 4));
+        return teamData
+      }
+
+      function generateQRCode() {
+        teamData = func()
+
+        const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
+        const compressedReadableStream = stream.pipeThrough(new CompressionStream("gzip"));
+        const blob = new Response(compressedReadableStream).blob();
+
+        blob.then((b) => {
+          b.arrayBuffer().then((arrayBuffer) => {
+            const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            document.getElementById("qrcode").innerHTML = "";
+            let qrcodeDataObject = { "ver": 1, "data": baseSixtyFourString }
+
+            new QRCode(document.getElementById("qrcode"), {
+              text: JSON.stringify(qrcodeDataObject),
+              correctLevel: QRCode.CorrectLevel.Q,
+              width: 400,
+              height: 400
+            });
+          })
+        })
+      }
+
       document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll(numInputs).forEach(function (input) {
           input.placeholder = "0";
@@ -236,16 +335,12 @@
         document.querySelectorAll('textarea').forEach(function (textarea) {
           textarea.addEventListener("input", function () {
             resizeTextarea(textarea);
-            console.log('rr')
           });
         });
         console.log(document.querySelectorAll(numInputs))
         document.querySelectorAll(numInputs).forEach(function (input) {
           input.addEventListener("input", function (event) {
-            // if (parseInt(event.target.value + '1') == parseInt(event.target.value)) {
-              console.log(event.target.value);
               event.target.value = event.target.value.replace(/\D/g, '');
-            // }
           });
         });
 
@@ -279,97 +374,6 @@
           });
         });
       });
-
-    function openCamera() {
-      const modal = document.getElementById('camera');
-      const videoElement = document.getElementById('cameraStream');
-      const overlay = document.getElementById('overlay');
-
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(function (stream) {
-          videoElement.srcObject = stream;
-
-          modal.style.display = 'flex';
-          overlay.style.display = 'block';
-        })
-        .catch();
-    }
-
-    function closeCamera() {
-      const modal = document.getElementById('camera');
-      const videoElement = document.getElementById('cameraStream');
-      const overlay = document.getElementById('overlay');
-
-      const stream = videoElement.srcObject;
-      const tracks = stream.getTracks();
-      tracks.forEach(track => track.stop());
-
-      modal.style.display = 'none';
-      overlay.style.display = 'none';
-    }
-
-      function generateQRCode() {
-        var new_data = {
-          "team": document.getElementById("team").value,
-          "auto": {
-            "left-zone": document.getElementById("left-zone").checked,
-            "a-stop": document.getElementById("a-stop").checked,
-            "a-reason": document.getElementById("a-reason").value,
-            "succeed": {},
-            "fail": {},
-            "method": {}
-          },
-          "teleop": {
-            "e-stop": document.getElementById("e-stop").checked,
-            "e-reason": document.getElementById("e-reason").value,
-            "succeed": {},
-            "fail": {},
-            "method": {}
-          }
-        }
-
-        for (let inputField of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
-          let tr = inputField.closest("tr");
-          let sec = tr.closest("table").dataset['sec'];
-          let cat = tr.dataset['cat'];
-          let con = inputField.getAttribute('con');
-
-          new_data[sec][cat][con] = inputField.value;
-        }
-
-        console.log(JSON.stringify(new_data, null, 4));
-
-        const stream = new Blob([JSON.stringify(new_data)], { type: 'application/json' }).stream();
-        const compressedReadableStream = stream.pipeThrough(new CompressionStream("gzip"));
-        const blob = new Response(compressedReadableStream).blob();
-
-        blob.then((b) => {
-          b.arrayBuffer().then((arrayBuffer) => {
-            const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-            document.getElementById("qrcode").innerHTML = "";
-            let qrcodeDataObject = { "ver": 1, "data": baseSixtyFourString }
-
-            new QRCode(document.getElementById("qrcode"), {
-              text: JSON.stringify(qrcodeDataObject),
-              correctLevel: QRCode.CorrectLevel.Q,
-              width: 400,
-              height: 400
-            });
-          })
-        })
-
-        // var table = document.querySelector('table');
-        // var rows = table.querySelectorAll('tr');
-
-        // rows.forEach(function(row) {
-        //   var items = row.querySelectorAll('input, textarea');
-
-        //   items.forEach(function(item) {
-        //     console.log(item.value);
-        //   });
-        // });
-      }
     </script>
   </body>
-
 </html>
