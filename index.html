@@ -310,7 +310,7 @@
           b.arrayBuffer().then((arrayBuffer) => {
             const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
             document.getElementById("qrcode").innerHTML = "";
-            let qrcodeDataObject = { "ver": 1, "data": baseSixtyFourString }
+            let qrcodeDataObject = { "ver": 1, "data": `https://team-4536.github.io/ScoutingApp/${baseSixtyFourString}` }
 
             new QRCode(document.getElementById("qrcode"), {
               text: JSON.stringify(qrcodeDataObject),
