@@ -88,7 +88,8 @@
 
     <label>Team:</label>
     <input id="team">
-    <button type="button" onclick="generateQRCode()">Generate QR Code</button>
+    <!-- <button type="button" onclick="generateQRCode()">Generate QR Code</button> -->
+    <button type="button" onclick="openQRCode()">Generate QR Code</button>
     <button onclick="openCamera()">Open Camera</button>
     <hr>
 
@@ -222,21 +223,21 @@
         reasonInput.disabled = !document.getElementById("e-stop").checked;
       }
 
-      // function openQRCode() {
-      //   const qrCodeContainer = document.getElementById('qrcode-container');
-      //   const overlay = document.getElementById('overlay');
+      function openQRCode() {
+        const qrCodeContainer = document.getElementById('qrcode-container');
+        const overlay = document.getElementById('overlay');
 
-      //   qrCodeContainer.style.display = 'block';
-      //   overlay.style.display = 'block';
-      // }
+        qrCodeContainer.style.display = 'block';
+        overlay.style.display = 'block';
+      }
 
-      // function closeQRCode() {
-      //   const qrCodeContainer = document.getElementById('qrcode-container');
-      //   const overlay = document.getElementById('overlay');
+      function closeQRCode() {
+        const qrCodeContainer = document.getElementById('qrcode-container');
+        const overlay = document.getElementById('overlay');
 
-      //   qrCodeContainer.style.display = 'none';
-      //   overlay.style.display = 'none';
-      // }
+        qrCodeContainer.style.display = 'none';
+        overlay.style.display = 'none';
+      }
 
       function openCamera() {
         const modal = document.getElementById('camera');
