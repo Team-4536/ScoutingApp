@@ -327,7 +327,7 @@
       }
 
       function decodeData(encodedData) {
-        return JSON.parse(atob(encodedData));
+        return JSON.parse(atob(JSON.parse(encodedData)));
       }
 
       document.addEventListener('DOMContentLoaded', function () {
