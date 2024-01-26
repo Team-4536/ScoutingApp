@@ -245,14 +245,14 @@
       function openCamera() {
         const modal = document.getElementById('camera');
         const videoElement = document.getElementById('cameraStream');
-        const overlay = document.getElementById('overlay');
+        // const overlay = document.getElementById('overlay');
 
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
           .then(function (stream) {
             videoElement.srcObject = stream;
 
             modal.style.display = 'flex';
-            overlay.style.display = 'block';
+            // overlay.style.display = 'block';
           })
           .catch();
       }
