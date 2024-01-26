@@ -243,6 +243,7 @@
 
       function closeQRCode() {
         document.getElementById('qrcode-container').style.display = 'none';
+        console.log(decodeData('H4sIAAAAAAAAE5WPQRICIQwE/5Kz+wF+E3EoLcOGguxFir/Lige9yHrrJDNTk0oGjuSITsSbKblKgmDLQ1eQCywF/bIU0/QxZnDRddjK5j1w2Z0c03uX7nlQkBe0TnyTqSjCrjrL6jqDYG9UCd/d8H+3vsp+gJd4HmQ5He49CTjy08+I1p5IFhUVpwEAAA=='))
       }
 
       function openCamera() {
@@ -323,6 +324,10 @@
             });
           })
         })
+      }
+
+      function decodeData(encodedData) {
+        return JSON.parse(atob(encodedData))
       }
 
       document.addEventListener('DOMContentLoaded', function () {
