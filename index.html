@@ -327,7 +327,11 @@
       }
 
       function decodeData(encodedData) {
-        return JSON.parse(atob(JSON.parse(encodedData)));
+        a = JSON.parse(encodedData);
+        b = atob(a);
+        c = JSON.parse(b);
+        
+        return c;
       }
 
       document.addEventListener('DOMContentLoaded', function () {
