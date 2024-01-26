@@ -77,9 +77,16 @@
         border: 2px solid #ffffff;
         border-radius: 8px;
       }
+
       #qrcode-container {
-        top:0;
-        left:0;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
         align-items: center;
       }
     </style>
@@ -93,8 +100,6 @@
 
     <label>Team:</label>
     <input id="team">
-    <!-- <button type="button" onclick="generateQRCode()">Generate QR Code</button> -->
-    <!-- <button type="button" onclick="openQRCode()">Generate QR Code</button> -->
     <button onclick="openQRCode()">Generate QR Code</button>
     <button onclick="openCamera()">Open Camera</button>
     <hr>
@@ -203,6 +208,7 @@
 
     <div id="qrcode-container">
       <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+      <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeQRCode()">Close QR Code</button>
     </div>
 
     <br><br>
@@ -227,35 +233,19 @@
         reasonInput.disabled = !document.getElementById("e-stop").checked;
       }
 
-      function openQRCode() {
-        const qrCodeContainer = document.getElementById('qrcode-container');
-    
+      function openQRCode() { document.getElementById('qrcode-container').style.display = 'block' }
 
-        generateQRCode()
-
-        qrCodeContainer.style.display = 'block';
-        
-      }
-
-      function closeQRCode() {
-        const qrCodeContainer = document.getElementById('qrcode-container');
-      
-
-        qrCodeContainer.style.display = 'none';
-        
-      }
+      function closeQRCode() { document.getElementById('qrcode-container').style.display = 'none' }
 
       function openCamera() {
         const modal = document.getElementById('camera');
         const videoElement = document.getElementById('cameraStream');
         
-
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
           .then(function (stream) {
             videoElement.srcObject = stream;
 
             modal.style.display = 'flex';
-          
           })
           .catch();
       }
@@ -264,13 +254,11 @@
         const modal = document.getElementById('camera');
         const videoElement = document.getElementById('cameraStream');
         
-
         const stream = videoElement.srcObject;
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
 
         modal.style.display = 'none';
-        
       }
 
       function func() {
