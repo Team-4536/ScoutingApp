@@ -327,11 +327,25 @@
       }
 
       function decodeData(encodedData) {
-        // a = JSON.parse(encodedData);
-        b = atob(encodedData);
-        // c = JSON.parse(b);
         
-        return b;
+      }
+
+      function fillTeamData(dataObject) {
+        var count = 0;
+
+        for(var prop in obj) {
+          if (obj.hasOwnProperty(prop)) {
+            ++count;
+          }
+        }
+
+        for (let i = 0; i < count; i++) {
+          try {
+            document.getElementById()
+          } catch {
+            
+          }
+        }
       }
 
       document.addEventListener('DOMContentLoaded', function () {
