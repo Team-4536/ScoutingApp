@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="qrcode.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Minutebots Scouting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="minutebots-logo.ico" type="image/x-icon">
+
+    <style>
+      body:not(#team) {
+        text-align: center;
+        margin: 0px;
+      }
+
+      h1, h2, label, th {
+        font-family: Arial, sans-serif;
+        color: #BB4536;
+      }
+
+      input, button, textarea {
+        border-radius: 7px;
+        border-width: 3px;
+        border-color: #a00000;
+        background-color: #e2a3a32b;
+        font-weight: bold;
+        color: #000000;
+      }
+      
+      button {
+        margin-left: 20px
+      }
+
+      input:not([type="text"], [type="checkbox"], #team), textarea {
+        width: 100px;
+        height: 16px;
+        min-width: 100px;
+        min-height: 16px;
+        max-width: 220px;
+        max-height: 145px;
+        font-family: Arial, sans-serif;
+        font-size: smaller;
+      }
+
+      input:disabled {
+        border-width: 3px;
+        border-color: #e6c1c1;
+        background-color: #e7afaf77;
+      }
+
+      #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #camera {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #cameraStream {
+        width: 80%;
+        max-width: 600px;
+        height: auto;
+        border: 2px solid #ffffff;
+        border-radius: 8px;
+      }
+
+      #qrcode-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <img src="minutebots-logo.png" width=325px>
+
+    <h1 style="margin: -15px;">Minutebots Scouting</h1>
+    <br>
+
+    <label>Team:</label>
+    <input id="team">
+    <!-- <button type="button" onclick="generateQRCode()">Generate QR Code</button> -->
+    <!-- <button type="button" onclick="openQRCode()">Generate QR Code</button> -->
+    <button onclick="openQRCode()">Generate QR Code</button>
+    <button onclick="openCamera()">Open Camera</button>
+    <hr>
+
+    <h2>Auto</h2>
+
+    <label>Left alliance zone</label>
+    <label class="switch"><input type="checkbox" id="left-zone"></label>
+    <br>
+
+    <label>A-Stop</label>
+    <label class="switch"><input type="checkbox" id="a-stop" onchange="toggleAStop()"></label>
+    <label>Reason:</label>
+    <input type="text" id="a-reason" placeholder="" disabled>
+    <br></br>
+
+    <table data-sec="auto" rule="all">
+      <tr>
+        <th></th>
+        <th>Amp</th>
+        <th>Speaker</th>
+        <th>Floor Intake</th>
+      </tr>
+
+      <tr data-cat="succeed">
+        <th style="text-align:right">Times Succeeded</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+      </tr>
+
+      <tr data-cat="fail">
+        <th style="text-align:right">Times Failed</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+      </tr>
+
+      <tr data-cat="method">
+        <th style="text-align:right">What Method</th>
+        <td><textarea con="amp"></textarea></td>
+        <td><textarea con="spkr"></textarea></td>
+        <td><textarea con="flr"></textarea></td>
+      </tr>
+    </table>
+    <hr>
+
+    <h2>Teleop</h2>
+
+    <label>E-Stop</label>
+    <label class="switch"><input type="checkbox" id="e-stop" onchange="toggleEStop()"></label>
+    <label>Reason:</label>
+    <input type="text" id="e-reason" disabled>
+    <br><br>
+
+    <table data-sec="teleop">
+      <tr>
+        <th></th>
+        <th>Amp</th>
+        <th>Speaker</th>
+        <th>Floor Intake</th>
+        <th>Source Intake</th>
+        <th>Climb</th>
+        <th>Trap</th>
+      </tr>
+
+      <tr data-cat="succeed">
+        <th style="text-align:right">Times Succeeded</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+        <td><input con="src"></td>
+        <td><input con="clmb"></td>
+        <td><input con="trp"></td>
+      </tr>
+
+      <tr data-cat="fail">
+        <th style="text-align:right">Times Failed</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+        <td><input con="src"></td>
+        <td><input con="clmb"></td>
+        <td><input con="trp"></td>
+      </tr>
+
+      <tr data-cat="method">
+        <th style="text-align:right">What Method</th>
+        <td><textarea con="amp"></textarea></td>
+        <td><textarea con="spkr"></textarea></td>
+        <td><textarea con="flr"></textarea></td>
+        <td><textarea con="src"></textarea></td>
+        <td><textarea con="clmb"></textarea></td>
+        <td><textarea con="trp"></textarea></td>
+      </tr>
+    </table>
+
+    <hr style="margin: 15px;">
+  
+    <div id="camera">
+      <video id="cameraStream" autoplay></video>
+      <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeCamera()">Close Camera</button>
+    </div>
+
+    <br><br>
+
+    <div id="qrcode-container">
+      <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+      <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeQRCode()">Close QR Code</button>
+    </div>
+
+    <br><br>
+
+    <script>
+      navigator.serviceWorker.register("sw.js").then((r) => r.update()); // crude offline support
+
+      numInputs = 'input:not([type="text"], [type="checkbox"])';
+
+      function resizeTextarea(textarea) {
+        textarea.style.height = "auto";
+        textarea.style.height = (textarea.scrollHeight) + "px";
+      }
+
+      function toggleAStop() {
+        const reasonInput = document.getElementById("a-reason");
+        reasonInput.disabled = !document.getElementById("a-stop").checked;
+      }
+
+      function toggleEStop() {
+        const reasonInput = document.getElementById("e-reason");
+        reasonInput.disabled = !document.getElementById("e-stop").checked;
+      }
+
+      function openQRCode() {
+        generateQRCode()
+
+        document.getElementById('qrcode-container').style.display = 'block';
+      }
+
+      function closeQRCode() {
+        document.getElementById('qrcode-container').style.display = 'none';
+        console.log(decodeData('H4sIAAAAAAAAE5WPQRICIQwE/5Kz+wF+E3EoLcOGguxFir/Lige9yHrrJDNTk0oGjuSITsSbKblKgmDLQ1eQCywF/bIU0/QxZnDRddjK5j1w2Z0c03uX7nlQkBe0TnyTqSjCrjrL6jqDYG9UCd/d8H+3vsp+gJd4HmQ5He49CTjy08+I1p5IFhUVpwEAAA=='))
+      }
+
+      function openCamera() {
+        const modal = document.getElementById('camera');
+        const videoElement = document.getElementById('cameraStream');
+        
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+          .then(function (stream) {
+            videoElement.srcObject = stream;
+
+            modal.style.display = 'flex';
+          })
+          .catch();
+      }
+
+      function closeCamera() {
+        const modal = document.getElementById('camera');
+        const videoElement = document.getElementById('cameraStream');
+        
+        const stream = videoElement.srcObject;
+        const tracks = stream.getTracks();
+        tracks.forEach(track => track.stop());
+
+        modal.style.display = 'none';
+      }
+
+      function func() {
+        var teamData = {
+          "team": document.getElementById("team").value,
+          "auto": {
+            "left-zone": document.getElementById("left-zone").checked,
+            "a-stop": document.getElementById("a-stop").checked,
+            "a-reason": document.getElementById("a-reason").value,
+            "succeed": {},
+            "fail": {},
+            "method": {}
+          },
+          "teleop": {
+            "e-stop": document.getElementById("e-stop").checked,
+            "e-reason": document.getElementById("e-reason").value,
+            "succeed": {},
+            "fail": {},
+            "method": {}
+          }
+        }
+
+        for (let inputField of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
+          let tr = inputField.closest("tr");
+          let sec = tr.closest("table").dataset['sec'];
+          let cat = tr.dataset['cat'];
+          let con = inputField.getAttribute('con');
+
+          teamData[sec][cat][con] = inputField.value;
+        }
+        
+        console.log(JSON.stringify(teamData, null, 4));
+        return teamData
+      }
+
+      function generateQRCode() {
+        teamData = func()
+
+        const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
+        const compressedReadableStream = stream.pipeThrough(new CompressionStream("gzip"));
+        const blob = new Response(compressedReadableStream).blob();
+
+        blob.then((b) => {
+          b.arrayBuffer().then((arrayBuffer) => {
+            const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            document.getElementById("qrcode").innerHTML = "";
+            let qrcodeDataObject = { "ver": 1, "data": baseSixtyFourString }
+
+            new QRCode(document.getElementById("qrcode"), {
+              text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
+              correctLevel: QRCode.CorrectLevel.Q,
+              width: 400,
+              height: 400
+            });
+          })
+        })
+      }
+
+      function decodeData(encodedData) {
+        
+      }
+
+      function fillTeamData(dataObject) {
+        var count = 0;
+
+        for(var prop in obj) {
+          if (obj.hasOwnProperty(prop)) {
+            ++count;
+          }
+        }
+
+        for (let i = 0; i < count; i++) {
+          try {
+            document.getElementById()
+          } catch {
+            
+          }
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll(numInputs).forEach(function (input) {
+          input.placeholder = "0";
+          input.type = "number";
+          input.min = "0";
+        });
+
+        document.getElementById('team').placeholder = "0000";
+
+        document.querySelectorAll('textarea').forEach(function (textarea) {
+          textarea.addEventListener("input", function () {
+            resizeTextarea(textarea);
+          });
+        });
+        console.log(document.querySelectorAll(numInputs))
+        document.querySelectorAll(numInputs).forEach(function (input) {
+          input.addEventListener("input", function (event) {
+              event.target.value = event.target.value.replace(/\D/g, '');
+          });
+        });
+
+        document.getElementById('team').addEventListener('input', function (event) {
+          value = event.target.value;
+
+          try {
+            if (parseInt(value) > 9999) {
+              if (value != '10000') {
+                event.target.value = event.target.value.slice(0, -1);
+              } else {
+                event.target.value = '9999';
+              }
+            }
+
+            if (value.length < 4) {
+              event.target.value = '0'.repeat(4 - value.length) + event.target.value;
+            } else if (value.length > 4 && value[0] == '0') {
+              event.target.value = value.slice(1);
+            }
+          } catch {}
+        });
+
+        document.querySelectorAll(`${numInputs}:not(#team)`).forEach(function (input) {
+          input.addEventListener('input', function (event) {
+            try {
+              if (parseInt(event.target.value) > 999) {
+                event.target.value = '999';
+              }
+            } catch {}
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
