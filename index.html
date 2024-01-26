@@ -77,6 +77,11 @@
         border: 2px solid #ffffff;
         border-radius: 8px;
       }
+      #qrcode-container {
+        top:0;
+        left:0;
+        align-items: center;
+      }
     </style>
   </head>
 
@@ -188,8 +193,6 @@
     </table>
 
     <hr style="margin: 15px;">
-
-    <div id="overlay"></div>
   
     <div id="camera">
       <video id="cameraStream" autoplay></video>
@@ -226,33 +229,33 @@
 
       function openQRCode() {
         const qrCodeContainer = document.getElementById('qrcode-container');
-        const overlay = document.getElementById('overlay');
+    
 
         generateQRCode()
 
         qrCodeContainer.style.display = 'block';
-        overlay.style.display = 'block';
+        
       }
 
       function closeQRCode() {
         const qrCodeContainer = document.getElementById('qrcode-container');
-        const overlay = document.getElementById('overlay');
+      
 
         qrCodeContainer.style.display = 'none';
-        overlay.style.display = 'none';
+        
       }
 
       function openCamera() {
         const modal = document.getElementById('camera');
         const videoElement = document.getElementById('cameraStream');
-        // const overlay = document.getElementById('overlay');
+        
 
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
           .then(function (stream) {
             videoElement.srcObject = stream;
 
             modal.style.display = 'flex';
-            // overlay.style.display = 'block';
+          
           })
           .catch();
       }
@@ -260,14 +263,14 @@
       function closeCamera() {
         const modal = document.getElementById('camera');
         const videoElement = document.getElementById('cameraStream');
-        const overlay = document.getElementById('overlay');
+        
 
         const stream = videoElement.srcObject;
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop());
 
         modal.style.display = 'none';
-        overlay.style.display = 'none';
+        
       }
 
       function func() {
