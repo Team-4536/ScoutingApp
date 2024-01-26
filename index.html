@@ -100,6 +100,8 @@
 
     <label>Team:</label>
     <input id="team">
+    <!-- <button type="button" onclick="generateQRCode()">Generate QR Code</button> -->
+    <!-- <button type="button" onclick="openQRCode()">Generate QR Code</button> -->
     <button onclick="openQRCode()">Generate QR Code</button>
     <button onclick="openCamera()">Open Camera</button>
     <hr>
@@ -233,9 +235,15 @@
         reasonInput.disabled = !document.getElementById("e-stop").checked;
       }
 
-      function openQRCode() { document.getElementById('qrcode-container').style.display = 'block' }
+      function openQRCode() {
+        generateQRCode()
 
-      function closeQRCode() { document.getElementById('qrcode-container').style.display = 'none' }
+        document.getElementById('qrcode-container').style.display = 'block';
+      }
+
+      function closeQRCode() {
+        document.getElementById('qrcode-container').style.display = 'none';
+      }
 
       function openCamera() {
         const modal = document.getElementById('camera');
