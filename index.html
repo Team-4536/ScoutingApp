@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Minutebots Scouting</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="minutebots-logo.ico" type="image/x-icon">
+
+    <style>
+      body:not(#team) {
+        text-align: center;
+        margin: 0px;
+      }
+
+      h1, h2, label, th {
+        font-family: Arial, sans-serif;
+        color: #BB4536;
+      }
+
+      input, button, textarea {
+        border-radius: 7px;
+        border-width: 3px;
+        border-color: #a00000;
+        background-color: #e2a3a32b;
+        font-weight: bold;
+        color: #000000;
+      }
+      
+      button {
+        margin-left: 20px
+      }
+
+      input:not([type="text"], [type="checkbox"], #team), textarea {
+        width: 100px;
+        height: 16px;
+        min-width: 100px;
+        min-height: 16px;
+        max-width: 220px;
+        max-height: 145px;
+        font-family: Arial, sans-serif;
+        font-size: smaller;
+      }
+
+      input:disabled {
+        border-width: 3px;
+        border-color: #e6c1c1;
+        background-color: #e7afaf77;
+      }
+
+      #overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      #camera {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #cameraStream {
+        width: 80%;
+        max-width: 600px;
+        height: auto;
+        border: 2px solid #ffffff;
+        border-radius: 8px;
+      }
+
+      #qrcode-container {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #00000080;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <img src="minutebots-logo.png" width=325px>
+
+    <h1 style="margin: -15px;">Minutebots Scouting</h1>
+    <br>
+
+    <label>Team:</label>
+    <input id="team">
+    <button onclick="openQRCode()">Generate QR Code</button>
+    <button onclick="openCamera()">Open Camera</button>
+    <hr>
+
+    <h2>Auto</h2>
+
+    <label>Left alliance zone</label>
+    <label class="switch"><input type="checkbox" id="left-zone"></label>
+    <br>
+
+    <label>A-Stop</label>
+    <label class="switch"><input type="checkbox" id="a-stop" onchange="toggleAStop()"></label>
+    <label>Reason:</label>
+    <input type="text" id="a-reason" placeholder="" disabled>
+    <br></br>
+
+    <table data-sec="auto">
+      <tr>
+        <th></th>
+        <th>Amp</th>
+        <th>Speaker</th>
+        <th>Floor Intake</th>
+      </tr>
+
+      <tr data-cat="succeed">
+        <th style="text-align:right">Times Succeeded</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+      </tr>
+
+      <tr data-cat="fail">
+        <th style="text-align:right">Times Failed</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+      </tr>
+
+      <tr data-cat="method">
+        <th style="text-align:right">What Method</th>
+        <td><textarea con="amp"></textarea></td>
+        <td><textarea con="spkr"></textarea></td>
+        <td><textarea con="flr"></textarea></td>
+      </tr>
+    </table>
+    <hr>
+
+    <h2>Teleop</h2>
+
+    <label>E-Stop</label>
+    <label class="switch"><input type="checkbox" id="e-stop" onchange="toggleEStop()"></label>
+    <label>Reason:</label>
+    <input type="text" id="e-reason" disabled>
+    <br><br>
+
+    <table data-sec="teleop">
+      <tr>
+        <th></th>
+        <th>Amp</th>
+        <th>Speaker</th>
+        <th>Floor Intake</th>
+        <th>Source Intake</th>
+        <th>Climb</th>
+        <th>Trap</th>
+      </tr>
+
+      <tr data-cat="succeed">
+        <th style="text-align:right">Times Succeeded</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+        <td><input con="src"></td>
+        <td><input con="clmb"></td>
+        <td><input con="trp"></td>
+      </tr>
+
+      <tr data-cat="fail">
+        <th style="text-align:right">Times Failed</th>
+        <td><input con="amp"></td>
+        <td><input con="spkr"></td>
+        <td><input con="flr"></td>
+        <td><input con="src"></td>
+        <td><input con="clmb"></td>
+        <td><input con="trp"></td>
+      </tr>
+
+      <tr data-cat="method">
+        <th style="text-align:right">What Method</th>
+        <td><textarea con="amp"></textarea></td>
+        <td><textarea con="spkr"></textarea></td>
+        <td><textarea con="flr"></textarea></td>
+        <td><textarea con="src"></textarea></td>
+        <td><textarea con="clmb"></textarea></td>
+        <td><textarea con="trp"></textarea></td>
+      </tr>
+    </table>
+
+    <hr style="margin: 15px;">
+  
+    <div id="camera">
+      <video id="cameraStream" autoplay></video>
+      <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeCamera()">Close Camera</button>
+    </div>
+
+    <br><br>
+
+    <div id="qrcode-container">
+      <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+      <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeQRCode()">Close QR Code</button>
+    </div>
+
+    <br><br>
+
+    <script src="qrcode.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
