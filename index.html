@@ -349,6 +349,7 @@
         const autoTable = document.querySelector('table[data-sec="auto"]')
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
+            console.log(`auto-${con[a]}-${cat[b]}`)
             console.log(teamData.auto[con[a]][cat[b]])
             getElementbyId(`auto-${con[a]}-${cat[b]}`) = teamData.auto[con[a]][cat[b]]
           }
