@@ -117,7 +117,7 @@
     <input type="text" id="a-reason" placeholder="" disabled>
     <br></br>
 
-    <table data-sec="auto" rule="all">
+    <table data-sec="auto">
       <tr>
         <th></th>
         <th>Amp</th>
@@ -216,7 +216,7 @@
 
     <script>
       async function decodeOnLoad() {
-        // try {
+        try {
           let encodedURL = window.location.search
 
           if (window.location.search[0] == '?') {
@@ -226,7 +226,7 @@
           const urlData = JSON.parse(decodeURI(encodedURL)).data
           const c = await decodeData(urlData)
           await fillTeamData(c)
-        // } catch {}
+        } catch {}
       } decodeOnLoad();
 
       navigator.serviceWorker.register("sw.js").then((r) => r.update());
@@ -239,22 +239,19 @@
       }
 
       function toggleAStop() {
-        const reasonInput = document.getElementById("a-reason");
-        reasonInput.disabled = !document.getElementById("a-stop").checked;
+        document.getElementById("a-reason").disabled = !document.getElementById("a-stop").checked;
       }
 
       function toggleEStop() {
-        const reasonInput = document.getElementById("e-reason");
-        reasonInput.disabled = !document.getElementById("e-stop").checked;
+        document.getElementById("e-reason").disabled = !document.getElementById("e-stop").checked;
       }
 
       function openQRCode() {
         generateQRCode()
-
         document.getElementById('qrcode-container').style.display = 'block';
       }
 
-      async function closeQRCode() {
+      function closeQRCode() {
         document.getElementById('qrcode-container').style.display = 'none';
       }
 
@@ -272,14 +269,8 @@
       }
 
       function closeCamera() {
-        const modal = document.getElementById('camera');
-        const videoElement = document.getElementById('cameraStream');
-        
-        const stream = videoElement.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
-
-        modal.style.display = 'none';
+        document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
+        document.getElementById('camera').style.display = 'none';
       }
 
       function dataObject() {
@@ -350,12 +341,15 @@
       }
 
       async function fillTeamData(teamData) {
-        var thingy = ['succeed', 'fail', 'method']
-        var thing = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp']
-
+        var con = ['succeed', 'fail', 'method']
+        var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp']
+        
+        const autoTable = document.querySelector('table[data-sec="auto"]')
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
-            console.log(teamData.auto[thingy[a]][thing[b]])
+            console.log(teamData.auto[con[a]][cat[b]])
+
+            autoTable.tr(con).value = teamData.auto[con[a]][cat[b]]
           }
         }
 
