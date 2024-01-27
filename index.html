@@ -226,7 +226,7 @@
           const urlData = JSON.parse(decodeURI(encodedURL)).data
           console.log(urlData)
           console.log(await decodeData(urlData))
-          console.log(await fillTeamData(decodeData(urlData)))
+          console.log(await fillTeamData(await decodeData(urlData)))
           fillTeamData(decodeData(urlData))
         } catch {}
       } decodeOnLoad();
