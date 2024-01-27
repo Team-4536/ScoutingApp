@@ -222,8 +222,12 @@
           if (window.location.search[0] == '?') {
               encodedURL = encodedURL.slice(1);
           }
-              const urlData = JSON.parse(decodeURI(encodedURL)).data
-              fillTeamData(decodeData(urlData))
+          console.log(encodedURL)  
+          const urlData = JSON.parse(decodeURI(encodedURL)).data
+          console.log(urlData)
+          console.log(decodeData(urlData))
+          console.log(fillTeamData(decodeData(urlData)))
+          fillTeamData(decodeData(urlData))
         } catch {}
       } decodeOnLoad();
 
