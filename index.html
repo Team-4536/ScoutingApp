@@ -216,19 +216,17 @@
 
     <script>
       async function decodeOnLoad() {
-        try {
+        // try {
           let encodedURL = window.location.search
 
           if (window.location.search[0] == '?') {
               encodedURL = encodedURL.slice(1);
           }
-          console.log(encodedURL)  
+          
           const urlData = JSON.parse(decodeURI(encodedURL)).data
-          console.log(urlData)
-          console.log(await decodeData(urlData))
-          console.log(await fillTeamData(await decodeData(urlData)))
-          fillTeamData(decodeData(urlData))
-        } catch {}
+          const c = await decodeData(urlData)
+          await fillTeamData(c)
+        // } catch {}
       } decodeOnLoad();
 
       navigator.serviceWorker.register("sw.js").then((r) => r.update());
