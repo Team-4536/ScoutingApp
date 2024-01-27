@@ -293,13 +293,14 @@
           }
         }
 
-        for (let inputField of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
-          let tr = inputField.closest("tr");
+        for (let num of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
+          let tr = num.closest("tr");
           let sec = tr.closest("table").dataset['sec'];
           let cat = tr.dataset['cat'];
-          let con = inputField.getAttribute('con');
+          let con = num.getAttribute('con');
 
-          teamData[sec][cat][con] = inputField.value;
+          teamData[sec][cat][con] = num.value;
+          num.id = `${sec}-${cat}-${con}`
         }
         
         console.log(JSON.stringify(teamData, null, 4));
@@ -348,8 +349,7 @@
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
             console.log(teamData.auto[con[a]][cat[b]])
-
-            autoTable.tr(con).value = teamData.auto[con[a]][cat[b]]
+            getElementbyId(`auto-${con[a]}-${cat[b]}`) = teamData.auto[con[a]][cat[b]]
           }
         }
 
