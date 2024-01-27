@@ -246,7 +246,7 @@
       }
 
       function openQRCode() {
-        generateQRCode()
+        generateQRCode();
         document.getElementById('qrcode-container').style.display = 'block';
       }
 
@@ -258,8 +258,7 @@
           .then(function (stream) {
             document.getElementById('cameraStream').srcObject = stream;
             document.getElementById('camera').style.display = 'flex';
-          })
-          .catch();
+          }).catch();
       }
 
       function closeCamera() {
@@ -294,11 +293,11 @@
           let con = num.getAttribute('con');
 
           teamData[sec][cat][con] = num.value;
-          num.setAttribute('id', `${sec}-${cat}-${con}`)
+          num.setAttribute('id', `${sec}-${cat}-${con}`);
         }
         
         console.log(JSON.stringify(teamData, null, 4));
-        return teamData
+        return teamData;
       }
 
       function generateQRCode() {
@@ -330,7 +329,7 @@
           let blob = new Blob([bytes]);
           let decoder = blob.stream().pipeThrough(new DecompressionStream("gzip"));
           blob = await new Response(decoder).blob();
-          let text = await blob.text()
+          let text = await blob.text();
           return JSON.parse(text);
         } catch {}
       }
@@ -342,11 +341,11 @@
         var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
         document.getElementById("team").value = teamData.team;
-        document.getElementById("left-zone").checked = teamData.left-zone;
-        document.getElementById("a-stop").checked = teamData.a-stop;
-        document.getElementById("a-reason").value = teamData.a-reason;
-        document.getElementById("e-stop").checked = teamData.e-stop;
-        document.getElementById("e-reason").value = e-reason;
+        document.getElementById("left-zone").checked = teamData.auto.left-zone;
+        document.getElementById("a-stop").checked = teamData.auto.a-stop;
+        document.getElementById("a-reason").value = teamData.auto.a-reason;
+        document.getElementById("e-stop").checked = teamData.teleop.e-stop;
+        document.getElementById("e-reason").value = teamData.teleop.e-reason;
         
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
