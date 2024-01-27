@@ -216,7 +216,7 @@
 
     <script>
       async function decodeOnLoad() {
-        try {
+        // try {
           let encodedURL = window.location.search
 
           if (window.location.search[0] == '?') {
@@ -226,7 +226,7 @@
           const urlData = JSON.parse(decodeURI(encodedURL)).data
           const c = await decodeData(urlData)
           await fillTeamData(c)
-        } catch {}
+        // } catch {}
       } decodeOnLoad();
 
       navigator.serviceWorker.register("sw.js").then((r) => r.update());
