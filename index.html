@@ -350,13 +350,17 @@
         
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
-            document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
+            try {
+              document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
+            } catch {}
           }
         }
 
         for (let c = 0; c < 3; c++) {
           for (let d = 0; d < 6; d++) {
-            document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
+            try {
+              document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
+            } catch {}
           }
         }
       }
