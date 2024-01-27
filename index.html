@@ -351,15 +351,13 @@
         } catch {}
       }
 
-      async function fillTeamData(dataObject) {
-        d = await decodeData('%7B%22ver%22:1,%22data%22:%22H4sIAAAAAAAAE52QwWrDMBBEf2XRuTk0VnDx30jO7qaKHAdZK1CM/71SDbHbQqE9CJ5WM8NqZhXRDKpT6kUZiaPqZuWR4uEx3lB1ZPyE5eUwxfG+uwY003hbbZP0PeK5Os1QROr1WKf3ayh81IXJV9SNWgqbd79Jm9MmPT2Vja7KAeNl3MVGRAHWzDuLjiicIyWdJSR2CGTLgAlyEEiVJFFi2GW7C0OmkIAYbIDWZs7WkWVHyXIUtCy5HhYQlLMrypgFi42y5DegKzvIQC21opayaUSPtZ5Z4dei8Peito8816uj0K/Q+8GuFMOn/Ed9/wj43uqfI5blA7yb1Es0AgAA%22%7D')
-
+      async function fillTeamData(teamData) {
         var thingy = ['succeed', 'fail', 'method']
         var thing = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp']
 
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
-            console.log(d.auto[thingy[a]][thing[b]])
+            console.log(teamData.auto[thingy[a]][thing[b]])
           }
         }
 
