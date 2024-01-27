@@ -216,7 +216,7 @@
 
     <script>
       async function decodeOnLoad() {
-        // try {
+        try {
           let encodedURL = window.location.search
 
           if (window.location.search[0] == '?') {
@@ -224,9 +224,8 @@
           }
           
           const urlData = JSON.parse(decodeURI(encodedURL)).data
-          const c = await decodeData(urlData)
-          await fillTeamData(c)
-        // } catch {}
+          await fillTeamData(await decodeData(urlData))
+        } catch {console.log('error')}
       } decodeOnLoad();
 
       navigator.serviceWorker.register("sw.js").then((r) => r.update());
@@ -351,7 +350,7 @@
             console.log(`auto-${con[a]}-${cat[b]}`)
             console.log(teamData.auto[con[a]][cat[b]])
             console.log(3 * a + b)
-            getElementbyId(`auto-${con[a]}-${cat[b]}`) = teamData.auto[con[a]][cat[b]]
+            document.getElementbyId(`auto-${con[a]}-${cat[b]}`) = teamData.auto[con[a]][cat[b]]
           }
         }
 
