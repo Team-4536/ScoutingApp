@@ -300,6 +300,7 @@
 
           teamData[sec][cat][con] = num.value;
           num.id = `${sec}-${cat}-${con}`
+          console.log(num.id)
         }
         
         console.log(JSON.stringify(teamData, null, 4));
@@ -350,6 +351,7 @@
             console.log(`auto-${con[a]}-${cat[b]}`)
             console.log(teamData.auto[con[a]][cat[b]])
             console.log(3 * a + b)
+            console.log(document.getElementById('auto-fail-amp'))
             document.getElementById(`auto-${con[a]}-${cat[b]}`) = teamData.auto[con[a]][cat[b]]
           }
         }
