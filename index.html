@@ -215,7 +215,7 @@
     <br><br>
 
     <script>
-      function decodeOnLoad() {
+      async function decodeOnLoad() {
         try {
           let encodedURL = window.location.search
 
@@ -225,8 +225,8 @@
           console.log(encodedURL)  
           const urlData = JSON.parse(decodeURI(encodedURL)).data
           console.log(urlData)
-          console.log(decodeData(urlData))
-          console.log(fillTeamData(decodeData(urlData)))
+          console.log(await decodeData(urlData))
+          console.log(await fillTeamData(decodeData(urlData)))
           fillTeamData(decodeData(urlData))
         } catch {}
       } decodeOnLoad();
