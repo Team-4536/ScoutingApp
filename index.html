@@ -296,7 +296,6 @@
           num.setAttribute('id', `${sec}-${cat}-${con}`);
         }
         
-        console.log(JSON.stringify(teamData, null, 4));
         return teamData;
       }
 
@@ -339,6 +338,8 @@
 
         var con = ['succeed', 'fail', 'method'];
         var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+
+        console.log(JSON.stringify(teamData, null, 4))
 
         document.getElementById("team").value = teamData.team;
         document.getElementById("left-zone").checked = teamData.auto.left-zone;
