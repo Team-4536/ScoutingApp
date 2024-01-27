@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
- 
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner / Reader
     </title>
 </head>
- 
+
 <body>
     <div class="container">
         <div class="section">
@@ -16,8 +15,7 @@
             </div>
         </div>
     </div>
-    <script
-        src="https://unpkg.com/html5-qrcode">
+    <script src="https://unpkg.com/html5-qrcode">
     </script>
     <script>
         function domReady(fn) {
@@ -30,13 +28,13 @@
                 document.addEventListener("DOMContentLoaded", fn);
             }
         }
-        
+
         domReady(function () {
             function onScanSuccess(decodeText, decodeResult) {
                 alert("You Qr is : " + decodeText, decodeResult);
             }
-        
-            let htmlscanner = new Html5QrcodeScanner(
+
+            let htmlscanner = new Html5Qrcode(
                 "my-qr-reader",
                 { fps: 1, qrbos: 250 }
             );
@@ -44,5 +42,5 @@
         });
     </script>
 </body>
- 
+
 </html>
