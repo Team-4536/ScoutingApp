@@ -215,20 +215,7 @@
     <br><br>
 
     <script>
-      function decodeOnLoad() {
-        let encodedURL = window.location.search
-
-        if (window.location.search[0] == '?') {
-            encodedURL = encodedURL.slice(1);
-        }
-
-        if (encodedURL) {
-            const urlData = JSON.parse(decodeURI(encodedURL)).data
-            fillTeamData(decodeData(urlData))
-        }
-      } decodeOnLoad();
-
-      navigator.serviceWorker.register("sw.js").then((r) => r.update());
+      navigator.serviceWorker.register("sw.js").then((r) => r.update()); // crude offline support
 
       const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
@@ -281,7 +268,7 @@
         modal.style.display = 'none';
       }
 
-      function dataObject() {
+      function func() {
         var teamData = {
           "team": document.getElementById("team").value,
           "auto": {
@@ -315,7 +302,7 @@
       }
 
       function generateQRCode() {
-        teamData = dataObject()
+        teamData = func()
 
         const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
         const compressedReadableStream = stream.pipeThrough(new CompressionStream("gzip"));
@@ -338,9 +325,9 @@
       }
 
       async function decodeData(encodedData) {
-        console.log(encodedData)
         let bytes = Uint8Array.from(atob(encodedData), c => c.charCodeAt(0));
         let blob = new Blob([bytes]);
+
         let decoder = blob.stream().pipeThrough(new DecompressionStream("gzip"));
         blob = await new Response(decoder).blob();
         let text = await blob.text()
