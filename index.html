@@ -254,15 +254,10 @@
         document.getElementById('qrcode-container').style.display = 'none';
       }
 
-      function openCamera() {
-        const modal = document.getElementById('camera');
-        const videoElement = document.getElementById('cameraStream');
-        
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      function openCamera() {navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
           .then(function (stream) {
-            videoElement.srcObject = stream;
-
-            modal.style.display = 'flex';
+            document.getElementById('cameraStream').srcObject = stream;
+            document.getElementById('camera').style.display = 'flex';
           })
           .catch();
       }
@@ -299,11 +294,7 @@
           let con = num.getAttribute('con');
 
           teamData[sec][cat][con] = num.value;
-          console.log(num);
-          console.log(`${sec}-${cat}-${con}`);
-          console.log('plz work')
           num.setAttribute('id', `${sec}-${cat}-${con}`)
-          console.log(num.id);
         }
         
         console.log(JSON.stringify(teamData, null, 4));
@@ -349,23 +340,25 @@
 
         var con = ['succeed', 'fail', 'method'];
         var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-        console.log(teamData);
+
+        document.getElementById("team").value = teamData.team;
+        document.getElementById("left-zone").checked = teamData.left-zone;
+        document.getElementById("a-stop").checked = teamData.a-stop;
+        document.getElementById("a-reason").value = teamData.a-reason;
+        document.getElementById("e-stop").checked = teamData.e-stop;
+        document.getElementById("e-reason").value = e-reason;
         
         for (let a = 0; a < 3; a++) {
           for (let b = 0; b < 3; b++) {
-            console.log(`auto-${con[a]}-${cat[b]}`);
-            console.log(teamData.auto[con[a]][cat[b]]);
-            console.log(3 * a + b);
-            console.log(document.getElementById('auto-fail-amp'));
             document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
           }
         }
 
-        // for (let a = 0; a < 3; a++) {
-        //   for (let b = 0; b < 3; b++) {
-        //     // thingy[i];
-        //   }
-        // }
+        for (let a = 0; a < 3; a++) {
+          for (let b = 0; b < 6; b++) {
+            document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
+          }
+        }
       }
 
       document.addEventListener('DOMContentLoaded', function () {
