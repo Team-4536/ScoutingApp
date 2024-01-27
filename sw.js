@@ -1,6 +1,6 @@
 "mode strict";
 
-var cache = caches.open("v21");
+var cache = caches.open("v22");
 
 const addResourcesToCache = async (resources) => {
     cache.then(c => c.addAll(resources))
