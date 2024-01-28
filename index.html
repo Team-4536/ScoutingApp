@@ -17,10 +17,13 @@
         color: #BB4536;
       }
 
-      input, button, textarea {
+      input, button, textarea, .action {
         border-radius: 7px;
         border-width: 3px;
-        border-color: #a00000;
+        border-top-color: #000000;
+        border-left-color: #000000;
+        border-bottom-color: #a00000;
+        border-right-color: #a00000;
         background-color: #e2a3a32b;
         font-weight: bold;
         color: #000000;
@@ -43,7 +46,10 @@
 
       input:disabled {
         border-width: 3px;
-        border-color: #e6c1c1;
+        border-top-color: #a0535354;
+        border-left-color: #a0535354;
+        border-bottom-color: #e6c1c1;
+        border-right-color: #e6c1c1;
         background-color: #e7afaf77;
       }
 
@@ -98,8 +104,8 @@
 
     <label>Team:</label>
     <input id="team">
-    <button onclick="openQRCode()">Generate QR Code</button>
-    <button onclick="openCamera()">Open Camera</button>
+    <button class="action" onclick="openQRCode()">Generate QR Code</button>
+    <button class="action" onclick="openCamera()">Open Camera</button>
     <hr>
 
     <h2>Auto</h2>
@@ -202,14 +208,10 @@
       <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeCamera()">Close Camera</button>
     </div>
 
-    <br><br>
-
     <div id="qrcode-container">
       <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
       <button style="height: 60px; font-size: larger; background-color: #edbdbd;" onclick="closeQRCode()">Close QR Code</button>
     </div>
-
-    <br><br>
 
     <script src="scripts/qrcode.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
