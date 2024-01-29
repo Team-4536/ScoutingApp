@@ -1,5 +1,5 @@
 async function decodeOnLoad() {
-    try {
+    // try {
       let encodedURL = window.location.search
 
       if (window.location.search[0] == '?') {
@@ -8,7 +8,7 @@ async function decodeOnLoad() {
       
       const urlData = JSON.parse(decodeURI(encodedURL)).data
       await fillTeamData(await decodeData(urlData))
-    } catch {}
+    // } catch {}
   } decodeOnLoad();
 
   navigator.serviceWorker.register("sw.js").then((r) => r.update());
@@ -36,7 +36,7 @@ async function decodeOnLoad() {
     }
 
     for (let num of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
-      try {
+      // try {
         let tr = num.closest("tr");
         let sec = tr.closest("table").dataset['sec'];
         let cat = tr.dataset['cat'];
@@ -44,7 +44,7 @@ async function decodeOnLoad() {
 
         teamData[sec][cat][con] = num.value;
         num.setAttribute('id', `${sec}-${cat}-${con}`);
-      } catch {}
+      // } catch {}
     }
     
     return teamData;
@@ -74,14 +74,14 @@ async function decodeOnLoad() {
   }
 
   async function decodeData(encodedData) {
-    try {
+    // try {
       let bytes = Uint8Array.from(atob(encodedData), c => c.charCodeAt(0));
       let blob = new Blob([bytes]);
       let decoder = blob.stream().pipeThrough(new DecompressionStream("gzip"));
       blob = await new Response(decoder).blob();
       let text = await blob.text();
       return JSON.parse(text);
-    } catch {}
+    // } catch {}
   }
 
   async function fillTeamData(teamData) {
@@ -102,17 +102,17 @@ async function decodeOnLoad() {
     
     for (let a = 0; a < 3; a++) {
       for (let b = 0; b < 3; b++) {
-        try {
+        // try {
           document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
-        } catch {}
+        // } catch {}
       }
     }
 
     for (let c = 0; c < 3; c++) {
       for (let d = 0; d < 6; d++) {
-        try {
+        // try {
           document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
-        } catch {console.log(ErrorEvent)}
+        // } catch {}
       }
     }
   }
