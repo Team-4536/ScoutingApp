@@ -1,3 +1,11 @@
+function eStop() {
+  document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
+}
+
+function aStop() {
+  document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
+}
+
 async function decodeOnLoad() {
     try {
       let encodedURL = window.location.search
@@ -112,14 +120,6 @@ async function decodeOnLoad() {
         } catch {}
       }
     }
-  }
-
-  function eStop() {
-    document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
-  }
-
-  function aStop() {
-    document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
   }
 
   document.addEventListener('DOMContentLoaded', function () {
