@@ -34,6 +34,10 @@
         margin-bottom: 15px;
       }
 
+      th {
+        text-align: right;
+      }
+
       input, button, textarea {
         border-radius: 7px;
         border-width: 3px;
@@ -141,13 +145,13 @@
   </head>
 
   <body>
-    <img src="assets/minutebots-logo.png" width=325px>
+    <img src="assets/minutebots-logo.png" width=325px></img>
 
     <h1 style="margin: -15px;">Minutebots Scouting</h1>
     <br>
 
     <label>Team:</label>
-    <input id="team">
+    <input id="team"></input>
     <button id="open-qrcode">Generate QRCode</button>
     <button id="open-camera">Open Camera</button>
     <hr>
@@ -173,21 +177,21 @@
       </tr>
 
       <tr data-cat="succeed">
-        <th style="text-align:right">Times Succeeded</th>
+        <th>Times Succeeded</th>
         <td><input con="amp"></td>
         <td><input con="spkr"></td>
         <td><input con="flr"></td>
       </tr>
 
       <tr data-cat="fail">
-        <th style="text-align:right">Times Failed</th>
+        <th>Times Failed</th>
         <td><input con="amp"></td>
         <td><input con="spkr"></td>
         <td><input con="flr"></td>
       </tr>
 
       <tr data-cat="method">
-        <th style="text-align:right">What Method</th>
+        <th>What Method</th>
         <td><textarea con="amp"></textarea></td>
         <td><textarea con="spkr"></textarea></td>
         <td><textarea con="flr"></textarea></td>
@@ -215,7 +219,7 @@
       </tr>
 
       <tr data-cat="succeed">
-        <th style="text-align:right">Times Succeeded</th>
+        <th>Times Succeeded</th>
         <td><input con="amp"></td>
         <td><input con="spkr"></td>
         <td><input con="flr"></td>
@@ -225,7 +229,7 @@
       </tr>
 
       <tr data-cat="fail">
-        <th style="text-align:right">Times Failed</th>
+        <th>Times Failed</th>
         <td><input con="amp"></td>
         <td><input con="spkr"></td>
         <td><input con="flr"></td>
@@ -235,7 +239,7 @@
       </tr>
 
       <tr data-cat="method">
-        <th style="text-align:right">What Method</th>
+        <th>What Method</th>
         <td><textarea con="amp"></textarea></td>
         <td><textarea con="spkr"></textarea></td>
         <td><textarea con="flr"></textarea></td>
