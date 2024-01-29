@@ -11,34 +11,34 @@ async function decodeOnLoad() {
     } catch {}
   } decodeOnLoad();
 
-  navigator.serviceWorker.register("sw.js").then((r) => r.update());
+  navigator.serviceWorker.register('sw.js').then((r) => r.update());
 
   const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
   function dataObject() {
     var teamData = {
-      "team": document.getElementById("team").value,
-      "auto": {
-        "left-zone": document.getElementById("left-zone").checked,
-        "a-stop": document.getElementById("a-stop").checked,
-        "a-reason": document.getElementById("a-reason").value,
-        "succeed": {},
-        "fail": {},
-        "method": {}
+      'team': document.getElementById('team').value,
+      'auto': {
+        'left-zone': document.getElementById('left-zone').checked,
+        'a-stop': document.getElementById('a-stop').checked,
+        'a-reason': document.getElementById('a-reason').value,
+        'succeed': {},
+        'fail': {},
+        'method': {}
       },
-      "teleop": {
-        "e-stop": document.getElementById("e-stop").checked,
-        "e-reason": document.getElementById("e-reason").value,
-        "succeed": {},
-        "fail": {},
-        "method": {}
+      'teleop': {
+        'e-stop': document.getElementById('e-stop').checked,
+        'e-reason': document.getElementById('e-reason').value,
+        'succeed': {},
+        'fail': {},
+        'method': {}
       }
     }
 
     for (let num of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
       try {
-        let tr = num.closest("tr");
-        let sec = tr.closest("table").dataset['sec'];
+        let tr = num.closest('tr');
+        let sec = tr.closest('table').dataset['sec'];
         let cat = tr.dataset['cat'];
         let con = num.getAttribute('con');
 
@@ -54,16 +54,16 @@ async function decodeOnLoad() {
     teamData = dataObject();
 
     const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
-    const compressedReadableStream = stream.pipeThrough(new CompressionStream("gzip"));
+    const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
     const blob = new Response(compressedReadableStream).blob();
 
     blob.then((b) => {
       b.arrayBuffer().then((arrayBuffer) => {
         const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-        document.getElementById("qrcode").innerHTML = "";
-        let qrcodeDataObject = { "ver": 1, "data": baseSixtyFourString }
+        document.getElementById('qrcode').innerHTML = '';
+        let qrcodeDataObject = { 'ver': 1, 'data': baseSixtyFourString }
 
-        new QRCode(document.getElementById("qrcode"), {
+        new QRCode(document.getElementById('qrcode'), {
           text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
           correctLevel: QRCode.CorrectLevel.Q,
           width: 400,
@@ -77,7 +77,7 @@ async function decodeOnLoad() {
     try {
       let bytes = Uint8Array.from(atob(encodedData), c => c.charCodeAt(0));
       let blob = new Blob([bytes]);
-      let decoder = blob.stream().pipeThrough(new DecompressionStream("gzip"));
+      let decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
       blob = await new Response(decoder).blob();
       let text = await blob.text();
       return JSON.parse(text);
@@ -87,25 +87,12 @@ async function decodeOnLoad() {
   async function fillTeamData(teamData) {
     dataObject();
 
-    const con = ['succeed', 'fail', 'method'];
-    const cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-    const inputs = [[null, 'team'], ['auto', 'left-zone'], ['auto', 'a-stop'], ['auto', 'a-reason'], ['teleop', 'e-stop'], ['teleop', 'e-reason']];
-
-    try {
-      for (const input of inputs) {
-        const element = document.getElementById(input[1]);
-
-        if (input[0]) {
-          if (element.type == 'checkbox') {
-            element.checked = teamData[input[0]][input[1]];
-          } else {
-            element.value = teamData[input[0]][input[1]];
-          }
-        } else {
-          element.value = teamData[input[1]];
-        }
-      }
-    } catch {}
+		document.getElementById('team').value = teamData.team;
+    document.getElementById('left-zone').checked = teamData.auto['left-zone'];;
+    document.getElementById('a-stop').checked = teamData.auto['a-stop'];
+    document.getElementById('a-reason').value = teamData.auto['a-reason'];
+    document.getElementById('e-stop').checked = teamData.teleop['e-stop'];
+		document.getElementById('e-reason').value = teamData.teleop['e-reason'];
     
     for (let a = 0; a < 3; a++) {
       for (let b = 0; b < 3; b++) {
@@ -125,20 +112,20 @@ async function decodeOnLoad() {
   }
 
   document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById("a-stop").addEventListener("change", function() {
-      document.getElementById("a-reason").disabled = !document.getElementById("a-stop").checked;
+    document.getElementById('a-stop').addEventListener('change', function() {
+      document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
     });
   
-    document.getElementById("e-stop").addEventListener("change", function() {
-      document.getElementById("e-reason").disabled = !document.getElementById("e-stop").checked;
+    document.getElementById('e-stop').addEventListener('change', function() {
+      document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
     });
   
-    document.getElementById("open-qrcode").addEventListener("click", function() {
+    document.getElementById('open-qrcode').addEventListener('click', function() {
       generateQRCode();
       document.getElementById('qrcode-container').style.display = 'block';
     });
   
-    document.getElementById("open-camera").addEventListener("click", function() {
+    document.getElementById('open-camera').addEventListener('click', function() {
       navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
         .then(function (stream) {
           document.getElementById('cameraStream').srcObject = stream;
@@ -146,32 +133,32 @@ async function decodeOnLoad() {
         }).catch();
     });
   
-    document.getElementById("close-qrcode").addEventListener("click", function() {
+    document.getElementById('close-qrcode').addEventListener('click', function() {
       document.getElementById('qrcode-container').style.display = 'none';
     });
   
-    document.getElementById("close-camera").addEventListener("click", function() {
+    document.getElementById('close-camera').addEventListener('click', function() {
       document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
       document.getElementById('camera').style.display = 'none';
     });
 
     document.querySelectorAll(numInputs).forEach(function (input) {
-      input.placeholder = "0";
-      input.type = "number";
-      input.min = "0";
+      input.placeholder = '0';
+      input.type = 'number';
+      input.min = '0';
     });
 
-    document.getElementById('team').placeholder = "0000";
+    document.getElementById('team').placeholder = '0000';
 
     document.querySelectorAll('textarea').forEach(function (textarea) {
-      textarea.addEventListener("input", function () {
-        textarea.style.height = "auto";
-        textarea.style.height = (textarea.scrollHeight) + "px";
+      textarea.addEventListener('input', function () {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
       });
     });
 
     document.querySelectorAll(numInputs).forEach(function (input) {
-      input.addEventListener("input", function (event) {
+      input.addEventListener('input', function (event) {
           event.target.value = event.target.value.replace(/\D/g, '');
       });
     });
