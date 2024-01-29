@@ -20,34 +20,35 @@ async function decodeOnLoad() {
     textarea.style.height = (textarea.scrollHeight) + "px";
   }
 
-  function toggleAStop() {
+  document.getElementById("a-stop").addEventListener("change", function() {
     document.getElementById("a-reason").disabled = !document.getElementById("a-stop").checked;
-  }
+  });
 
-  function toggleEStop() {
+  document.getElementById("e-stop").addEventListener("change", function() {
     document.getElementById("e-reason").disabled = !document.getElementById("e-stop").checked;
-  }
+  });
 
-  function openQRCode() {
+  document.getElementById("open-qrcode").addEventListener("click", function() {
     generateQRCode();
     document.getElementById('qrcode-container').style.display = 'block';
-  }
+  });
 
-  function closeQRCode() {
-    document.getElementById('qrcode-container').style.display = 'none';
-  }
-
-  function openCamera() {navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+  document.getElementById("open-camera").addEventListener("click", function() {
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(function (stream) {
         document.getElementById('cameraStream').srcObject = stream;
         document.getElementById('camera').style.display = 'flex';
       }).catch();
-  }
+  });
 
-  function closeCamera() {
+  document.getElementById("close-qrcode").addEventListener("click", function() {
+    document.getElementById('qrcode-container').style.display = 'none';
+  });
+
+  document.getElementById("close-camera").addEventListener("click", function() {
     document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
     document.getElementById('camera').style.display = 'none';
-  }
+  });
 
   function dataObject() {
     var teamData = {
