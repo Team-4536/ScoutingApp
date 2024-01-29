@@ -91,19 +91,21 @@ async function decodeOnLoad() {
     const cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
     const inputs = [[null, 'team'], ['auto', 'left-zone'], ['auto', 'a-stop'], ['auto', 'a-reason'], ['teleop', 'e-stop'], ['teleop', 'e-reason']];
 
-    for (const input of inputs) {
-      const element = document.getElementById(input[1]);
+    try {
+      for (const input of inputs) {
+        const element = document.getElementById(input[1]);
 
-      if (input[1]) {
-        if (element.type == 'checkbox') {
-          element.checked = teamData[input[0]][input[1]];
+        if (input[0]) {
+          if (element.type == 'checkbox') {
+            element.checked = teamData[input[0]][input[1]];
+          } else {
+            element.value = teamData[input[0]][input[1]];
+          }
         } else {
-          element.value = teamData[input[0]][input[1]];
+          element.value = teamData[input[1]];
         }
-      } else {
-        element.value = teamData[input[1]];
       }
-    }
+    } catch {}
     
     for (let a = 0; a < 3; a++) {
       for (let b = 0; b < 3; b++) {
