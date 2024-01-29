@@ -88,7 +88,7 @@ async function decodeOnLoad() {
     dataObject();
 
 		document.getElementById('team').value = teamData.team;
-    document.getElementById('left-zone').checked = teamData.auto['left-zone'];;
+    document.getElementById('left-zone').checked = teamData.auto['left-zone'];
     document.getElementById('a-stop').checked = teamData.auto['a-stop'];
     document.getElementById('a-reason').value = teamData.auto['a-reason'];
     document.getElementById('e-stop').checked = teamData.teleop['e-stop'];
