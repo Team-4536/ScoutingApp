@@ -91,15 +91,17 @@ async function decodeOnLoad() {
     const cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
     const inputs = [[null, 'team'], ['auto', 'left-zone'], ['auto', 'a-stop'], ['auto', 'a-reason'], ['teleop', 'e-stop'], ['teleop', 'e-reason']];
 
-    for (i in inputs) {
-      if (i[0]) {
-        if (document.getElementById(i[1]).type == 'checkbox') {
-          document.getElementById(i[1]).checked = teamData[i[0]][i[1]];
+    for (const input in inputs) {
+      const element = document.getElementById(input[1]);
+
+      if (section) {
+        if (element.type == 'checkbox') {
+          element.checked = teamData[input[0]][input[1]];
         } else {
-          document.getElementById(i[1]).value = teamData[i[0]][i[1]];
+          element.value = teamData[input[0]][input[1]];
         }
       } else {
-        document.getElementById(i[1]).value = teamData[i[1]];
+        element.value = teamData[input[1]];
       }
     }
     
