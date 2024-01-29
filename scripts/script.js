@@ -91,10 +91,10 @@ async function decodeOnLoad() {
     const cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
     const inputs = [[null, 'team'], ['auto', 'left-zone'], ['auto', 'a-stop'], ['auto', 'a-reason'], ['teleop', 'e-stop'], ['teleop', 'e-reason']];
 
-    for (const input in inputs) {
+    for (const input of inputs) {
       const element = document.getElementById(input[1]);
 
-      if (section) {
+      if (input[1]) {
         if (element.type == 'checkbox') {
           element.checked = teamData[input[0]][input[1]];
         } else {
