@@ -9,7 +9,7 @@ async function decodeOnLoad() {
       const urlData = JSON.parse(decodeURI(encodedURL)).data
       await fillTeamData(await decodeData(urlData))
     } catch {}
-  } decodeOnLoad();
+  } decodeOnLoad(); aStop(); eStop();
 
   navigator.serviceWorker.register('sw.js').then((r) => r.update());
 
@@ -114,13 +114,21 @@ async function decodeOnLoad() {
     }
   }
 
+  function eStop() {
+    document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
+  }
+
+  function aStop() {
+    document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('a-stop').addEventListener('change', function() {
-      document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
+      eStop();
     });
   
     document.getElementById('e-stop').addEventListener('change', function() {
-      document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
+      aStop();
     });
   
     document.getElementById('open-qrcode').addEventListener('click', function() {
