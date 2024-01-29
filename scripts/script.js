@@ -8,7 +8,7 @@ async function decodeOnLoad() {
       
       const urlData = JSON.parse(decodeURI(encodedURL)).data
       await fillTeamData(await decodeData(urlData))
-    } catch {console.log('error')}
+    } catch {}
   } decodeOnLoad();
 
   navigator.serviceWorker.register("sw.js").then((r) => r.update());
@@ -36,13 +36,15 @@ async function decodeOnLoad() {
     }
 
     for (let num of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
-      let tr = num.closest("tr");
-      let sec = tr.closest("table").dataset['sec'];
-      let cat = tr.dataset['cat'];
-      let con = num.getAttribute('con');
+      try {
+        let tr = num.closest("tr");
+        let sec = tr.closest("table").dataset['sec'];
+        let cat = tr.dataset['cat'];
+        let con = num.getAttribute('con');
 
-      teamData[sec][cat][con] = num.value;
-      num.setAttribute('id', `${sec}-${cat}-${con}`);
+        teamData[sec][cat][con] = num.value;
+        num.setAttribute('id', `${sec}-${cat}-${con}`);
+      } catch {}
     }
     
     return teamData;
@@ -88,8 +90,6 @@ async function decodeOnLoad() {
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    console.log(JSON.stringify(teamData, null, 4))
-
     // document.getElementById("team").value = teamData.team;
     // document.getElementById("left-zone").checked = teamData.auto.left-zone;
     // document.getElementById("a-stop").checked = teamData.auto.a-stop;
@@ -109,7 +109,7 @@ async function decodeOnLoad() {
       for (let d = 0; d < 6; d++) {
         try {
           document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
-        } catch {}
+        } catch {console.log(ErrorEvent)}
       }
     }
   }
@@ -188,8 +188,6 @@ async function decodeOnLoad() {
 
     document.querySelectorAll(`${numInputs}:not(#team)`).forEach(function (input) {
       input.addEventListener('input', function (event) {
-        console.log(event.target.value[0])
-
         if (event.target.value[0] == '0') {
           event.target.value = event.target.value.slice(1);
         }
@@ -197,7 +195,6 @@ async function decodeOnLoad() {
         try {
           if (parseInt(event.target.value) > 999) {
             event.target.value = '999';
-            console.log('nkgjfgdsetfywuyf')
           }
         } catch {}
       });
