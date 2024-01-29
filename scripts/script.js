@@ -87,18 +87,21 @@ async function decodeOnLoad() {
   async function fillTeamData(teamData) {
     dataObject();
 
-    var con = ['succeed', 'fail', 'method'];
-    var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+    const con = ['succeed', 'fail', 'method'];
+    const cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+    const inputs = [[null, 'team'], ['auto', 'left-zone'], ['auto', 'a-stop'], ['auto', 'a-reason'], ['teleop', 'e-stop'], ['teleop', 'e-reason']];
 
-    console.log(teamData);
-    console.log(teamData.team);
-
-    document.getElementById("team").value = teamData.team;
-    document.getElementById("left-zone").checked = teamData.auto['left-zone'];
-    document.getElementById("a-stop").checked = teamData.auto['a-stop'];
-    document.getElementById("a-reason").value = teamData.auto['a-reason'];
-    document.getElementById("e-stop").checked = teamData.teleop['e-stop'];
-    document.getElementById("e-reason").value = teamData.teleop['e-reason'];
+    for (i in inputs) {
+      if (i[0]) {
+        if (document.getElementById(i[1]).type == 'checkbox') {
+          document.getElementById(i[1]).checked = teamData[i[0]][i[1]];
+        } else {
+          document.getElementById(i[1]).value = teamData[i[0]][i[1]];
+        }
+      } else {
+        document.getElementById(i[1]).value = teamData[i[1]];
+      }
+    }
     
     for (let a = 0; a < 3; a++) {
       for (let b = 0; b < 3; b++) {
