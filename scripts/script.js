@@ -15,41 +15,6 @@ async function decodeOnLoad() {
 
   const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
-  function resizeTextarea(textarea) {
-    textarea.style.height = "auto";
-    textarea.style.height = (textarea.scrollHeight) + "px";
-  }
-
-  document.getElementById("a-stop").addEventListener("change", function() {
-    document.getElementById("a-reason").disabled = !document.getElementById("a-stop").checked;
-  });
-
-  document.getElementById("e-stop").addEventListener("change", function() {
-    document.getElementById("e-reason").disabled = !document.getElementById("e-stop").checked;
-  });
-
-  document.getElementById("open-qrcode").addEventListener("click", function() {
-    generateQRCode();
-    document.getElementById('qrcode-container').style.display = 'block';
-  });
-
-  document.getElementById("open-camera").addEventListener("click", function() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then(function (stream) {
-        document.getElementById('cameraStream').srcObject = stream;
-        document.getElementById('camera').style.display = 'flex';
-      }).catch();
-  });
-
-  document.getElementById("close-qrcode").addEventListener("click", function() {
-    document.getElementById('qrcode-container').style.display = 'none';
-  });
-
-  document.getElementById("close-camera").addEventListener("click", function() {
-    document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
-    document.getElementById('camera').style.display = 'none';
-  });
-
   function dataObject() {
     var teamData = {
       "team": document.getElementById("team").value,
@@ -150,6 +115,36 @@ async function decodeOnLoad() {
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById("a-stop").addEventListener("change", function() {
+      document.getElementById("a-reason").disabled = !document.getElementById("a-stop").checked;
+    });
+  
+    document.getElementById("e-stop").addEventListener("change", function() {
+      document.getElementById("e-reason").disabled = !document.getElementById("e-stop").checked;
+    });
+  
+    document.getElementById("open-qrcode").addEventListener("click", function() {
+      generateQRCode();
+      document.getElementById('qrcode-container').style.display = 'block';
+    });
+  
+    document.getElementById("open-camera").addEventListener("click", function() {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function (stream) {
+          document.getElementById('cameraStream').srcObject = stream;
+          document.getElementById('camera').style.display = 'flex';
+        }).catch();
+    });
+  
+    document.getElementById("close-qrcode").addEventListener("click", function() {
+      document.getElementById('qrcode-container').style.display = 'none';
+    });
+  
+    document.getElementById("close-camera").addEventListener("click", function() {
+      document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
+      document.getElementById('camera').style.display = 'none';
+    });
+
     document.querySelectorAll(numInputs).forEach(function (input) {
       input.placeholder = "0";
       input.type = "number";
@@ -160,7 +155,8 @@ async function decodeOnLoad() {
 
     document.querySelectorAll('textarea').forEach(function (textarea) {
       textarea.addEventListener("input", function () {
-        resizeTextarea(textarea);
+        textarea.style.height = "auto";
+        textarea.style.height = (textarea.scrollHeight) + "px";
       });
     });
 
