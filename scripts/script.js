@@ -94,11 +94,11 @@ async function decodeOnLoad() {
     console.log(teamData.team);
 
     document.getElementById("team").value = teamData.team;
-    document.getElementById("left-zone").checked = teamData.auto.left-zone;
-    document.getElementById("a-stop").checked = teamData.auto.a-stop;
-    document.getElementById("a-reason").value = teamData.auto.a-reason;
-    document.getElementById("e-stop").checked = teamData.teleop.e-stop;
-    document.getElementById("e-reason").value = teamData.teleop.e-reason;
+    document.getElementById("left-zone").checked = teamData.auto['left-zone'];
+    document.getElementById("a-stop").checked = teamData.auto['a-stop'];
+    document.getElementById("a-reason").value = teamData.auto['a-reason'];
+    document.getElementById("e-stop").checked = teamData.teleop['e-stop'];
+    document.getElementById("e-reason").value = teamData.teleop['e-reason'];
     
     for (let a = 0; a < 3; a++) {
       for (let b = 0; b < 3; b++) {
