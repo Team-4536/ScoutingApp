@@ -90,7 +90,7 @@ async function decodeOnLoad() {
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    // document.getElementById("team").value = teamData.team;
+    document.getElementById("team").value = teamData.team;
     // document.getElementById("left-zone").checked = teamData.auto.left-zone;
     // document.getElementById("a-stop").checked = teamData.auto.a-stop;
     // document.getElementById("a-reason").value = teamData.auto.a-reason;
