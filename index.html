@@ -262,6 +262,9 @@
       <button id="close-qrcode">Close QR Code</button>
     </div>
 
+    <script type="module">
+      navigator.serviceWorker.register('app.js').then((r) => r.update());
+    </script>
     <script src="scripts/qrcode.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="scripts/script.js"></script>

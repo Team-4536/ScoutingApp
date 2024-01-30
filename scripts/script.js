@@ -19,6 +19,8 @@ async function decodeOnLoad() {
   } catch {}
 } decodeOnLoad(); aStop(); eStop();
 
+navigator.serviceWorker.register('sw.js').then((r) => r.update());
+
 const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
