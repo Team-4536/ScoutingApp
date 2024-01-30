@@ -23,8 +23,6 @@ decodeOnLoad();
 aStop();
 eStop();
 
-navigator.serviceWorker.register('sw.js').then((r) => r.update());
-
 const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
@@ -132,11 +130,11 @@ async function fillTeamData(teamData) {
 
 document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('a-stop').addEventListener('change', function() {
-    eStop();
+    aStop();
   });
 
   document.getElementById('e-stop').addEventListener('change', function() {
-    aStop();
+    eStop();
   });
 
   document.getElementById('open-qrcode').addEventListener('click', function() {
