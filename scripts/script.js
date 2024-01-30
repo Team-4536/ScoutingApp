@@ -57,6 +57,10 @@ async function decodeOnLoad() {
     
     return teamData;
   }
+  
+  function createCSV(teamData) {
+    return teamData.map(obj => Object.values(obj).join(',')).join('\n);
+  }
 
   function generateQRCode() {
     teamData = dataObject();
