@@ -128,7 +128,11 @@ async function fillTeamData(teamData) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener(input, textfield), function() {
+    dataObject()
+  }
+
   document.getElementById('a-stop').addEventListener('change', function() {
     aStop();
   });
