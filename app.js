@@ -1,8 +1,9 @@
 "mode strict";
 
-class CacheController {
+class CacheController extends EventTarget {
     constructor() {
-        this.cache = null
+	super();
+        this.cache = null;
         globalThis.caches.open("v1").then((c) => this.cache = c);
     }
     refresh() {
@@ -16,7 +17,7 @@ class CacheController {
         console.log("in cache", cached);
         if (!cached || navigator.onLine) {
             console.log("caching");
-            let f = globalThis.fetch(request);
+            let f = globalThis.fetch(request, { cache: "reload" });
             return f.then((r) => {
                 let z = r.clone();
                 this.cache.put(request, r);
@@ -29,15 +30,59 @@ class CacheController {
     }
 }
 
-class DBController {
-    constructor() {
+class DBController extends EventTarget {
+    constructor(dbName, version=1) {
+	super();
+	this.dbrq = indexedDB.open(dbName, version);
+        this.dbrq.addEventListener("success", this.openSuccess.bind(this));
+        this.dbrq.addEventListener("error", this.openError.bind(this));
+        this.dbrq.addEventListener("upgradeneeded", this.upgrade.bind(this));
+    }
+
+    openSuccess(event) {
+	console.log("db opened");
+	this.db = event.target.result;
+    }
+
+    openError(event) {
+    }
+
+    upgrade(event) {
+	console.log("initializing/upgrading");
+	let db = event.target.result;
+	db.createObjectStore("team", { keyPath: "team" });
+    };
+
+    async saveTeam(team) {
+	const tx = this.db.transaction("team", "readwrite");
+	const store = tx.objectStore("team")
+	const rq = store.put(team);
+	let p = new Promise((r) => {
+	    rq.onsuccess = (e) => {
+		r(e.target.result)
+	    };
+	});
+	console.log(p);
+    }
+
+    getTeam(team) {
+	const tx = this.db.transaction("team");
+	const store = tx.objectStore("team")
+	const rq = store.get(team);
+	let p = new Promise((r) => {
+	    rq.onsuccess = (e) => {
+		console.log(e);
+		r(e.target.result);
+	    };
+	});
+	return p;
     }
 }
 
 class App {
     constructor() {
         this.cacheController = new CacheController();
-        this.dbController = new DBController();
+        this.dbController = new DBController("scouting");
 
         globalThis.addEventListener("message", this.message.bind(this));
         globalThis.addEventListener("install", this.install.bind(this));
@@ -61,42 +106,36 @@ class App {
     }
 
     message(event) {
-        console.log("got message", event);
-        let args = event.data;
-        if (!Array.isArray(args)) {
-            console.log("received badly formatted message (not array)");
+        let rq = event.data;
+        if (typeof rq !== "object") {
+            console.log("received badly formatted message (not object)");
             return;
         }
-        if (args.length == 0) {
-            console.log("received badly formatted message (empty)");
-            return;
-        }
-        let c = args[0];
-        args.shift();
-        if (typeof c != "string") {
-            console.log("received badly formatted message (command must be a string)");
-            return;
-        }
-        let s = c.split(".");
-        if (s.length != 2) {
-            console.log("received badly formatted message (command must be of the form controller.method)");
-            return;
-        }
-        let controller = s[0];
-        let cmd = s[1];
+	let { requestId, method, args } = rq;
+        let [controller, cmd] = method.split(".");
 
         let ctlr = Reflect.get(this, `${controller}Controller`);
         if (!ctlr) {
             console.log(`controller ${controller}Controller not found`);
             return;
         }
-        let method = Reflect.get(ctlr, cmd);
-        if (!method) {
+        let target = Reflect.get(ctlr, cmd);
+	let caller = event.source.id;
+        if (!target) {
             console.log(`method ${cmd} not found`);
             return;
         }
         try {
-            method.apply(ctlr, args);
+            target.call(ctlr, ...args).then((result) => {
+		globalThis.clients.get(caller).then((client) => {
+		    client.postMessage({
+			reply: {
+			    requestId: requestId,
+			    result: result
+			}
+		    });
+		});
+	    });
         } catch (e) {
             console.log(e);
         }
