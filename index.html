@@ -67,8 +67,8 @@
       /* input[type="checkbox"]:not(:disabled) {} */
 
       input[type="checkbox"]:disabled {
-          border-color: var(--borderRed);
-          background-color: var(--disabledBackground);
+        border-color: var(--borderRed);
+        background-color: var(--disabledBackground);
       }
 
       textarea {
@@ -282,11 +282,15 @@
 
     <div class="score">
   		<label>Collisions</label>
-  		<input type="checkbox" class="amp">
+  		<input type="checkbox" class="amp">   
+    </div>
 		
+    <div class="score">
   		<label>Climb With Others</label>
   		<input type="checkbox">
+    </div>
 		
+    <div class="score">
   		<label>Total Game Score</label>
   		<input type="text" class="amp">
 		</div>
@@ -299,7 +303,9 @@
 		<div class="score double-indented">
   		<label>Amp Auto Score</label>
   		<input type="text" class="amp">
+    </div>
 		
+    <div class="score double-indented">
   		<label>Amp Teleop Score</label>
   		<input type="text" class="amp">
 		</div>
@@ -312,10 +318,14 @@
 		<div class="score double-indented">
   		<label>Speaker Auto Score</label>
   		<input type="text" class="amp">
+    </div>
 		
+    <div class="score double-indented">
   		<label>Speaker Teleop Score</label>
   		<input type="text" class="amp">
+    </div>
 		
+    <div class="score double-indented">
   		<label>Speaker Amplified Score</label>
   		<input type="text" class="amp">
 		</div>
@@ -323,13 +333,19 @@
 		<div class="score">
   		<label>Cooperation</label>
   		<input type="checkbox">
+    </div>
 		
+    <div class="score">
   		<label>Melody</label>
   		<input type="checkbox">
+    </div>
 
+    <div class="score"> 
   		<label>Ensemble</label>
   		<input type="checkbox">
+    </div>
 
+    <div class="score">
   		<label>Win</label>
   		<input type="checkbox">
 		</div>
@@ -354,9 +370,7 @@
       <button id="close-qrcode">Close QR Code</button>
     </div>
 
-    <script type="module">
-      navigator.serviceWorker.register('app.js').then((r) => r.update());
-    </script>
+    <script type="module"> navigator.serviceWorker.register('app.js').then((r) => r.update()); </script>
     <script src="scripts/qrcode.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="scripts/script.js"></script>
