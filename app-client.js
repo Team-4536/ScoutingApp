@@ -2,23 +2,38 @@ var rqId = 1;
 
 var pendingRequests = {};
 
+const rqTimeout = (rqId) => {
+    console.warn(`request ${rqId} timed out`);
+    delete pendingRequests[rqId];
+}
+
 const call = (method, ...args) => {
     let rq = {
-	requestId: ++rqId,
-	method: method,
-	args: args
+        requestId: ++rqId,
+        method: method,
+        args: args
     }
 
     navigator.serviceWorker.controller.postMessage(rq);
-    return new Promise((resolve) => {
-	pendingRequests[rqId] = resolve;
+    return new Promise((resolve, reject) => {
+        pendingRequests[rqId] = {
+            resolve: resolve,
+            reject: reject,
+            timer: setTimeout(rqTimeout, 1000, rqId)
+        };
     });
 }
 
 navigator.serviceWorker.addEventListener("message", (m) => {
     let reply = m.data.reply;
-    let resolver = pendingRequests[reply.requestId];
-    resolver(reply.result);
+    let rq = pendingRequests[reply.requestId];
+    if (!rq) {
+        console.log(`received unexpected reply for ${reply.requestid}`);
+    } else {
+        rq.resolve(reply.result);
+        clearTimeout(rq.timer);
+        delete pendingRequests[reply.requestId];
+    }
 });
 
 class DBClient {
@@ -26,19 +41,19 @@ class DBClient {
     }
 
     async saveTeam(team) {
-	return call("db.saveTeam", team);
+        return call("db.saveTeam", team);
     }
 
     async getTeam(team) {
-	return call("db.getTeam", team);
+        return call("db.getTeam", team);
     }
 
     async getAllTeams() {
-	return [];
+        return call("db.getAllTeams");
     }
 
     async getAllTeamNumbers() {
-	return [];
+        return call("db.getAllTeamNumbers");
     }
 }
 
