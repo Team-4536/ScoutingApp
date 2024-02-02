@@ -2,7 +2,7 @@
 
 class CacheController extends EventTarget {
     constructor() {
-	super();
+        super();
         this.cache = null;
         globalThis.caches.open("v1").then((c) => this.cache = c);
     }
@@ -32,50 +32,59 @@ class CacheController extends EventTarget {
 
 class DBController extends EventTarget {
     constructor(dbName, version=1) {
-	super();
-	this.dbrq = indexedDB.open(dbName, version);
+        super();
+        this.dbrq = indexedDB.open(dbName, version);
         this.dbrq.addEventListener("success", this.openSuccess.bind(this));
         this.dbrq.addEventListener("error", this.openError.bind(this));
         this.dbrq.addEventListener("upgradeneeded", this.upgrade.bind(this));
     }
 
     openSuccess(event) {
-	console.log("db opened");
-	this.db = event.target.result;
+        console.log("db opened");
+        this.db = event.target.result;
     }
 
     openError(event) {
     }
 
     upgrade(event) {
-	console.log("initializing/upgrading");
-	let db = event.target.result;
-	db.createObjectStore("team", { keyPath: "team" });
+        console.log("initializing/upgrading");
+        let db = event.target.result;
+        db.createObjectStore("team", { keyPath: "team" });
     };
 
+    teamRead(reader) {
+        const tx = this.db.transaction("team");
+        const store = tx.objectStore("team");
+        const rq = reader(store);
+        return new Promise((r) => {
+            rq.onsuccess = (e) => {
+                r(e.target.result);
+            };
+        });
+    }
+
     async saveTeam(team) {
-	const tx = this.db.transaction("team", "readwrite");
-	const store = tx.objectStore("team")
-	const rq = store.put(team);
-	let p = new Promise((r) => {
-	    rq.onsuccess = (e) => {
-		r(e.target.result)
-	    };
-	});
-	console.log(p);
+        const tx = this.db.transaction("team", "readwrite");
+        const store = tx.objectStore("team")
+        const rq = store.put(team);
+        let p = new Promise((r) => {
+            rq.onsuccess = (e) => {
+                r(e.target.result)
+            };
+        });
     }
 
     getTeam(team) {
-	const tx = this.db.transaction("team");
-	const store = tx.objectStore("team")
-	const rq = store.get(team);
-	let p = new Promise((r) => {
-	    rq.onsuccess = (e) => {
-		console.log(e);
-		r(e.target.result);
-	    };
-	});
-	return p;
+        return this.teamRead((store) => { return store.get(team); });
+    }
+
+    getAllTeams() {
+        return this.teamRead((store) => { return store.getAll(); });
+    }
+
+    getAllTeamNumbers() {
+        return this.teamRead((store) => { return store.getAllKeys(); });
     }
 }
 
@@ -111,7 +120,7 @@ class App {
             console.log("received badly formatted message (not object)");
             return;
         }
-	let { requestId, method, args } = rq;
+        let { requestId, method, args } = rq;
         let [controller, cmd] = method.split(".");
 
         let ctlr = Reflect.get(this, `${controller}Controller`);
@@ -120,22 +129,22 @@ class App {
             return;
         }
         let target = Reflect.get(ctlr, cmd);
-	let caller = event.source.id;
+        let caller = event.source.id;
         if (!target) {
             console.log(`method ${cmd} not found`);
             return;
         }
         try {
             target.call(ctlr, ...args).then((result) => {
-		globalThis.clients.get(caller).then((client) => {
-		    client.postMessage({
-			reply: {
-			    requestId: requestId,
-			    result: result
-			}
-		    });
-		});
-	    });
+                globalThis.clients.get(caller).then((client) => {
+                    client.postMessage({
+                        reply: {
+                            requestId: requestId,
+                            result: result
+                        }
+                    });
+                });
+            });
         } catch (e) {
             console.log(e);
         }
