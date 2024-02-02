@@ -177,12 +177,12 @@
 
     <h1 style="margin: -15px;">Minutebots Scouting</h1>
     <br>
-
     <label>Team:</label>
     <input id="team"></input>
     <button id="open-qrcode">Generate QRCode</button>
     <button id="open-camera">Open Camera</button>
-    <button onclick="navigator.share('3546ty rteyui euh uefruhfurhhyfreyuy3yrhbjufrbhuhf frh h')">button (:</button>
+    <button onclick="navigator.share('3546ty rteyui euh uefruhfurhhyfreyuy3yrhbjufrbhuhf frh h')">Share</button>
+
     <hr>
 
     <h2>Auto</h2>
@@ -370,7 +370,12 @@
       <button id="close-qrcode">Close QR Code</button>
     </div>
 
-    <script type="module"> navigator.serviceWorker.register('app.js').then((r) => r.update()); </script>
+    <script type="module">
+      navigator.serviceWorker.register('app.js').then((r) => r.update());
+
+      import { DBClient } from "./app-client.js";
+      window.dbClient = new DBClient();
+    </script>
     <script src="scripts/qrcode.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="scripts/script.js"></script>
