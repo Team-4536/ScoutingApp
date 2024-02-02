@@ -65,8 +65,7 @@ function dataObject() {
 // }
 
 function generateQRCode() {
-  teamData = dataObject();
-
+  const teamData = dataObject();
   const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
   const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
   const blob = new Response(compressedReadableStream).blob();
@@ -129,15 +128,15 @@ async function fillTeamData(teamData) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  document.addEventListener(input, textfield), function() {
-    dataObject()
-  }
+  document.querySelectorAll(`textarea, input`).forEach(function (input) {
+    // dataObject();
+  });
 
-  document.getElementById('a-stop').addEventListener('change', function() {
+  document.getElementById('a-stop').addEventListener('input', function() {
     aStop();
   });
 
-  document.getElementById('e-stop').addEventListener('change', function() {
+  document.getElementById('e-stop').addEventListener('input', function() {
     eStop();
   });
 
@@ -185,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   document.getElementById('team').addEventListener('input', function (event) {
-    value = event.target.value;
+    const value = event.target.value;
 
     try {
       if (parseInt(value) > 9999) {
