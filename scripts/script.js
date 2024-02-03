@@ -27,8 +27,7 @@ const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
   var teamData = {
-    // 'team': document.getElementById('team').value,
-    'team': "document.getElementById('team').value",
+    'team': document.getElementById('team').value,
     'auto': {
       'left-zone': document.getElementById('left-zone').checked,
       'a-stop': document.getElementById('a-stop').checked,
@@ -225,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log(value)
 
-    if (value == '0000') {
+    if (parseInt(value) == 0) {
       event.target.value = '';
     }
 
@@ -238,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
 
-      if (value.length < 4) {
+      if (value.length < 4 && parseInt(value) != 0) {
         event.target.value = '0'.repeat(4 - value.length) + event.target.value;
       } else if (value.length > 4 && value[0] == '0') {
         event.target.value = value.slice(1);
