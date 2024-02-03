@@ -17,13 +17,18 @@ async function decodeOnLoad() {
     const urlData = JSON.parse(decodeURI(encodedURL)).data
     await fillTeamData(await decodeData(urlData))
   } catch {}
-} decodeOnLoad(); aStop(); eStop();
+}
+
+decodeOnLoad();
+aStop();
+eStop();
 
 const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
   var teamData = {
-    'team': document.getElementById('team').value,
+    // 'team': document.getElementById('team').value,
+    'team': "document.getElementById('team').value",
     'auto': {
       'left-zone': document.getElementById('left-zone').checked,
       'a-stop': document.getElementById('a-stop').checked,
@@ -61,8 +66,7 @@ function dataObject() {
 // }
 
 function generateQRCode() {
-  teamData = dataObject();
-
+  const teamData = dataObject();
   const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
   const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
   const blob = new Response(compressedReadableStream).blob();
@@ -124,13 +128,53 @@ async function fillTeamData(teamData) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-  document.getElementById('a-stop').addEventListener('change', function() {
-    eStop();
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.collapsible').forEach(function(input) {
+    input.addEventListener("click", function() {
+      this.classList.toggle("active");
+      var content = this.nextElementSibling;
+
+      if (content.style.display === "block") {
+        content.style.display = "none";
+      } else {
+        content.style.display = "block";
+      }
+    });
   });
 
-  document.getElementById('e-stop').addEventListener('change', function() {
+  document.querySelectorAll(`textarea, input`).forEach(function(input) {
+    input.addEventListener('change', function(event) {
+      const teamData = dataObject()
+
+      if (teamData.team.length > 2) {
+        dbClient.saveTeam(teamData);
+        reloadTeams();
+        console.log("textarea and/or input changed")
+      }
+    });
+  });
+
+  reloadTeams();
+
+  async function reloadTeams() {
+    teams.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
+
+    console.log(await dbClient.getAllTeamNumbers)
+
+    for (let team of await dbClient.getAllTeamNumbers()) {
+      let option = document.createElement('option');
+      option.value = team;
+      option.textContent = team;
+      teams.appendChild(option);
+    }
+  }
+
+  document.getElementById('a-stop').addEventListener('input', function() {
     aStop();
+  });
+
+  document.getElementById('e-stop').addEventListener('input', function() {
+    eStop();
   });
 
   document.getElementById('open-qrcode').addEventListener('click', function() {
@@ -177,7 +221,13 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   document.getElementById('team').addEventListener('input', function (event) {
-    value = event.target.value;
+    const value = event.target.value;
+
+    console.log(value)
+
+    if (value == '0000') {
+      event.target.value = '';
+    }
 
     try {
       if (parseInt(value) > 9999) {

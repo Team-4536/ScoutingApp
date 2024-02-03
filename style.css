@@ -1,0 +1,217 @@
+:root {
+    --MinutebotsColor: #bb4536;
+    --borderRed: #a00000;
+    --backgroundColor: #e2a3a32b;
+    --secondaryBackground: #edbdbd;
+    --disabledTopBorder: #a0535354;
+    --disabledBottomBorder: #e6c1c1;
+    --disabledBackground: #e7afaf77;
+    --overlayColor: #00000080;
+    --lightGrey: #00000010;
+    --darkGrey: #00000020;
+}
+
+body:not(#team) {
+    text-align: center;
+    margin: 0px;
+    cursor: default;
+}
+
+h1, h2, label, th {
+    font-family: Arial, sans-serif;
+    color: var(--MinutebotsColor);
+    margin: 0px;
+}
+
+hr {
+    width: 100vw;
+    border-color: var(--borderRed);
+}
+
+th {
+    text-align: right;
+}
+
+input, button:not(.collapsible), textarea, select {
+    border-radius: 7px;
+    border-width: 3px;
+    border-top-color: black;
+    border-left-color: black;
+    border-bottom-color: var(--borderRed);
+    border-right-color: var(--borderRed);
+    background-color: var(--backgroundColor);
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* button, table {
+    margin-left: 13px
+} */
+
+input:not([type="text"], [type="checkbox"], #team), textarea {
+    width: 100px;
+    height: 16px;
+    font-family: Arial, sans-serif;
+    font-size: smaller;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.35);
+}
+
+/* input[type="checkbox"]:not(:disabled) {} */
+
+input[type="checkbox"]:disabled {
+    border-color: var(--borderRed);
+    background-color: var(--disabledBackground);
+}
+
+textarea {
+    width: 100px;
+    height: 24px;
+    min-width: 100px;
+    min-height: 24px;
+    max-width: 220px;
+    max-height: 145px;
+}
+
+input[type="text"]:disabled {
+    border-width: 3px;
+    border-top-color: var(--disabledTopBorder);
+    border-left-color: var(--disabledTopBorder);
+    border-bottom-color: var(--disabledBottomBorder);
+    border-right-color: var(--disabledBottomBorder);
+    background-color: var(--disabledBackground);
+}
+
+#team, select {
+    width: 90px;
+}
+
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#camera {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlayColor);
+    justify-content: center;
+    align-items: center;
+}
+
+#cameraStream {
+    width: 80%;
+    max-width: 600px;
+    height: auto;
+    border: 2px solid white;
+    border-radius: 8px;
+}
+
+#close-camera {
+    height: 60px;
+    font-size: larger;
+    background-color: var(--secondaryBackground);
+}
+
+#qrcode-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--overlayColor);
+    justify-content: center;
+    align-items: center;
+}
+
+#close-qrcode {
+    height: 60px;
+    font-size: larger;
+    background-color: var(--secondaryBackground);
+}
+
+.score {
+    margin-bottom: 6px;
+    margin-left: 15px;
+    text-align: left;
+}
+
+.score label {
+    display: inline-block;
+    width: 150px;
+    font-weight: bold;
+}
+
+.score input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-left: 0px;
+}
+
+.score input[type="text"] {
+    width: 160px;
+}
+
+.indented {
+    margin-left: 45px;
+}
+
+.double-indented {
+    margin-left: 80px;
+}
+
+.collapsible:after {
+    content: '\02795';
+    font-size: 25px;
+    color: var(--MinutebotsColor);
+    float: right;
+}
+
+.active:after {
+    content: "\2796";
+}
+
+.collapsible {
+    background-color: var(--lightGrey);
+    color: var(--MinutebotsColor);
+    cursor: pointer;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    text-align: center;
+    outline: none;
+    font-size: 25px;
+    margin: 0px;
+    font-weight: bold;
+}
+
+.active {
+    margin-bottom: 0px;
+}
+
+.collapsible:not(.active) {
+    margin-bottom: 15px;
+}
+
+.collapsible:hover {
+    background-color: var(--darkGrey);
+}
+
+.content {
+    margin-top: -3px;
+    padding: 18px;
+    display: none;
+    overflow: hidden;
+    background-color: var(--lightGrey);
+    margin-bottom: 15px;
+}
