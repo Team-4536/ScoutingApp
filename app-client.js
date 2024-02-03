@@ -44,6 +44,10 @@ class DBClient {
         return call("db.saveTeam", team);
     }
 
+    async deleteTeam(team) {
+        return call("db.deleteTeam", team);
+    }
+
     async getTeam(team) {
         return call("db.getTeam", team);
     }

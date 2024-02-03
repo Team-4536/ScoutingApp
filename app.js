@@ -66,8 +66,19 @@ class DBController extends EventTarget {
 
     async saveTeam(team) {
         const tx = this.db.transaction("team", "readwrite");
-        const store = tx.objectStore("team")
+        const store = tx.objectStore("team");
         const rq = store.put(team);
+        let p = new Promise((r) => {
+            rq.onsuccess = (e) => {
+                r(e.target.result)
+            };
+        });
+    }
+
+    async deleteTeam(team) {
+        const tx = this.db.transaction("team", "readwrite");
+        const store = tx.objectStore("team");
+        const rq = store.delete(team);
         let p = new Promise((r) => {
             rq.onsuccess = (e) => {
                 r(e.target.result)
