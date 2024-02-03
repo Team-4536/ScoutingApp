@@ -125,7 +125,7 @@ async function fillTeamData(teamData) {
         document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
       } catch {}
     }
-  }
+  };
 }
 
 document.addEventListener('DOMContentLoaded', function() {
