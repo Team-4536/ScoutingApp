@@ -44,10 +44,6 @@ input, button:not(.collapsible), textarea, select {
     cursor: pointer;
 }
 
-/* button, table {
-    margin-left: 13px
-} */
-
 input:not([type="text"], [type="checkbox"], #team), textarea {
     width: 100px;
     height: 16px;
