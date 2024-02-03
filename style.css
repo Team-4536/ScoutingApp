@@ -7,8 +7,8 @@
     --disabledBottomBorder: #e6c1c1;
     --disabledBackground: #e7afaf77;
     --overlayColor: #00000080;
-    --lightGrey: #00000015;
-    --darkGrey: #00000030;
+    --lightGrey: #00000010;
+    --darkGrey: #00000020;
 }
 
 body:not(#team) {
@@ -24,8 +24,7 @@ h1, h2, label, th {
 }
 
 hr {
-    margin-left: -25px;
-    width: 1250vw;
+    width: 100vw;
     border-color: var(--borderRed);
 }
 
@@ -200,8 +199,8 @@ input[type="text"]:disabled {
     margin-bottom: 0px;
 }
 
-:not(.active) {
-    margin-bottom: 10px;
+.collapsible:not(.active) {
+    margin-bottom: 15px;
 }
 
 .collapsible:hover {
@@ -209,9 +208,10 @@ input[type="text"]:disabled {
 }
 
 .content {
+    margin-top: -3px;
     padding: 18px;
     display: none;
     overflow: hidden;
     background-color: var(--lightGrey);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }

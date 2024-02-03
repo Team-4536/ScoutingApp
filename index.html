@@ -26,19 +26,17 @@
     <button onclick="navigator.share({url: 'https://team-4536.github.io/ScoutingApp/'})">Share</button>
     <hr>
 
-    <button type="button" class="collapsible">Auto</button>
+    <button class="collapsible">Auto</button>
     <div class="content">
-      <hr>
-
       <label for="left-zone">Left alliance zone</label>
       <input type="checkbox" id="left-zone" style="margin-bottom: 10px;"></input>
       <br>
 
       <label for="a-stop">A-Stop</label>
       <input type="checkbox" id="a-stop"></input>
+
       <label>Reason:</label>
       <input type="text" id="a-reason" placeholder="" disabled></input>
-      <br></br>
 
       <table data-sec="auto">
         <tr>
@@ -71,146 +69,149 @@
       </table>
     </div>
 
-    <h2>Teleop</h2>
+    <button class="collapsible">Teleop</button>
+    <div class="content">
+      <label for="e-stop">E-Stop</label>
+      <input type="checkbox" id="e-stop"></input>
 
-    <label for="e-stop">E-Stop</label>
-    <input type="checkbox" id="e-stop"></input>
-    <label>Reason:</label>
-    <input type="text" id="e-reason" disabled></input>
-    <br><br>
+      <label>Reason:</label>
+      <input type="text" id="e-reason" disabled></input>
+      <br><br>
 
-    <table data-sec="teleop">
-      <tr>
-        <th></th>
-        <th>Amp</th>
-        <th>Speaker</th>
-        <th>Floor Intake</th>
-        <th>Source Intake</th>
-        <th>Climb</th>
-        <th>Trap</th>
-      </tr>
+      <table data-sec="teleop">
+        <tr>
+          <th></th>
+          <th>Amp</th>
+          <th>Speaker</th>
+          <th>Floor Intake</th>
+          <th>Source Intake</th>
+          <th>Climb</th>
+          <th>Trap</th>
+        </tr>
 
-      <tr data-cat="succeed">
-        <th>Times Succeeded</th>
-        <td><input con="amp"></td>
-        <td><input con="spkr"></td>
-        <td><input con="flr"></td>
-        <td><input con="src"></td>
-        <td><input con="clmb"></td>
-        <td><input con="trp"></td>
-      </tr>
+        <tr data-cat="succeed">
+          <th>Times Succeeded</th>
+          <td><input con="amp"></td>
+          <td><input con="spkr"></td>
+          <td><input con="flr"></td>
+          <td><input con="src"></td>
+          <td><input con="clmb"></td>
+          <td><input con="trp"></td>
+        </tr>
 
-      <tr data-cat="fail">
-        <th>Times Failed</th>
-        <td><input con="amp"></td>
-        <td><input con="spkr"></td>
-        <td><input con="flr"></td>
-        <td><input con="src"></td>
-        <td><input con="clmb"></td>
-        <td><input con="trp"></td>
-      </tr>
+        <tr data-cat="fail">
+          <th>Times Failed</th>
+          <td><input con="amp"></td>
+          <td><input con="spkr"></td>
+          <td><input con="flr"></td>
+          <td><input con="src"></td>
+          <td><input con="clmb"></td>
+          <td><input con="trp"></td>
+        </tr>
 
-      <tr data-cat="method">
-        <th>What Method</th>
-        <td><textarea con="amp"></textarea></td>
-        <td><textarea con="spkr"></textarea></td>
-        <td><textarea con="flr"></textarea></td>
-        <td><textarea con="src"></textarea></td>
-        <td><textarea con="clmb"></textarea></td>
-        <td><textarea con="trp"></textarea></td>
-      </tr>
-    </table>
-
-    <hr style="margin: 15px;">
-
-    <div class="score">
-  		<label>Collisions</label>
-  		<input type="checkbox" class="amp">   
-    </div>
-		
-    <div class="score">
-  		<label>Climb With Others</label>
-  		<input type="checkbox">
-    </div>
-		
-    <div class="score">
-  		<label>Total Game Score</label>
-  		<input type="text" class="amp">
-		</div>
-
-		<div class="score indented">
-  		<label>Total Amp Score</label>
-  		<input type="text" class="amp">
-		</div>
-
-		<div class="score double-indented">
-  		<label>Amp Auto Score</label>
-  		<input type="text" class="amp">
-    </div>
-		
-    <div class="score double-indented">
-  		<label>Amp Teleop Score</label>
-  		<input type="text" class="amp">
-		</div>
-
-		<div class="score indented">
-  		<label>Total Speaker Score</label>
-  		<input type="text" class="amp">
-		</div>
-
-		<div class="score double-indented">
-  		<label>Speaker Auto Score</label>
-  		<input type="text" class="amp">
-    </div>
-		
-    <div class="score double-indented">
-  		<label>Speaker Teleop Score</label>
-  		<input type="text" class="amp">
-    </div>
-		
-    <div class="score double-indented">
-  		<label>Speaker Amplified Score</label>
-  		<input type="text" class="amp">
-		</div>
-
-		<div class="score">
-  		<label>Cooperation</label>
-  		<input type="checkbox">
-    </div>
-		
-    <div class="score">
-  		<label>Melody</label>
-  		<input type="checkbox">
+        <tr data-cat="method">
+          <th>What Method</th>
+          <td><textarea con="amp"></textarea></td>
+          <td><textarea con="spkr"></textarea></td>
+          <td><textarea con="flr"></textarea></td>
+          <td><textarea con="src"></textarea></td>
+          <td><textarea con="clmb"></textarea></td>
+          <td><textarea con="trp"></textarea></td>
+        </tr>
+      </table>
     </div>
 
-    <div class="score"> 
-  		<label>Ensemble</label>
-  		<input type="checkbox">
-    </div>
+    <button class="collapsible">Scoring</button>
+    <div class="content">
+      <div class="score">
+        <label>Collisions</label>
+        <input type="checkbox" class="amp">   
+      </div>
+      
+      <div class="score">
+        <label>Climb With Others</label>
+        <input type="checkbox">
+      </div>
+      
+      <div class="score">
+        <label>Total Game Score</label>
+        <input type="text" class="amp">
+      </div>
 
-    <div class="score">
-  		<label>Win</label>
-  		<input type="checkbox">
-		</div>
+      <div class="score indented">
+        <label>Total Amp Score</label>
+        <input type="text" class="amp">
+      </div>
 
-		<div class="score indented">
-  		<label>By How Much</label>
-  		<input type="text" class="amp">
-		</div>
+      <div class="score double-indented">
+        <label>Amp Auto Score</label>
+        <input type="text" class="amp">
+      </div>
+      
+      <div class="score double-indented">
+        <label>Amp Teleop Score</label>
+        <input type="text" class="amp">
+      </div>
 
-		<div class="score">
-  		<label>Tie</label>
-  		<input type="checkbox">
-		</div>
-  
-    <div id="camera">
-      <video id="cameraStream" autoplay></video>
-      <button id="close-camera">Close Camera</button>
-    </div>
+      <div class="score indented">
+        <label>Total Speaker Score</label>
+        <input type="text" class="amp">
+      </div>
 
-    <div id="qrcode-container">
-      <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
-      <button id="close-qrcode">Close QR Code</button>
+      <div class="score double-indented">
+        <label>Speaker Auto Score</label>
+        <input type="text" class="amp">
+      </div>
+      
+      <div class="score double-indented">
+        <label>Speaker Teleop Score</label>
+        <input type="text" class="amp">
+      </div>
+      
+      <div class="score double-indented">
+        <label>Speaker Amplified Score</label>
+        <input type="text" class="amp">
+      </div>
+
+      <div class="score">
+        <label>Cooperation</label>
+        <input type="checkbox">
+      </div>
+      
+      <div class="score">
+        <label>Melody</label>
+        <input type="checkbox">
+      </div>
+
+      <div class="score"> 
+        <label>Ensemble</label>
+        <input type="checkbox">
+      </div>
+
+      <div class="score">
+        <label>Win</label>
+        <input type="checkbox">
+      </div>
+
+      <div class="score indented">
+        <label>By How Much</label>
+        <input type="text" class="amp">
+      </div>
+
+      <div class="score">
+        <label>Tie</label>
+        <input type="checkbox">
+      </div>
+    
+      <div id="camera">
+        <video id="cameraStream" autoplay></video>
+        <button id="close-camera">Close Camera</button>
+      </div>
+
+      <div id="qrcode-container">
+        <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+        <button id="close-qrcode">Close QR Code</button>
+      </div>
     </div>
 
     <script type="module">

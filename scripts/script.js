@@ -129,29 +129,28 @@ async function fillTeamData(teamData) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  var collapsible = document.getElementsByClassName("collapsible");
-  
-  for (let i = 0; i < collapsible.length; i++) {
-    collapsible[i].addEventListener("click", function() {
+  document.querySelectorAll('.collapsible').forEach(function(input) {
+    input.addEventListener("click", function() {
       this.classList.toggle("active");
       var content = this.nextElementSibling;
+
       if (content.style.display === "block") {
         content.style.display = "none";
       } else {
         content.style.display = "block";
       }
     });
-  }
+  });
 
   document.querySelectorAll(`textarea, input`).forEach(function(input) {
     input.addEventListener('change', function(event) {
       const teamData = dataObject()
 
-      // if (teamData.team.length > 2) {
+      if (teamData.team.length > 2) {
         dbClient.saveTeam(teamData);
         reloadTeams();
         console.log("textarea and/or input changed")
-      // }
+      }
     });
   });
 
