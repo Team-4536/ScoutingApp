@@ -195,7 +195,7 @@ input[type="text"]:disabled {
     font-weight: bold;
 }
 
-.active {
+.collapsible.active {
     margin-bottom: 0px;
 }
 
@@ -209,9 +209,10 @@ input[type="text"]:disabled {
 
 .content {
     margin-top: -3px;
-    padding: 18px;
-    display: none;
-    overflow: hidden;
     background-color: var(--lightGrey);
     margin-bottom: 15px;
+    display: none;
+    float: left;
+    min-width: 100vw;
+    padding: 18px;
 }
