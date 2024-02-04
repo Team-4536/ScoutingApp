@@ -45,7 +45,7 @@ input, button:not(.collapsible), textarea, select {
 }
 
 input:not([type="text"], [type="checkbox"], #team), textarea {
-    width: 100px;
+    width: 90px;
     height: 16px;
     font-family: Arial, sans-serif;
     font-size: smaller;
@@ -63,9 +63,9 @@ input[type="checkbox"]:disabled {
 }
 
 textarea {
-    width: 100px;
+    width: 70px;
     height: 24px;
-    min-width: 100px;
+    min-width: 90px;
     min-height: 24px;
     max-width: 220px;
     max-height: 145px;
@@ -149,6 +149,10 @@ input[type="text"]:disabled {
     font-weight: bold;
 }
 
+.score:not(.indented) label {
+    width: 150px;
+}
+
 .score input[type="checkbox"] {
     transform: scale(1.2);
     margin-left: 0px;
@@ -158,8 +162,9 @@ input[type="text"]:disabled {
     width: 160px;
 }
 
-.indented {
+.indented label {
     margin-left: 45px;
+    width: 1330;
 }
 
 .double-indented {
@@ -191,7 +196,7 @@ input[type="text"]:disabled {
     font-weight: bold;
 }
 
-.active {
+.collapsible.active {
     margin-bottom: 0px;
 }
 
@@ -205,9 +210,10 @@ input[type="text"]:disabled {
 
 .content {
     margin-top: -3px;
-    padding: 18px;
-    display: none;
-    overflow: hidden;
     background-color: var(--lightGrey);
     margin-bottom: 15px;
+    display: none;
+    float: left;
+    min-width: 100vw;
+    padding: 18px;
 }

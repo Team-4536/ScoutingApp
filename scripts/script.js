@@ -27,8 +27,7 @@ const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
   var teamData = {
-    // 'team': document.getElementById('team').value,
-    'team': "document.getElementById('team').value",
+    'team': document.getElementById('team').value,
     'auto': {
       'left-zone': document.getElementById('left-zone').checked,
       'a-stop': document.getElementById('a-stop').checked,
@@ -128,17 +127,30 @@ async function fillTeamData(teamData) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.collapsible').forEach(function(input) {
-    input.addEventListener("click", function() {
-      this.classList.toggle("active");
-      var content = this.nextElementSibling;
+function toggleSectionCollapse(id) {
+  const section = document.getElementById(id);
 
-      if (content.style.display === "block") {
-        content.style.display = "none";
-      } else {
-        content.style.display = "block";
-      }
+  section.classList.toggle("active");
+  let content = section.nextElementSibling;
+
+  if (content.style.display === "block") {
+    content.style.display = "none";
+  } else {
+    content.style.display = "block";
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('teams').addEventListener('change', async function(event) {
+    const team = event.target.value;
+
+    const teamData = await dbClient.getTeam(team);
+    fillTeamData(teamData);
+  });
+
+  document.querySelectorAll('.collapsible').forEach(function(input) {
+    input.addEventListener("click", function(event) {
+      toggleSectionCollapse(event.target.id);
     });
   });
 
@@ -149,17 +161,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (teamData.team.length > 2) {
         dbClient.saveTeam(teamData);
         reloadTeams();
-        console.log("textarea and/or input changed")
       }
     });
   });
 
   reloadTeams();
+  toggleSectionCollapse('auto');
 
   async function reloadTeams() {
     teams.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
-
-    console.log(await dbClient.getAllTeamNumbers)
 
     for (let team of await dbClient.getAllTeamNumbers()) {
       let option = document.createElement('option');
@@ -223,9 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('team').addEventListener('input', function (event) {
     const value = event.target.value;
 
-    console.log(value)
-
-    if (value == '0000') {
+    if (parseInt(value) == 0) {
       event.target.value = '';
     }
 
@@ -238,7 +246,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       }
 
-      if (value.length < 4) {
+      if (value.length < 4 && parseInt(value) != 0) {
         event.target.value = '0'.repeat(4 - value.length) + event.target.value;
       } else if (value.length > 4 && value[0] == '0') {
         event.target.value = value.slice(1);
