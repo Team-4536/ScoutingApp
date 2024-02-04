@@ -128,6 +128,14 @@ async function fillTeamData(teamData) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('teams').addEventListener('change', async function(event) {
+    const team = event.target.value;
+
+    const teamData = await dbClient.getTeam(team);
+    console.log(teamData);
+    fillTeamData(teamData);
+  });
+
   document.querySelectorAll('.collapsible').forEach(function(input) {
     input.addEventListener("click", function() {
       this.classList.toggle("active");
