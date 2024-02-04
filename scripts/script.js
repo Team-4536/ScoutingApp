@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   reloadTeams();
-  toggleSectionCollapse();
+  toggleSectionCollapse('auto');
 
   async function reloadTeams() {
     teams.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
