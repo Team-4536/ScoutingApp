@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (parseInt(event.target.value) > 999) {
-                event.target.value = 'e';
+                event.target.value = '999';
             }
         });
     });
