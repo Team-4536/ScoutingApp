@@ -192,22 +192,44 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('qrcode-container').style.display = 'block';
   });
 
-  document.getElementById('open-camera').addEventListener('click', function() {
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then(function (stream) {
-        document.getElementById('cameraStream').srcObject = stream;
-        document.getElementById('camera').style.display = 'flex';
-      }).catch();
-  });
+    const beginScan = async () => {
+        let popup = document.getElementById('scanner')
+        popup.style.display = 'flex';
+
+        let scanner = new Html5Qrcode("cameraStream", {
+	    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
+	    verbose: false
+        });
+
+        function callback(text, detail) {
+            console.log('got scan', text, detail);
+            scanner.pause(true);
+        };
+
+        function errorCallback(error) {
+	    console.log('scanner error', error);
+        };
+
+        let framerate = 15;
+        let cameras = await Html5Qrcode.getCameras()
+        console.log(cameras);
+        let camera = cameras[0].id;
+        await scanner.start(camera, { fps: framerate, verbose: true },
+                            callback, errorCallback);
+        scanner.applyVideoConstraints({ frameRate: framerate });
+    }
+
+    const closeScanner = () => {
+        document.getElementById('scanner').style.display = 'none';
+    }
+
+    document.getElementById('open-scanner').addEventListener('click', beginScan);
 
   document.getElementById('close-qrcode').addEventListener('click', function() {
     document.getElementById('qrcode-container').style.display = 'none';
   });
 
-  document.getElementById('close-camera').addEventListener('click', function() {
-    document.getElementById('cameraStream').srcObject.getTracks().forEach(track => track.stop());
-    document.getElementById('camera').style.display = 'none';
-  });
+    document.getElementById('close-scanner').addEventListener('click', closeScanner);
 
   document.querySelectorAll(numInputs).forEach(function (input) {
     input.placeholder = '0';
