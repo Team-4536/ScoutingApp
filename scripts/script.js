@@ -1,60 +1,86 @@
+function getElem(value, type, head = document) {
+    const typeMap = {
+        id: head.getElementById,
+        name: head.getElementsByName,
+        class: head.getElementsByClassName,
+        queryAll: head.querySelectorAll,
+        query: head.querySelector,
+        tag: head.getElementsByTagName,
+    };
+
+    if (!(type in typeMap)) {
+        console.warn(`Unrecognized element type: ${type}`);
+        return undefined;
+    }
+
+    const result = typeMap[type].call(head, value);
+
+    if (!result) {
+        console.error(`Element with type '${type}' of '${value}' was not found`);
+    }
+
+    return result;
+}
+
 function eStop() {
-    document.getElementById('e-reason').disabled = !document.getElementById('e-stop').checked;
+    getElem('e-reason', 'id').disabled = !getElem('e-stop', 'id').checked;
 }
 
 function aStop() {
-    document.getElementById('a-reason').disabled = !document.getElementById('a-stop').checked;
+    getElem('a-reason', 'id').disabled = !getElem('a-stop', 'id').checked;
 }
 
 async function decodeOnLoad() {
-    try {
-        let encodedURL = window.location.search
+    let encodedURL = window.location.search;
 
-        if (window.location.search[0] == '?') {
-            encodedURL = encodedURL.slice(1);
-        }
-        
-        const urlData = JSON.parse(decodeURI(encodedURL)).data
-        await fillTeamData(await decodeData(urlData))
-    } catch {}
+    if (window.location.search[0] == '?') {
+        encodedURL = encodedURL.slice(1);
+    }
+    
+    const urlData = JSON.parse(decodeURI(encodedURL)).data;
+    const data = await decodeData(urlData);
+
+    if (data) {
+        fillTeamData(data);
+        getElem('teams', 'id').value = data.team;
+    } else {
+        console.error('Could not fill team data due to invalid data');
+    }
+
+    aStop();
+    eStop();
 }
-
-decodeOnLoad();
-aStop();
-eStop();
 
 const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
     var teamData = {
-        'team': document.getElementById('team').value,
+        'team': getElem('team', 'id').value,
         'auto': {
-            'left-zone': document.getElementById('left-zone').checked,
-            'a-stop': document.getElementById('a-stop').checked,
-            'a-reason': document.getElementById('a-reason').value,
+            'left-zone': getElem('left-zone', 'id').checked,
+            'a-stop': getElem('a-stop', 'id').checked,
+            'a-reason': getElem('a-reason', 'id').value,
             'succeed': {},
             'fail': {},
             'method': {}
         },
         'teleop': {
-            'e-stop': document.getElementById('e-stop').checked,
-            'e-reason': document.getElementById('e-reason').value,
+            'e-stop': getElem('e-stop', 'id').checked,
+            'e-reason': getElem('e-reason', 'id').value,
             'succeed': {},
             'fail': {},
             'method': {}
         }
     }
 
-    for (let num of document.querySelectorAll(`${numInputs}:not(#team), textarea`)) {
-        try {
-            let tr = num.closest('tr');
-            let sec = tr.closest('table').dataset['sec'];
-            let cat = tr.dataset['cat'];
-            let con = num.getAttribute('con');
+    for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
+        let tr = num.closest('tr');
+        let sec = tr.closest('table').dataset['sec'];
+        let cat = tr.dataset['cat'];
+        let con = num.getAttribute('con');
 
-            teamData[sec][cat][con] = num.value;
-            num.setAttribute('id', `${sec}-${cat}-${con}`);
-        } catch {}
+        teamData[sec][cat][con] = num.value;
+        num.setAttribute('id', `${sec}-${cat}-${con}`);
     }
     
     return teamData;
@@ -65,25 +91,17 @@ function dataObject() {
 // }
 
 function generateQRCode() {
-    const teamData = dataObject();
-    const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
-    const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
-    const blob = new Response(compressedReadableStream).blob();
+    encodeData().then((data) => {
+        getElem('qrcode', 'id').innerHTML = '';
+        let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-    blob.then((b) => {
-        b.arrayBuffer().then((arrayBuffer) => {
-            const baseSixtyFourString = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-            document.getElementById('qrcode').innerHTML = '';
-            let qrcodeDataObject = { 'ver': 1, 'data': baseSixtyFourString }
-
-            new QRCode(document.getElementById('qrcode'), {
-                text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
-                correctLevel: QRCode.CorrectLevel.Q,
-                width: 400,
-                height: 400
-            });
-        })
-    })
+        new QRCode(getElem('qrcode', 'id'), {
+            text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
+            correctLevel: QRCode.CorrectLevel.Q,
+            width: 400,
+            height: 400
+        });
+    });
 }
 
 async function decodeData(encodedData) {
@@ -94,41 +112,96 @@ async function decodeData(encodedData) {
         blob = await new Response(decoder).blob();
         let text = await blob.text();
         return JSON.parse(text);
-    } catch {}
+    } catch (error) {
+        console.error(`Error decoding data due to invalid data: "${error.message}"`);
+    }
 }
 
-async function fillTeamData(teamData) {
+async function encodeData(data) {
+    const teamData = dataObject();
+    const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
+    const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
+    const blob = await new Response(compressedReadableStream).blob();
+
+    const ab = await blob.arrayBuffer();
+    return btoa(String.fromCharCode(...new Uint8Array(ab)));
+}
+
+function fillTeamData(teamData) {
     dataObject();
 
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    document.getElementById('team').value = teamData.team;
-    document.getElementById('left-zone').checked = teamData.auto['left-zone'];
-    document.getElementById('a-stop').checked = teamData.auto['a-stop'];
-    document.getElementById('a-reason').value = teamData.auto['a-reason'];
-    document.getElementById('e-stop').checked = teamData.teleop['e-stop'];
-    document.getElementById('e-reason').value = teamData.teleop['e-reason'];
+    if (teamData) {
+        getElem('team', 'id').value = teamData.team !== undefined ? teamData.team : '';
+        getElem('left-zone', 'id').checked = teamData.auto['left-zone'];
+        getElem('a-stop', 'id').checked = teamData.auto['a-stop'];
+        getElem('a-reason', 'id').value = teamData.auto['a-reason'];
+        getElem('e-stop', 'id').checked = teamData.teleop['e-stop'];
+        getElem('e-reason', 'id').value = teamData.teleop['e-reason'];
+    }
     
     for (let a = 0; a < 3; a++) {
         for (let b = 0; b < 3; b++) {
             try {
-                document.getElementById(`auto-${con[a]}-${cat[b]}`).value = teamData.auto[con[a]][cat[b]];
-            } catch {}
+                getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = teamData.auto[con[a]][cat[b]];
+            } catch (error) {
+                console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
+            }
         }
     }
 
     for (let c = 0; c < 3; c++) {
         for (let d = 0; d < 6; d++) {
             try {
-                document.getElementById(`teleop-${con[c]}-${cat[d]}`).value = teamData.teleop[con[c]][cat[d]];
-            } catch {}
+                getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = teamData.teleop[con[c]][cat[d]];
+            }
+            catch (error) {
+                console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
+            }
+        }
+    }
+
+    aStop();
+    eStop();
+}
+
+function clearTeamData() {
+    var con = ['succeed', 'fail', 'method'];
+    var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+
+    getElem('team', 'id').value = '';
+    getElem('left-zone', 'id').checked = '';
+    getElem('a-stop', 'id').checked = '';
+    getElem('a-reason', 'id').value = '';
+    getElem('e-stop', 'id').checked = '';
+    getElem('e-reason', 'id').value = '';
+    
+    for (let a = 0; a < 3; a++) {
+        for (let b = 0; b < 3; b++) {
+            try {
+                getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = '';
+            } catch (error) {
+                console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
+            }
+        }
+    }
+
+    for (let c = 0; c < 3; c++) {
+        for (let d = 0; d < 6; d++) {
+            try {
+                getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = '';
+            }
+            catch (error) {
+                console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
+            }
         }
     }
 }
 
 function toggleSectionCollapse(id) {
-    const section = document.getElementById(id);
+    const section = getElem(id, 'id');
 
     section.classList.toggle("active");
     let content = section.nextElementSibling;
@@ -141,20 +214,27 @@ function toggleSectionCollapse(id) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.getElementById('teams').addEventListener('change', async function(event) {
+    reloadTeams();
+    toggleSectionCollapse('auto');
+    decodeOnLoad();
+
+    getElem('teams', 'id').addEventListener('change', function(event) {
         const team = event.target.value;
 
-        const teamData = await dbClient.getTeam(team);
-        fillTeamData(teamData);
+        if (team != '') {
+            dbClient.getTeam(team).then(teamData => fillTeamData(teamData));
+        } else {
+            clearTeamData();
+        }
     });
 
-    document.querySelectorAll('.collapsible').forEach(function(input) {
+    getElem('.collapsible', 'queryAll').forEach(function(input) {
         input.addEventListener("click", function(event) {
             toggleSectionCollapse(event.target.id);
         });
     });
 
-    document.querySelectorAll(`textarea, input`).forEach(function(input) {
+    getElem(`textarea, input`, 'queryAll').forEach(function(input) {
         input.addEventListener('change', function(event) {
             const teamData = dataObject()
             if (teamData.team.length > 2) {
@@ -203,7 +283,9 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleSectionCollapse('auto');
 
     async function reloadTeams() {
-        teams.querySelectorAll('option:not(:first-child)').forEach(option => option.remove());
+        const teams = getElem('teams', 'id')
+
+        getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
 
         for (let team of await dbClient.getAllTeamNumbers()) {
             let option = document.createElement('option');
@@ -213,17 +295,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.getElementById('a-stop').addEventListener('input', function() {
+    getElem('a-stop', 'id').addEventListener('input', function() {
         aStop();
     });
 
-    document.getElementById('e-stop').addEventListener('input', function() {
+    getElem('e-stop', 'id').addEventListener('input', function() {
         eStop();
     });
 
-    document.getElementById('open-qrcode').addEventListener('click', function() {
+    getElem('open-qrcode', 'id').addEventListener('click', function() {
         generateQRCode();
-        document.getElementById('qrcode-container').style.display = 'block';
+        getElem('qrcode-container', 'id').style.display = 'block';
     });
 
     document.getElementById('close-qrcode').addEventListener('click', function() {
@@ -236,56 +318,52 @@ document.addEventListener('DOMContentLoaded', function() {
         input.min = '0';
     });
 
-    document.getElementById('team').placeholder = '0000';
+    getElem('team', 'id').placeholder = '0000';
 
-    document.querySelectorAll('textarea').forEach(function (textarea) {
+    getElem('textarea', 'queryAll').forEach(function (textarea) {
         textarea.addEventListener('input', function () {
             textarea.style.height = 'auto';
             textarea.style.height = (textarea.scrollHeight) + 'px';
         });
     });
 
-    document.querySelectorAll(numInputs).forEach(function (input) {
-        input.addEventListener('input', function (event) {
-                event.target.value = event.target.value.replace(/\D/g, '');
-        });
-    });
+    // document.querySelectorAll(numInputs).forEach(function (input) {
+    //     input.addEventListener('input', function (event) {
+    //         event.target.value = event.target.value.replace(/\D/g, '');
+    //     });
+    // });
 
-    document.getElementById('team').addEventListener('input', function (event) {
+    getElem('team', 'id').addEventListener('input', function (event) {
         const value = event.target.value;
 
         if (parseInt(value) == 0) {
             event.target.value = '';
         }
 
-        try {
-            if (parseInt(value) > 9999) {
-                if (value != '10000') {
-                    event.target.value = event.target.value.slice(0, -1);
-                } else {
-                    event.target.value = '9999';
-                }
+        if (parseInt(value) > 9999) {
+            if (value != '10000') {
+                event.target.value = event.target.value.slice(0, -1);
+            } else {
+                event.target.value = '9999';
             }
+        }
 
-            if (value.length < 4 && parseInt(value) != 0) {
-                event.target.value = '0'.repeat(4 - value.length) + event.target.value;
-            } else if (value.length > 4 && value[0] == '0') {
-                event.target.value = value.slice(1);
-            }
-        } catch {}
+        if (value.length < 4 && parseInt(value) != 0) {
+            event.target.value = '0'.repeat(4 - value.length) + event.target.value;
+        } else if (value.length > 4 && value[0] == '0') {
+            event.target.value = value.slice(1);
+        }
     });
 
-    document.querySelectorAll(`${numInputs}:not(#team)`).forEach(function (input) {
+    getElem(`${numInputs}:not(#team)`, 'queryAll').forEach(function (input) {
         input.addEventListener('input', function (event) {
             if (event.target.value[0] == '0') {
                 event.target.value = event.target.value.slice(1);
             }
 
-            try {
-                if (parseInt(event.target.value) > 999) {
-                    event.target.value = '999';
-                }
-            } catch {}
+            if (parseInt(event.target.value) > 999) {
+                event.target.value = 'e';
+            }
         });
     });
 });
