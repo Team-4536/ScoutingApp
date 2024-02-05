@@ -22,7 +22,7 @@
     </select>
 
     <button id="open-qrcode">Generate QRCode</button>
-    <button id="open-camera">Open Camera</button>
+    <button id="open-scanner">Open Scanner</button>
     <button onclick="navigator.share({url: 'https://team-4536.github.io/ScoutingApp/'})">Share</button>
     <hr>
 
@@ -204,9 +204,9 @@
       </div>
     </div>
     
-    <div id="camera">
-      <video id="cameraStream" autoplay></video>
-      <button id="close-camera">Close Camera</button>
+    <div id="scanner">
+      <div id="cameraStream"></div>
+      <button id="close-scanner">Close Scanner</button>
     </div>
 
     <div id="qrcode-container">
@@ -221,6 +221,7 @@
       window.dbClient = new DBClient();
     </script>
     <script src="scripts/qrcode.js"></script>
+    <script src="scripts/qrcode-scanner.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="scripts/script.js" type="module"></script>
   </body>
