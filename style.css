@@ -93,7 +93,7 @@ input[type="text"]:disabled {
     height: 100%;
 }
 
-#scanner {
+#camera {
     display: none;
     position: fixed;
     top: 0;
@@ -113,7 +113,7 @@ input[type="text"]:disabled {
     border-radius: 8px;
 }
 
-#close-scanner {
+#close-camera {
     height: 60px;
     font-size: larger;
     background-color: var(--secondaryBackground);
