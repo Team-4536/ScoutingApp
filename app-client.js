@@ -40,8 +40,8 @@ class DBClient {
     constructor() {
     }
 
-    async saveTeam(team) {
-        return call("db.saveTeam", team);
+    async putTeam(team) {
+        return call("db.putTeam", team);
     }
 
     async deleteTeam(team) {

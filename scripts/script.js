@@ -35,16 +35,16 @@ async function decodeOnLoad() {
 
     if (window.location.search[0] == '?') {
         encodedURL = encodedURL.slice(1);
-    }
     
-    const urlData = JSON.parse(decodeURI(encodedURL)).data;
-    const data = await decodeData(urlData);
+        const urlData = JSON.parse(decodeURI(encodedURL)).data;
+        const data = await decodeData(urlData);
 
-    if (data) {
-        fillTeamData(data);
-        getElem('teams', 'id').value = data.team;
-    } else {
-        console.error('Could not fill team data due to invalid data');
+        if (data) {
+            fillTeamData(data);
+            getElem('teams', 'id').value = data.team;
+        } else {
+            console.error('Could not fill team data due to invalid data');
+        }
     }
 
     aStop();
@@ -54,24 +54,37 @@ async function decodeOnLoad() {
 const numInputs = 'input:not([type="text"], [type="checkbox"])';
 
 function dataObject() {
-    var teamData = {
-        'team': getElem('team', 'id').value,
+    const teamData = {
+        'team': '',
         'auto': {
-            'left-zone': getElem('left-zone', 'id').checked,
-            'a-stop': getElem('a-stop', 'id').checked,
-            'a-reason': getElem('a-reason', 'id').value,
+            'left-zone': null,
+            'a-stop': null,
+            'a-reason': '',
             'succeed': {},
             'fail': {},
             'method': {}
         },
         'teleop': {
-            'e-stop': getElem('e-stop', 'id').checked,
-            'e-reason': getElem('e-reason', 'id').value,
+            'e-stop': null,
+            'e-reason': '',
             'succeed': {},
             'fail': {},
             'method': {}
         }
     }
+
+    return teamData;
+}
+
+function fillDataObject() {
+    var teamData = dataObject();
+
+    teamData.team = getElem('team', 'id').value;
+    teamData.auto['left-zone'] = getElem('left-zone', 'id').checked;
+    teamData.auto['a-stop'] = getElem('a-stop', 'id').checked;
+    teamData.auto['a-reason'] = getElem('a-reason', 'id').value;
+    teamData.teleop['e-stop'] = getElem('e-stop', 'id').checked;
+    teamData.teleop['e-reason'] = getElem('e-reason', 'id').value;
 
     for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
         let tr = num.closest('tr');
@@ -102,6 +115,8 @@ function generateQRCode() {
             height: 400
         });
     });
+
+    getElem('qrcode-container', 'id').style.display = 'block';
 }
 
 async function decodeData(encodedData) {
@@ -118,7 +133,7 @@ async function decodeData(encodedData) {
 }
 
 async function encodeData(data) {
-    const teamData = dataObject();
+    const teamData = fillDataObject();
     const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
     const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
     const blob = await new Response(compressedReadableStream).blob();
@@ -128,18 +143,18 @@ async function encodeData(data) {
 }
 
 function fillTeamData(teamData) {
-    dataObject();
+    fillDataObject();
 
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     if (teamData) {
-        getElem('team', 'id').value = teamData.team !== undefined ? teamData.team : '';
-        getElem('left-zone', 'id').checked = teamData.auto['left-zone'];
-        getElem('a-stop', 'id').checked = teamData.auto['a-stop'];
-        getElem('a-reason', 'id').value = teamData.auto['a-reason'];
-        getElem('e-stop', 'id').checked = teamData.teleop['e-stop'];
-        getElem('e-reason', 'id').value = teamData.teleop['e-reason'];
+        getElem('team', 'id').value = teamData.team !== undefined ? teamData.team: '';
+        getElem('left-zone', 'id').checked = teamData.auto['left-zone'] !== undefined ? teamData.auto['left-zone'] : '';
+        getElem('a-stop', 'id').checked = teamData.auto['a-stop'] !== undefined ? teamData.auto['a-stop'] : '';
+        getElem('a-reason', 'id').value = teamData.auto['a-reason'] !== undefined ? teamData.auto['a-reason'] : '';
+        getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] !== undefined ? teamData.teleop['e-stop'] : '';
+        getElem('e-reason', 'id').value = teamData.teleop['e-reason'] !== undefined ? teamData.teleop['e-reason'] : '';
     }
     
     for (let a = 0; a < 3; a++) {
@@ -167,7 +182,7 @@ function fillTeamData(teamData) {
     eStop();
 }
 
-function clearTeamData() {
+function clearTeamData(team = '') {
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
@@ -198,6 +213,25 @@ function clearTeamData() {
             }
         }
     }
+
+    if (team) {
+        const teams = getElem('teams', 'id');
+
+        for (const option in getElem('option:not(:first-child)', 'queryAll', teams)) {
+            if (option == team) {
+                teams.value == team
+
+                break;
+            } else {
+                teamData = dataObject(team);
+
+                dbClient.putTeam(teamData);
+                reloadTeams();
+
+                break;
+            }
+        }
+    }
 }
 
 function toggleSectionCollapse(id) {
@@ -213,10 +247,35 @@ function toggleSectionCollapse(id) {
     }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
+        let tr = num.closest('tr');
+        let sec = tr.closest('table').dataset['sec'];
+        let cat = tr.dataset['cat'];
+        let con = num.getAttribute('con');
+
+        teamData[sec][cat][con] = num.value;
+        num.setAttribute('id', `${sec}-${cat}-${con}`);
+    }
+
     reloadTeams();
+    // decodeOnLoad();
     toggleSectionCollapse('auto');
-    decodeOnLoad();
+
+    const search = new URLSearchParams(window.location.search);
+    const team = search.get('team');
+
+    if (team) {
+        const teamData = dbClient.getTeam(team);
+
+        if (await teamData) {
+            fillTeamData(teamData);
+        } else {
+            dataObject = dataObject(team);
+            dbClient.putTeam(dataObject);
+            clearTeamData(team);
+        }
+    }
 
     getElem('teams', 'id').addEventListener('change', function(event) {
         const team = event.target.value;
@@ -236,9 +295,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     getElem(`textarea, input`, 'queryAll').forEach(function(input) {
         input.addEventListener('change', function(event) {
-            const teamData = dataObject()
+            const teamData = fillDataObject()
             if (teamData.team.length > 2) {
-                dbClient.saveTeam(teamData);
+                dbClient.putTeam(teamData);
                 reloadTeams();
             }
         });
@@ -279,11 +338,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById('close-scanner').addEventListener('click', closeScanner);
 
-    reloadTeams();
-    toggleSectionCollapse('auto');
-
     async function reloadTeams() {
-        const teams = getElem('teams', 'id')
+        const teams = getElem('teams', 'id');
 
         getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
 
@@ -295,18 +351,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    getElem('a-stop', 'id').addEventListener('input', function() {
-        aStop();
-    });
+    getElem('a-stop', 'id').addEventListener('input', aStop);
 
-    getElem('e-stop', 'id').addEventListener('input', function() {
-        eStop();
-    });
+    getElem('e-stop', 'id').addEventListener('input', eStop);
 
-    getElem('open-qrcode', 'id').addEventListener('click', function() {
-        generateQRCode();
-        getElem('qrcode-container', 'id').style.display = 'block';
-    });
+    getElem('open-qrcode', 'id').addEventListener('click', generateQRCode);
 
     document.getElementById('close-qrcode').addEventListener('click', function() {
         document.getElementById('qrcode-container').style.display = 'none';
