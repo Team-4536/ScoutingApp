@@ -19,9 +19,15 @@ class CacheController extends EventTarget {
             console.log("caching");
             let f = globalThis.fetch(request, { cache: "reload" });
             return f.then((r) => {
+                console.log("resp", r);
                 let z = r.clone();
                 this.cache.put(request, r);
                 return z;
+            }).catch(e => {
+                console.log("fail", e);
+                if (cached) {
+                    return cached;
+                }
             });
         } else {
             console.log("returning cached");
