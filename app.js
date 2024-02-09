@@ -1,4 +1,4 @@
-"mode strict";
+"use strict";
 
 class CacheController extends EventTarget {
     constructor() {
@@ -64,7 +64,7 @@ class DBController extends EventTarget {
         });
     }
 
-    async saveTeam(team) {
+    async putTeam(team) {
         const tx = this.db.transaction("team", "readwrite");
         const store = tx.objectStore("team");
         const rq = store.put(team);
@@ -162,4 +162,4 @@ class App {
     }
 }
 
-app = new App();
+const app = new App();
