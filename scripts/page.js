@@ -43,9 +43,14 @@ function generateQRCode() {
     getElem('qrcode-container', 'id').style.display = 'block';
 }
 
-window.addEventListener('popstate', onLoad);
+window.addEventListener('popstate', async function() {
+    // onLoad();
+    console.log('popstate called');
+});
 
 document.addEventListener('DOMContentLoaded', async function() {
+    onLoad();
+    console.log('DOMContentLoaded called');
     // for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
     //     let tr = num.closest('tr');
     //     let sec = tr.closest('table').dataset['sec'];
