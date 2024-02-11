@@ -1,12 +1,6 @@
-const numInputs = 'input:not([type="text"], [type="checkbox"])';
+"use strict";
 
-function aStop() {
-    getElem('a-reason', 'id').disabled = !getElem('a-stop', 'id').checked;
-}
-
-function eStop() {
-    getElem('e-reason', 'id').disabled = !getElem('e-stop', 'id').checked;
-}
+import { dataObject, numInputs, onLoad, getElem, fillTeamData, fillDataObject, encodeData, decodeData, aStop, eStop, toggleSectionCollapse, reloadTeams } from "./utils.js";
 
 async function decodeOnLoad() {
     let encodedURL = window.location.search;
@@ -49,163 +43,37 @@ function generateQRCode() {
     getElem('qrcode-container', 'id').style.display = 'block';
 }
 
-async function decodeData(encodedData) {
-    try {
-        let bytes = Uint8Array.from(atob(encodedData), c => c.charCodeAt(0));
-        let blob = new Blob([bytes]);
-        let decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
-        blob = await new Response(decoder).blob();
-        let text = await blob.text();
-        return JSON.parse(text);
-    } catch (error) {
-        console.error(`Error decoding data due to invalid data: "${error.message}"`);
-    }
-}
-
-async function encodeData(data) {
-    const teamData = fillDataObject();
-    const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
-    const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
-    const blob = await new Response(compressedReadableStream).blob();
-
-    const ab = await blob.arrayBuffer();
-    return btoa(String.fromCharCode(...new Uint8Array(ab)));
-}
-
-function fillTeamData(teamData) {
-    fillDataObject();
-
-    var con = ['succeed', 'fail', 'method'];
-    var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-    if (teamData) {
-        getElem('team', 'id').value = teamData.team !== undefined ? teamData.team: '';
-        getElem('left-zone', 'id').checked = teamData.auto['left-zone'] !== undefined ? teamData.auto['left-zone'] : '';
-        getElem('a-stop', 'id').checked = teamData.auto['a-stop'] !== undefined ? teamData.auto['a-stop'] : '';
-        getElem('a-reason', 'id').value = teamData.auto['a-reason'] !== undefined ? teamData.auto['a-reason'] : '';
-        getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] !== undefined ? teamData.teleop['e-stop'] : '';
-        getElem('e-reason', 'id').value = teamData.teleop['e-reason'] !== undefined ? teamData.teleop['e-reason'] : '';
-    }
-    
-    for (let a = 0; a < 3; a++) {
-        for (let b = 0; b < 3; b++) {
-            try {
-                getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = teamData.auto[con[a]][cat[b]];
-            } catch (error) {
-                console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
-            }
-        }
-    }
-
-    for (let c = 0; c < 3; c++) {
-        for (let d = 0; d < 6; d++) {
-            try {
-                getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = teamData.teleop[con[c]][cat[d]];
-            }
-            catch (error) {
-                console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
-            }
-        }
-    }
-
-    aStop();
-    eStop();
-}
-
-function clearTeamData(team = '') {
-    var con = ['succeed', 'fail', 'method'];
-    var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-    getElem('team', 'id').value = '';
-    getElem('left-zone', 'id').checked = '';
-    getElem('a-stop', 'id').checked = '';
-    getElem('a-reason', 'id').value = '';
-    getElem('e-stop', 'id').checked = '';
-    getElem('e-reason', 'id').value = '';
-    
-    for (let a = 0; a < 3; a++) {
-        for (let b = 0; b < 3; b++) {
-            try {
-                getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = '';
-            } catch (error) {
-                console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
-            }
-        }
-    }
-
-    for (let c = 0; c < 3; c++) {
-        for (let d = 0; d < 6; d++) {
-            try {
-                getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = '';
-            }
-            catch (error) {
-                console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
-            }
-        }
-    }
-
-    if (team) {
-        const teams = getElem('teams', 'id');
-
-        for (const option in getElem('option:not(:first-child)', 'queryAll', teams)) {
-            if (option == team) {
-                teams.value == team
-
-                break;
-            } else {
-                teamData = dataObject(team);
-
-                dbClient.putTeam(teamData);
-                reloadTeams();
-
-                break;
-            }
-        }
-    }
-}
-
-function toggleSectionCollapse(id) {
-    const section = getElem(id, 'id');
-
-    section.classList.toggle("active");
-    let content = section.nextElementSibling;
-
-    if (content.style.display === "block") {
-        content.style.display = "none";
-    } else {
-        content.style.display = "block";
-    }
-}
+window.addEventListener('popstate', onLoad);
 
 document.addEventListener('DOMContentLoaded', async function() {
-    for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
-        let tr = num.closest('tr');
-        let sec = tr.closest('table').dataset['sec'];
-        let cat = tr.dataset['cat'];
-        let con = num.getAttribute('con');
+    // for (let num of getElem(`${numInputs}:not(#team), textarea`, 'queryAll')) {
+    //     let tr = num.closest('tr');
+    //     let sec = tr.closest('table').dataset['sec'];
+    //     let cat = tr.dataset['cat'];
+    //     let con = num.getAttribute('con');
 
-        teamData[sec][cat][con] = num.value;
-        num.setAttribute('id', `${sec}-${cat}-${con}`);
-    }
+    //     teamData[sec][cat][con] = num.value;
+    //     num.setAttribute('id', `${sec}-${cat}-${con}`);
+    // }
 
-    reloadTeams();
+    // reloadTeams();
     // decodeOnLoad();
-    toggleSectionCollapse('auto');
+    // toggleSectionCollapse('auto');
 
     const search = new URLSearchParams(window.location.search);
     const team = search.get('team');
 
-    if (team) {
-        const teamData = dbClient.getTeam(team);
+    // if (team) {
+    //     const teamData = dbClient.getTeam(team);
 
-        if (await teamData) {
-            fillTeamData(teamData);
-        } else {
-            dataObject = dataObject(team);
-            dbClient.putTeam(dataObject);
-            clearTeamData(team);
-        }
-    }
+    //     if (await teamData) {
+    //         fillTeamData(teamData);
+    //     } else {
+    //         dataObject = dataObject(team);
+    //         dbClient.putTeam(dataObject);
+    //         fillTeamData(JSON.parse(dataObject));
+    //     }
+    // }
 
     getElem('teams', 'id').addEventListener('change', function(event) {
         const team = event.target.value;
@@ -213,7 +81,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (team != '') {
             dbClient.getTeam(team).then(teamData => fillTeamData(teamData));
         } else {
-            clearTeamData();
+            fillTeamData(JSON.parse(dataObject));
         }
     });
 
@@ -261,25 +129,12 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     const closeScanner = () => {
-        document.getElementById('scanner').style.display = 'none';
+        getElem('scanner', 'id').style.display = 'none';
     }
 
-    document.getElementById('open-scanner').addEventListener('click', beginScan);
+    getElem('open-scanner', 'id').addEventListener('click', beginScan);
 
-    document.getElementById('close-scanner').addEventListener('click', closeScanner);
-
-    async function reloadTeams() {
-        const teams = getElem('teams', 'id');
-
-        getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
-
-        for (let team of await dbClient.getAllTeamNumbers()) {
-            let option = document.createElement('option');
-            option.value = team;
-            option.textContent = team;
-            teams.appendChild(option);
-        }
-    }
+    getElem('close-scanner', 'id').addEventListener('click', closeScanner);
 
     getElem('a-stop', 'id').addEventListener('input', aStop);
 
