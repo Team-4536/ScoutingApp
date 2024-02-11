@@ -216,10 +216,8 @@
         </div>
 
         <script type="module">
-            navigator.serviceWorker.register('app.js').then((r) => r.update());
-
-            import { DBClient } from "./app-client.js";
-            window.dbClient = new DBClient();
+            let reg = await navigator.serviceWorker.register('app.js')
+            await reg.update();
         </script>
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>

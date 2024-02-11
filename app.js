@@ -13,11 +13,12 @@ class CacheController extends EventTarget {
         }
     }
     async fetch(request) {
+        console.log(`fetch ${request.url}`)
         let cached = await this.cache.match(request, { ignoreSearch: true });
         console.log("in cache", cached);
         if (!cached || navigator.onLine) {
             console.log("caching");
-            let f = globalThis.fetch(request, { cache: "reload" });
+            let f = globalThis.fetch(request, { cache: "no-store" });
             return f.then((r) => {
                 console.log("resp", r);
                 let z = r.clone();

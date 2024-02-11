@@ -1,6 +1,9 @@
 "use strict";
 
 const numInputs = 'input:not([type="text"], [type="checkbox"], #team)';
+import { DBClient } from "../app-client.js";
+
+const dbClient = new DBClient();
 
 const dataObject = JSON.stringify({
     'team': '',
