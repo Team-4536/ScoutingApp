@@ -1,3 +1,5 @@
+"use strict";
+
 var rqId = 1;
 
 var pendingRequests = {};
