@@ -9,16 +9,20 @@
     </head>
 
     <body>
-        <img src="assets/minutebots-logo.png" width=325px></img>
+        <img align="right" src="assets/minutebots-logo.png" width=325px></img>
 
-        <h1 style="margin: -15px;">Minutebots Scouting</h1>
+        <h1>Minutebots Scouting</h1>
         <br>
 
         <label id="team-label"></label>
+        <label>Team:</label>
+        <!--
         <input id="team"></input>
+        -->
 
-        <select id="teams" style="margin-bottom: 8px;">
-            <option></option>
+        <select id="teams">
+            <option selected value="select">Select team ...</option>
+            <option value="new">New team ...</option>
         </select>
         <br>
 
@@ -70,7 +74,7 @@
             </table>
         </div>
 
-        <button class="collapsible" id="teleop">teleop</button>
+        <button class="collapsible" id="teleop">Teleop</button>
         <div class="content">
             <label for="e-stop">E-Stop</label>
             <input type="checkbox" id="e-stop"></input>
@@ -122,7 +126,7 @@
             </table>
         </div>
 
-        <button class="collapsible" id="scoring">scoring</button>
+        <button class="collapsible" id="scoring">Scoring</button>
         <div class="content">
             <div class="score">
                 <label>Collisions</label>

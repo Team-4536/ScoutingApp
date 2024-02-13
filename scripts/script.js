@@ -52,17 +52,30 @@ const push = team => { history.pushState(null, null, location.origin + location.
 
 const refreshTeams = async () => {
     const teams = getElem('teams', 'id');
-    const teamValue = teams.value;
+    console.log(teams.options);
+    console.log(teams.options.length);
 
-    getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
+    console.log(teams.selectedIndex);
+
+    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
+
+    while (teams.options.length > 2) {
+        teams.options.remove(2);
+    }
+    
+    //getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
 
     const teamNumbers = await dbClient.getAllTeamNumbers();
+    console.log(teamNumbers);
 
     if (teamNumbers) {
         for (const team of teamNumbers) {
             let option = document.createElement('option');
             option.value = team;
             option.textContent = team;
+            if (team == selectedTeam) {
+                option.selected = true
+            }
             teams.appendChild(option);
         }
     }
@@ -71,7 +84,7 @@ const refreshTeams = async () => {
 }
 
 const onLoad = async () => {
-    toggleSectionCollapse('auto');
+    openSection('auto');
     fillDataObject();
 
     let url = window.location.search
@@ -138,7 +151,17 @@ const toggleSectionCollapse = id => {
 const fillDataObject = () => {
     var teamData = JSON.parse(dataObject);
 
-    teamData.team = getElem('team', 'id').value;
+    // mark
+    let teams = getElem('teams', 'id')
+    console.log(teams);
+    console.log(teams.selectedIndex);
+    if (teams.selectedIndex < 2) {
+        return teamData
+    }
+    // not mark
+
+    teamData.team = teams.options[teams.selectedIndex].value
+    //teamData.team = getElem('team', 'id').value;
     teamData.auto['left-zone'] = getElem('left-zone', 'id').checked;
     teamData.auto['a-stop'] = getElem('a-stop', 'id').checked;
     teamData.auto['a-reason'] = getElem('a-reason', 'id').value;
@@ -188,7 +211,8 @@ const fillTeamData = teamData => {
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     if (teamData) {
-        getElem('team', 'id').value = teamData.team || '';
+        // getElem('team', 'id').value = teamData.team || '';
+        getElem('teams', 'id').value = teamData.team || '';
         getElem('left-zone', 'id').checked = teamData.auto['left-zone'] || '';
         getElem('a-stop', 'id').checked = teamData.auto['a-stop'] || '';
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
@@ -375,7 +399,14 @@ const addOrRename = () => {
 const switchTeam = async event => {
     teamState();
 
-    const team = event.target.value;
+    let team = event.target.value;
+    console.log('select team', team);
+
+    if (team == "new") {
+        console.log("create a new team");
+        team = prompt("new team");
+        console.log("new team is ", team);
+    }
 
     if (team === '') {
         fillTeamData(JSON.parse(dataObject));
@@ -400,6 +431,22 @@ document.addEventListener('DOMContentLoaded', () => {
     getElem('team-label', 'id').addEventListener('click', addOrRename);
 
     getElem('teams', 'id').addEventListener('change', async event => switchTeam(event));
+
+    getElem('.collapsible', 'queryAll').forEach(function(input) {
+        input.addEventListener("click", function(event) {
+            openSection(event.target.id);
+        });
+    });
+
+    getElem(`textarea, input`, 'queryAll').forEach(function(input) {
+        input.addEventListener('change', function(event) {
+            const teamData = fillDataObject()
+            if (teamData.team.length > 2) {
+                dbClient.putTeam(teamData);
+                reloadTeams();
+            }
+        });
+    });
 
     getElem('open-scanner', 'id').addEventListener('click', beginScan);
 
@@ -428,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     getElem('.collapsible', 'queryAll').forEach(input => {
-        input.addEventListener("click", event => toggleSectionCollapse(event.target.id));
+        input.addEventListener("click", event => openSection(event.target.id));
     });
 
     getElem(numInputs, 'queryAll').forEach( input => {
@@ -452,3 +499,19 @@ document.addEventListener('DOMContentLoaded', () => {
     //     });
     // });
 });
+
+function openSection(id) {
+    const section = getElem(id, 'id');
+
+    const sections = getElem('collapsible', 'class')
+
+    console.log("sections", sections);
+    for (let s of sections) {
+        s.classList.remove("active");
+        s.classList.add("inactive");
+        s.nextElementSibling.style.display = "none";
+    }
+    section.classList.remove("inactive");
+    section.classList.add("active");
+    section.nextElementSibling.style.display = "block";
+}

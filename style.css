@@ -12,15 +12,14 @@
 }
 
 body:not(#team) {
-    text-align: center;
-    margin: 0px;
+    margin: 2px;
     cursor: default;
 }
 
 h1, h2, label, th {
     font-family: Arial, sans-serif;
     color: var(--MinutebotsColor);
-    margin: 0px;
+    margin: 2px;
 }
 
 hr {
@@ -45,7 +44,7 @@ input, button:not(.collapsible), textarea, select {
 }
 
 input:not([type="text"], [type="checkbox"], #team), textarea {
-    width: 90px;
+    width: 100px;
     height: 16px;
     font-family: Arial, sans-serif;
     font-size: smaller;
@@ -81,7 +80,8 @@ input[type="text"]:disabled {
 }
 
 #team, select {
-    width: 90px;
+    width: 12em;
+    font-size: 16px;
 }
 
 #overlay {
@@ -198,6 +198,7 @@ input[type="text"]:disabled {
 
 .collapsible.active {
     margin-bottom: 0px;
+    display: block;
 }
 
 .collapsible:not(.active) {
