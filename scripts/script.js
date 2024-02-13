@@ -47,7 +47,7 @@ function getElem(value, type, head = document) {
 
 const push = (team) => { history.pushState(null, null, location.origin + location.pathname + '?team=' + team) }
 
-async function reloadTeams() {
+async function refreshTeams() {
     const teams = getElem('teams', 'id');
 
     getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
@@ -62,10 +62,13 @@ async function reloadTeams() {
             teams.appendChild(option);
         }
     }
+
+    getElem('teams', 'id').value = getElem('team', 'id');
 }
 
 async function onLoad() {
     toggleSectionCollapse('auto');
+    fillDataObject();
 
     let url = window.location.search
     
@@ -102,8 +105,6 @@ async function onLoad() {
     } else {
         fillTeamData(JSON.parse(dataObject));
     }
-
-    reloadTeams();
 }
 
 function aStop() {
@@ -176,14 +177,11 @@ async function encodeData(data) {
 }
 
 function fillTeamData(teamData) {
-    fillDataObject();
-
     var con = ['succeed', 'fail', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     if (teamData) {
         getElem('team', 'id').value = teamData.team || '';
-        getElem('teams', 'id').value = teamData.team || '';
         getElem('left-zone', 'id').checked = teamData.auto['left-zone'] || '';
         getElem('a-stop', 'id').checked = teamData.auto['a-stop'] || '';
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
@@ -212,6 +210,8 @@ function fillTeamData(teamData) {
         }
     }
 
+    refreshTeams();
+    getElem('teams', 'id').value = teamData.team || '';
     aStop();
     eStop();
 }
@@ -249,7 +249,7 @@ async function decodeOnLoad() {
 
         if (data) {
             fillTeamData(data);
-            getElem('teams', 'id').value = data.team;
+            // getElem('teams', 'id').value = data.team;
         } else {
             console.error('Could not fill team data due to invalid data');
         }
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const teamData = fillDataObject()
             if (teamData.team.length > 2) {
                 dbClient.putTeam(teamData);
-                reloadTeams();
+                refreshTeams();
             }
         });
     });
