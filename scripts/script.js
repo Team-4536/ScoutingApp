@@ -322,22 +322,43 @@ const validTeam = () => {
     const team = getElem('team', 'id').value;
 
     if ([3, 4].includes(team.length) && Number.isInteger(parseInt(team))) {
-        return True;
+        return true;
     } else {
         return false;
     }
 }
 
 const addOrRename = () => {
+    const oldTeam = getElem('teams', 'id').value;
+    const newTeam = getElem('team', 'id').value;
+
     switch (teamState()) {
         case 'add':
+            if (validTeam()) {
+                if (confirm('this action will add team ' + newTeam)) {
+                    dbClient.putTeam();
+                }
+            } else {
+                confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
+            }
+
             break;
         case 'rename':
-            if (validTeam()) {
-                dbClient.deleteTeam(getElem('teams', 'id').value);
-                dbClient.putTeam(fillDataObject());
+            if (oldTeam != newTeam) {
+                if (validTeam()) {
+                    if (confirm('this action will rename ' + oldTeam + ' with ' + newTeam)) {
+                        dbClient.deleteTeam(getElem('teams', 'id').value);
+                        dbClient.putTeam(fillDataObject());
 
-                fillTeamData();
+                        fillTeamData();
+                    } else {
+                        // cancelled
+                    }
+                } else {
+                    confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
+                }
+            } else {
+                confirm('the team entered, "' + newTeam + '", already matches the selected team, "' + oldTeam + '"');
             }
 
             break;
@@ -415,10 +436,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem(`textarea, input`, 'queryAll').forEach(input => {
         input.addEventListener('change', event => {
-            if (validTeam()) {
-                dbClient.putTeam(teamData);
+            // if (validTeam()) {
+                dbClient.putTeam(fillDataObject());
                 refreshTeams();
-            }
+            // }
         });
     });
 
