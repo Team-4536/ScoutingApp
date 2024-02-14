@@ -223,6 +223,13 @@
             let reg = await navigator.serviceWorker.register('app.js')
             await reg.update();
         </script>
+        <script>
+        window.addEventListener('keydown', event => {
+            if (event.key === '`') {
+                window.location.href = 'index.html';
+            }
+        });
+        </script>
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>
         <script src="scripts/script.js" type="module"></script>
