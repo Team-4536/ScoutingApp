@@ -100,9 +100,11 @@ const onLoad = async () => {
             if (!teamData) {
                 teamData = JSON.parse(dataObject);
 
-                if (validTeam()) {
+                if (validTeam(team)) {
                     teamData.team = team;
                     dbClient.putTeam(teamData);
+                } else {
+                    confirm('error invlaid eteeam') //later
                 }
             }
 
@@ -133,19 +135,6 @@ const aStop = () => {
 
 const eStop = () => {
     getElem('e-reason', 'id').disabled = !getElem('e-stop', 'id').checked;
-}
-
-const toggleSectionCollapse = id => {
-    const section = getElem(id, 'id');
-
-    section.classList.toggle("active");
-    let content = section.nextElementSibling;
-
-    if (content.style.display === "block") {
-        content.style.display = "none";
-    } else {
-        content.style.display = "block";
-    }
 }
 
 const fillDataObject = () => {
@@ -241,7 +230,7 @@ const fillTeamData = teamData => {
         }
     }
 
-    refreshTeams().then(() => teamState());
+    refreshTeams();
     aStop();
     eStop();
 }
@@ -255,14 +244,14 @@ const formatTeam = event => {
 
     if (parseInt(value) > 9999) {
         if (value != '10000') {
-            event.target.value = event.target.value.slice(0, -1);
+            event.target.value = value.slice(0, -1);
         } else {
             event.target.value = '9999';
         }
     }
 
     if (value.length < 4 && parseInt(value) != 0) {
-        event.target.value = '0'.repeat(4 - value.length) + event.target.value;
+        event.target.value = '0'.repeat(4 - value.length) + value;
     } else if (value.length > 4 && value[0] == '0') {
         event.target.value = value.slice(1);
     }
@@ -333,20 +322,8 @@ const generateQRCode = () => {
     getElem('qrcode-container', 'id').style.display = 'block';
 }
 
-const teamState = () => {
-    const team = getElem('team-label', 'id');
-
-    if (getElem('teams', 'id').value === '') {
-        team.textContent = 'Add:';
-        return 'add';
-    } else {
-        team.textContent = 'Rename:';
-        return 'rename';
-    }
-}
-
-const validTeam = () => {
-    const team = getElem('team', 'id').value;
+const validTeam = (team) => {
+    // const team = getElem('team', 'id').value;
 
     if ([3, 4].includes(team.length) && Number.isInteger(parseInt(team))) {
         return true;
@@ -359,8 +336,8 @@ const addOrRename = () => {
     const oldTeam = getElem('teams', 'id').value;
     const newTeam = getElem('team', 'id').value;
 
-    switch (teamState()) {
-        case 'add':
+    // switch (teamState()) {
+        // case 'add':
             if (validTeam()) {
                 if (confirm('this action will add team ' + newTeam)) {
                     dbClient.putTeam();
@@ -369,8 +346,8 @@ const addOrRename = () => {
                 confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
             }
 
-            break;
-        case 'rename':
+        //     break;
+        // case 'rename':
             if (oldTeam != newTeam) {
                 if (validTeam()) {
                     if (confirm('this action will rename ' + oldTeam + ' with ' + newTeam)) {
@@ -388,24 +365,22 @@ const addOrRename = () => {
                 confirm('the team entered, "' + newTeam + '", already matches the selected team, "' + oldTeam + '"');
             }
 
-            break;
-        default:
+            // break;
+        // default:
             console.error('Invalid state for team label, (neither "Add:" nor "Rename:")');
 
-            break;
-    }
+            // break;
+    // }
 }
 
 const switchTeam = async event => {
-    teamState();
+    // teamState();
 
     let team = event.target.value;
-    console.log('select team', team);
 
-    if (team == "new") {
-        console.log("create a new team");
-        team = prompt("new team");
-        console.log("new team is ", team);
+    if (team == 'new') {
+        team = prompt('new team');
+        fillTeamData(JSON.parse(dataObject));
     }
 
     if (team === '') {
@@ -428,7 +403,7 @@ const switchTeam = async event => {
 document.addEventListener('DOMContentLoaded', () => {
     onLoad();
 
-    getElem('team-label', 'id').addEventListener('click', addOrRename);
+    // getElem('team-label', 'id').addEventListener('click', addOrRename);
 
     getElem('teams', 'id').addEventListener('change', async event => switchTeam(event));
 
@@ -458,9 +433,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem('open-qrcode', 'id').addEventListener('click', generateQRCode);
 
-    getElem('team', 'id').placeholder = '0000';
+    // getElem('team', 'id').placeholder = '0000';
 
-    getElem('team', 'id').addEventListener('input', formatTeam);
+    // getElem('team', 'id').addEventListener('input', formatTeam);
 
     getElem('textarea', 'queryAll').forEach( textarea =>
         textarea.addEventListener('input', resizeText(textarea))
@@ -505,7 +480,6 @@ function openSection(id) {
 
     const sections = getElem('collapsible', 'class')
 
-    console.log("sections", sections);
     for (let s of sections) {
         s.classList.remove("active");
         s.classList.add("inactive");
