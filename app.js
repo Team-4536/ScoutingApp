@@ -1,5 +1,7 @@
 "use strict";
 
+import validTeam from './scripts/script.js'
+
 class CacheController extends EventTarget {
     constructor() {
         super();
@@ -72,14 +74,16 @@ class DBController extends EventTarget {
     }
 
     async putTeam(team) {
-        const tx = this.db.transaction("team", "readwrite");
-        const store = tx.objectStore("team");
-        const rq = store.put(team);
-        let p = new Promise((r) => {
-            rq.onsuccess = (e) => {
-                r(e.target.result)
-            };
-        });
+        if (validTeam(team)) {
+            const tx = this.db.transaction("team", "readwrite");
+            const store = tx.objectStore("team");
+            const rq = store.put(team);
+            let p = new Promise((r) => {
+                rq.onsuccess = (e) => {
+                    r(e.target.result)
+                };
+            });
+        }
     }
 
     async deleteTeam(team) {

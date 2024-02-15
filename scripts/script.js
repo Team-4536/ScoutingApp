@@ -48,19 +48,18 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const push = team => { history.pushState(null, null, location.origin + location.pathname + '?team=' + team) }
+const push = team => history.pushState(null, null, location.origin + location.pathname + '?team=' + team)
+
+const getTeam = () => {
+    return currentTeam;
+}
 
 const refreshTeams = async () => {
     const teams = getElem('teams', 'id');
-    console.log(teams.options);
-    console.log(teams.options.length);
-
-    console.log(teams.selectedIndex);
-
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
 
-    while (teams.options.length > 2) {
-        teams.options.remove(2);
+    while (teams.options.length > 1) {
+        teams.options.remove(1);
     }
     
     //getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
@@ -80,10 +79,21 @@ const refreshTeams = async () => {
         }
     }
 
-    teams.value = getElem('team', 'id').value ?? teamValue;
+    // teams.value = getElem('team', 'id').value ?? teamValue;
 }
 
 const onLoad = async () => {
+    let currentTeam = '';
+
+    for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
+        let tr = num.closest('tr');
+        let sec = tr.closest('table').dataset['sec'];
+        let cat = tr.dataset['cat'];
+        let con = num.getAttribute('con');
+
+        num.setAttribute('id', `${sec}-${cat}-${con}`);
+    }
+
     openSection('auto');
     fillDataObject();
 
@@ -103,8 +113,9 @@ const onLoad = async () => {
                 if (validTeam(team)) {
                     teamData.team = team;
                     dbClient.putTeam(teamData);
+                    currentTeam = team;
                 } else {
-                    confirm('error invlaid eteeam') //later
+                    confirm('searched team ' + team + ' does not exist, and is invalid')
                 }
             }
 
@@ -119,6 +130,7 @@ const onLoad = async () => {
                 if (team) {
                     push(team);
                     dbClient.putTeam(data);
+                    currentTeam = team
                 }
             } else {
                 // Add visable error message
@@ -164,7 +176,6 @@ const fillDataObject = () => {
         let con = num.getAttribute('con');
 
         teamData[sec][cat][con] = num.value;
-        num.setAttribute('id', `${sec}-${cat}-${con}`);
     }
     
     return teamData;
@@ -380,7 +391,11 @@ const switchTeam = async event => {
 
     if (team == 'new') {
         team = prompt('new team');
-        fillTeamData(JSON.parse(dataObject));
+        let teamData = JSON.parse(dataObject);
+        teamData.team = team;
+        dbClient.putTeam(teamData);
+        refreshTeams();
+        fillTeamData(teamData);
     }
 
     if (team === '') {
@@ -418,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const teamData = fillDataObject()
             if (teamData.team.length > 2) {
                 dbClient.putTeam(teamData);
-                reloadTeams();
+                refreshTeams();
             }
         });
     });
@@ -489,3 +504,5 @@ function openSection(id) {
     section.classList.add("active");
     section.nextElementSibling.style.display = "block";
 }
+
+export { validTeam }
