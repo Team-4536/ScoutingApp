@@ -65,25 +65,39 @@ const getTeam = () => {
 const refreshTeams = async () => {
     const teams = getElem('teams', 'id');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
+    const teamNumbers = await dbClient.getAllTeamNumbers() || [];
+    let newSelect = document.createElement('select');
+    
+    newSelect.addEventListener('change', async event => switchTeam(event));
 
-    while (teams.options.length > 2) {
-        teams.options.remove(2);
+    newSelect.setAttribute('id', 'teams')
+    {
+        let selectOption = document.createElement('option')
+        selectOption.value = 'select';
+        selectOption.textContent = "Select team ...";
+        newSelect.add(selectOption);
+
+        let newOption = document.createElement('option')
+        newOption.value = 'new';
+        newOption.textContent = "New team ...";
+        newSelect.add(newOption);
     }
 
-    const teamNumbers = await dbClient.getAllTeamNumbers();
-    console.log('teamNumbers: ' + teamNumbers);
-
-    if (teamNumbers) {
-        for (const team of teamNumbers) {
-            let option = document.createElement('option');
-            option.value = team;
-            option.textContent = team;
-            if (team == selectedTeam) {
-                option.selected = true
-            }
-            teams.appendChild(option);
+    for (const team of teamNumbers) {
+        if (typeof team != "string") {
+            // filter out bad keys from dev times
+            continue;
         }
+        let teamOption = document.createElement('option');
+        teamOption.value = team;
+        teamOption.textContent = team;
+        if (team == selectedTeam) {
+            teamOption.selected = true
+        }
+        newSelect.appendChild(teamOption);
     }
+
+    teams.replaceWith(newSelect);
 }
 
 const onLoad = async () => {
