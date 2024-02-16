@@ -54,7 +54,7 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const saveTeam = (data) => validTeam(data) && dbClient.putTeam(data);
+const saveTeam = (data) => validTeam(data.team) && dbClient.putTeam(data)
 
 const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team);
 
@@ -69,8 +69,6 @@ const refreshTeams = async () => {
     while (teams.options.length > 2) {
         teams.options.remove(2);
     }
-    
-    //getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
 
     const teamNumbers = await dbClient.getAllTeamNumbers();
     console.log('teamNumbers: ' + teamNumbers);
@@ -86,22 +84,11 @@ const refreshTeams = async () => {
             teams.appendChild(option);
         }
     }
-
-    // teams.value = getElem('team', 'id').value ?? teamValue;
 }
 
 const onLoad = async () => {
     let currentTeam = '';
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-    // for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
-    //     let tr = num.closest('tr');
-    //     let sec = tr.closest('table').dataset['sec'];
-    //     let cat = tr.dataset['cat'];
-    //     let con = num.getAttribute('con');
-
-    //     num.setAttribute('id', `${sec}-${cat}-${con}`);
-    // }
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
@@ -125,7 +112,7 @@ const onLoad = async () => {
                         th.appendChild(input);
                         plus.addEventListener('click', () => {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            saveTeam(fillTeamData());
+                            saveTeam(presentTeamData());
                         });
                     }
 
@@ -141,7 +128,6 @@ const onLoad = async () => {
     }
 
     openSection('auto');
-    fillDataObject();
 
     let url = window.location.search
     
@@ -165,25 +151,25 @@ const onLoad = async () => {
                 }
             }
 
-            fillTeamData(teamData);
+            presentTeamData(teamData);
         } else {
             const data = await decodeData(url);
 
             if (data) {
-                fillTeamData(data);
+                presentTeamData(data);
                 const team = data.team;
                 
                 if (team) {
                     push(team);
                     saveTeam(data);
-                    currentTeam = team
+                    currentTeam = team;
                 }
             } else {
                 // Add visable error message
             }
         }
     } else {
-        fillTeamData(JSON.parse(dataObject));
+        presentTeamData(JSON.parse(dataObject));
     }
 }
 
@@ -195,19 +181,19 @@ const eStop = () => {
     getElem('e-reason', 'id').disabled = !getElem('e-stop', 'id').checked;
 }
 
-const fillDataObject = () => {
+const scrapeDataObject = () => {
     var teamData = JSON.parse(dataObject);
 
     // mark
-            // let teams = getElem('teams', 'id')
-            // console.log(teams);
-            // console.log(teams.selectedIndex);
-            // if (teams.selectedIndex < 2) {
-            //     return teamData
-            // }
+    let teams = getElem('teams', 'id')
+    console.log(teams);
+    console.log(teams.selectedIndex);
+    if (teams.selectedIndex < 2) {
+        return teamData
+    }
     // not mark
 
-    // teamData.team = teams.options[teams.selectedIndex].value
+    teamData.team = teams.options[teams.selectedIndex].value
     //teamData.team = getElem('team', 'id').value;
     teamData.auto['left-zone'] = getElem('left-zone', 'id').checked;
     teamData.auto['a-stop'] = getElem('a-stop', 'id').checked;
@@ -249,8 +235,7 @@ const decodeData = async encodedData => {
 }
 
 const encodeData = async data => {
-    const teamData = fillDataObject();
-    const stream = new Blob([JSON.stringify(teamData)], { type: 'application/json' }).stream();
+    const stream = new Blob([JSON.stringify(data)], { type: 'application/json' }).stream();
     const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
     const blob = await new Response(compressedReadableStream).blob();
     const ab = await blob.arrayBuffer();
@@ -258,7 +243,7 @@ const encodeData = async data => {
     return btoa(String.fromCharCode(...new Uint8Array(ab)));
 }
 
-const fillTeamData = teamData => {
+const presentTeamData = (teamData) => {
     var con = ['succeeds', 'fails', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
@@ -386,8 +371,6 @@ const generateQRCode = () => {
 }
 
 const validTeam = (team) => {
-    // const team = getElem('team', 'id').value;
-
     if ([3, 4].includes(team.length) && Number.isInteger(parseInt(team))) {
         return true;
     } else {
@@ -395,50 +378,7 @@ const validTeam = (team) => {
     }
 }
 
-const addOrRename = () => {
-    const oldTeam = getElem('teams', 'id').value;
-    const newTeam = getElem('team', 'id').value;
-
-    // switch (teamState()) {
-        // case 'add':
-            if (validTeam()) {
-                if (confirm('this action will add team ' + newTeam)) {
-                    saveTeam();
-                }
-            } else {
-                confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
-            }
-
-        //     break;
-        // case 'rename':
-            if (oldTeam != newTeam) {
-                if (validTeam()) {
-                    if (confirm('this action will rename ' + oldTeam + ' with ' + newTeam)) {
-                        dbClient.deleteTeam(getElem('teams', 'id').value);
-                        saveTeam(fillDataObject());
-
-                        fillTeamData();
-                    } else {
-                        // cancelled
-                    }
-                } else {
-                    confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
-                }
-            } else {
-                confirm('the team entered, "' + newTeam + '", already matches the selected team, "' + oldTeam + '"');
-            }
-
-            // break;
-        // default:
-            console.error('Invalid state for team label, (neither "Add:" nor "Rename:")');
-
-            // break;
-    // }
-}
-
 const switchTeam = async event => {
-    // teamState();
-
     let team = event.target.value;
 
     if (team == 'new') {
@@ -447,42 +387,37 @@ const switchTeam = async event => {
         teamData.team = team;
         saveTeam(teamData);
         refreshTeams();
-        fillTeamData(teamData);
+        presentTeamData(teamData);
     }
 
     if (team === '') {
-        fillTeamData(JSON.parse(dataObject));
+        presentTeamData(JSON.parse(dataObject));
     } else {
         const teamData = await dbClient.getTeam(team);
 
         if (teamData) {
-            fillTeamData(teamData);
+            presentTeamData(teamData);
             push(team);
             saveTeam(teamData);
         }
     }
 }
 
-// window.addEventListener('popstate', async function() {
-//     onLoad();
-// });
-
 document.addEventListener('DOMContentLoaded', () => {
     onLoad();
 
-    // getElem('team-label', 'id').addEventListener('click', addOrRename);
-
     getElem('teams', 'id').addEventListener('change', async event => switchTeam(event));
 
-    getElem('.collapsible', 'queryAll').forEach(function(input) {
-        input.addEventListener("click", function(event) {
+    getElem('.collapsible', 'queryAll').forEach((input) => {
+        input.addEventListener("click", (event) => {
             openSection(event.target.id);
         });
     });
 
-    getElem(`textarea, input`, 'queryAll').forEach(function(input) {
-        input.addEventListener('change', function(event) {
-            const teamData = fillDataObject()
+    getElem(`textarea, input`, 'queryAll').forEach((input) => {
+        input.addEventListener('change', () => {
+            const teamData = scrapeDataObject()
+
             if (teamData.team.length > 2) {
                 saveTeam(teamData);
                 refreshTeams();
@@ -500,11 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem('open-qrcode', 'id').addEventListener('click', generateQRCode);
 
-    // getElem('team', 'id').placeholder = '0000';
-
-    // getElem('team', 'id').addEventListener('input', formatTeam);
-
-    getElem('textarea', 'queryAll').forEach( textarea =>
+    getElem('textarea', 'queryAll').forEach( (textarea) =>
         textarea.addEventListener('input', resizeText(textarea))
     );
 
@@ -512,26 +443,24 @@ document.addEventListener('DOMContentLoaded', () => {
         getElem('qrcode-container', 'id').style.display = 'none'
     );
 
-    getElem(numInputs, 'queryAll').forEach(input =>
-        input.addEventListener('input', event => formatNumber(event))
+    getElem(numInputs, 'queryAll').forEach((input) =>
+        input.addEventListener('input', (event) => formatNumber(event))
     );
 
-    getElem('.collapsible', 'queryAll').forEach(input => {
-        input.addEventListener("click", event => openSection(event.target.id));
+    getElem('.collapsible', 'queryAll').forEach((input) => {
+        input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
-    getElem(numInputs, 'queryAll').forEach( input => {
+    getElem(numInputs, 'queryAll').forEach( (input) => {
         input.placeholder = '0';
         input.type = 'number';
         input.min = '0';
     });
 
-    getElem(`textarea, input`, 'queryAll').forEach(input => {
-        input.addEventListener('change', event => {
-            // if (validTeam()) {
-                saveTeam(fillDataObject());
-                refreshTeams();
-            // }
+    getElem(`textarea, input`, 'queryAll').forEach((input) => {
+        input.addEventListener('change', () => {
+            saveTeam(scrapeDataObject());
+            refreshTeams();
         });
     });
 
@@ -557,4 +486,4 @@ function openSection(id) {
     section.nextElementSibling.style.display = "block";
 }
 
-window.fillDataObject = fillDataObject
+window.scrapeDataObject = scrapeDataObject
