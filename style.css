@@ -29,6 +29,7 @@ hr {
 
 th {
     text-align: right;
+    white-space: nowrap;
 }
 
 input, button:not(.collapsible), textarea, select {
@@ -44,7 +45,7 @@ input, button:not(.collapsible), textarea, select {
 }
 
 input:not([type="text"], [type="checkbox"], #team), textarea {
-    width: 100px;
+    width: 8em;
     height: 16px;
     font-family: Arial, sans-serif;
     font-size: smaller;
@@ -61,14 +62,14 @@ input[type="checkbox"]:disabled {
     background-color: var(--disabledBackground);
 }
 
-textarea {
+/* textarea {
     width: 70px;
     height: 24px;
     min-width: 90px;
     min-height: 24px;
     max-width: 220px;
     max-height: 145px;
-}
+} */
 
 input[type="text"]:disabled {
     border-width: 3px;
@@ -79,8 +80,13 @@ input[type="text"]:disabled {
     background-color: var(--disabledBackground);
 }
 
-#team, select {
-    width: 12em;
+select:not(#teams) {
+    width: 7em;
+    font-size: 16px;
+}
+
+#teams {
+    width: 10em;
     font-size: 16px;
 }
 

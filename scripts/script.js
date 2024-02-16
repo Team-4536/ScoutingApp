@@ -64,8 +64,8 @@ const refreshTeams = async () => {
     const teams = getElem('teams', 'id');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
 
-    while (teams.options.length > 1) {
-        teams.options.remove(1);
+    while (teams.options.length > 2) {
+        teams.options.remove(2);
     }
     
     //getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
@@ -90,7 +90,6 @@ const refreshTeams = async () => {
 
 const onLoad = async () => {
     let currentTeam = '';
-    const cats = ['con', 'succeeds', 'fails', 'method'];
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     // for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
@@ -104,23 +103,35 @@ const onLoad = async () => {
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
-        // console.log(catItems)
 
-        for(let i = 1; i < count + 1; i++) {
-            // console.log(cons[i + 1]);
-            const th = document.createElement('th')
-            th.innerHTML = '32'
+        for (let i = 0; i < count; i++) {
+            for (let j = 0; j < 4; j++) {
+                const th = document.createElement('th');
 
-            // console.log(catItems[i])
+                if (j === 0) {
+                    th.innerHTML = cons[i];
+                } else {
+                    if (j === 3) {
+                        th.appendChild(document.createElement('select'));
+                    } else {
+                        const plus = document.createElement('button');
+                        const input = document.createElement('input');
 
-            catItems[i].appendChild(th)
+                        plus.innerHTML = '+'
 
-            // const conItem = getElem(con.class, 'class');
+                        th.appendChild(plus);
+                        th.appendChild(input);
+                        plus.addEventListener('click', () => input.value = parseInt(input.value) + 1);
+                    }
 
-            // console.log(cats)
-            // console.log(con)
-            // console.log(con.className)
-            // console.log(con.closest('table').dataset['sec'])
+                    const cat = catItems[j].className
+                    const con = cons[i]
+
+                    th.id = [table, cat, con].join('-');
+                }
+
+                catItems[j].appendChild(th);
+            }
         }
     }
 
@@ -183,15 +194,15 @@ const fillDataObject = () => {
     var teamData = JSON.parse(dataObject);
 
     // mark
-    let teams = getElem('teams', 'id')
-    console.log(teams);
-    console.log(teams.selectedIndex);
-    if (teams.selectedIndex < 2) {
-        return teamData
-    }
+            // let teams = getElem('teams', 'id')
+            // console.log(teams);
+            // console.log(teams.selectedIndex);
+            // if (teams.selectedIndex < 2) {
+            //     return teamData
+            // }
     // not mark
 
-    teamData.team = teams.options[teams.selectedIndex].value
+    // teamData.team = teams.options[teams.selectedIndex].value
     //teamData.team = getElem('team', 'id').value;
     teamData.auto['left-zone'] = getElem('left-zone', 'id').checked;
     teamData.auto['a-stop'] = getElem('a-stop', 'id').checked;
@@ -199,13 +210,19 @@ const fillDataObject = () => {
     teamData.teleop['e-stop'] = getElem('e-stop', 'id').checked;
     teamData.teleop['e-reason'] = getElem('e-reason', 'id').value;
 
-    for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
-        let tr = num.closest('tr');
-        let sec = tr.closest('table').dataset['sec'];
-        let cat = tr.dataset['cat'];
-        let con = num.getAttribute('con');
+    const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-        teamData[sec][cat][con] = num.value;
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+        const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
+
+        for (let i = 0; i < count; i++) {
+            for (let j = 1; j < 4; j++) {
+                const cat = catItems[j].className
+                const con = cons[i]
+                
+                teamData[table][cat][con] = getElem([table, cat, con].join('-'), 'id').value
+            }
+        }
     }
     
     return teamData;
@@ -499,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getElem(numInputs, 'queryAll').forEach( input => {
-        input.placeholder = '0';
+        input.value = '0';
         input.type = 'number';
         input.min = '0';
     });
@@ -535,4 +552,4 @@ function openSection(id) {
     section.nextElementSibling.style.display = "block";
 }
 
-export { validTeam }
+window.fillDataObject = fillDataObject
