@@ -14,6 +14,14 @@ const consoleImport = `
 			</div>
 		
 			<script src="assets/console/script.js"></script>
+            
+            <script>
+                Object.keys(window).forEach(function(item) {
+                    if (typeof window[item] === 'function') {
+                        window[item] = window[item];
+   					 }
+				});
+            </script>
 		</body>
 	</html>
 `;
