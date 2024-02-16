@@ -4,7 +4,7 @@ const consoleImport = `
 			<meta charset="UTF-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>Custom Console</title>
-			<link rel="stylesheet" type="text/css" href="style.css">
+			<link rel="stylesheet" type="text/css" href="assets/console/style.css">
 		</head>
 		<body>
 			<div id="resize-handle"></div>
@@ -13,7 +13,7 @@ const consoleImport = `
 				<input type="text" id="console-input" placeholder="Enter command...">
 			</div>
 		
-			<script src="script.js"></script>
+			<script src="assets/console/script.js"></script>
 		</body>
 	</html>
 `;
@@ -22,5 +22,3 @@ const consoleImport = `
 //
 // <script src="console/console-import.js"></script>
 // <script>document.write(consoleImport)</script>
-
-// ADD BACK CONSOLE/...

@@ -54,7 +54,9 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const push = team => history.pushState(null, null, location.origin + location.pathname + '?team=' + team)
+const saveTeam = (data) => dbClient.putTeam(data)
+
+const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team)
 
 const getTeam = () => {
     return currentTeam;
@@ -71,7 +73,7 @@ const refreshTeams = async () => {
     //getElem('option:not(:first-child)', 'queryAll', teams).forEach(option => option.remove());
 
     const teamNumbers = await dbClient.getAllTeamNumbers();
-    console.log(teamNumbers);
+    console.log('teamNumbers: ' + teamNumbers);
 
     if (teamNumbers) {
         for (const team of teamNumbers) {
@@ -121,7 +123,10 @@ const onLoad = async () => {
 
                         th.appendChild(plus);
                         th.appendChild(input);
-                        plus.addEventListener('click', () => input.value = parseInt(input.value) + 1);
+                        plus.addEventListener('click', () => {
+                            input.value = (parseInt(input.value) || 0) + 1;
+                            saveTeam(fillTeamData());
+                        });
                     }
 
                     const cat = catItems[j].className
@@ -153,7 +158,7 @@ const onLoad = async () => {
 
                 if (validTeam(team)) {
                     teamData.team = team;
-                    dbClient.putTeam(teamData);
+                    saveTeam(teamData);
                     currentTeam = team;
                 } else {
                     confirm('searched team ' + team + ' does not exist, and is invalid')
@@ -170,7 +175,7 @@ const onLoad = async () => {
                 
                 if (team) {
                     push(team);
-                    dbClient.putTeam(data);
+                    saveTeam(data);
                     currentTeam = team
                 }
             } else {
@@ -265,25 +270,25 @@ const fillTeamData = teamData => {
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
         getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] || '';
         getElem('e-reason', 'id').value = teamData.teleop['e-reason'] || '';
-    }
     
-    for (let a = 0; a < 3; a++) {
-        for (let b = 0; b < 3; b++) {
-            try {
-                getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = teamData.auto[con[a]][cat[b]] || '';
-            } catch (error) {
-                console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
+        for (let a = 0; a < 3; a++) {
+            for (let b = 0; b < 3; b++) {
+                try {
+                    getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = teamData.auto[con[a]][cat[b]] || '';
+                } catch (error) {
+                    console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
+                }
             }
         }
-    }
 
-    for (let c = 0; c < 3; c++) {
-        for (let d = 0; d < 6; d++) {
-            try {
-                getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = teamData.teleop[con[c]][cat[d]] || '';
-            }
-            catch (error) {
-                console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
+        for (let c = 0; c < 3; c++) {
+            for (let d = 0; d < 6; d++) {
+                try {
+                    getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = teamData.teleop[con[c]][cat[d]] || '';
+                }
+                catch (error) {
+                    console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
+                }
             }
         }
     }
@@ -398,7 +403,7 @@ const addOrRename = () => {
         // case 'add':
             if (validTeam()) {
                 if (confirm('this action will add team ' + newTeam)) {
-                    dbClient.putTeam();
+                    saveTeam();
                 }
             } else {
                 confirm('the team name ' + newTeam + ' is not a valid name, please enter a valid team name');
@@ -410,7 +415,7 @@ const addOrRename = () => {
                 if (validTeam()) {
                     if (confirm('this action will rename ' + oldTeam + ' with ' + newTeam)) {
                         dbClient.deleteTeam(getElem('teams', 'id').value);
-                        dbClient.putTeam(fillDataObject());
+                        saveTeam(fillDataObject());
 
                         fillTeamData();
                     } else {
@@ -440,7 +445,7 @@ const switchTeam = async event => {
         team = prompt('new team');
         let teamData = JSON.parse(dataObject);
         teamData.team = team;
-        dbClient.putTeam(teamData);
+        saveTeam(teamData);
         refreshTeams();
         fillTeamData(teamData);
     }
@@ -453,7 +458,7 @@ const switchTeam = async event => {
         if (teamData) {
             fillTeamData(teamData);
             push(team);
-            dbClient.putTeam(teamData);
+            saveTeam(teamData);
         }
     }
 }
@@ -479,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('change', function(event) {
             const teamData = fillDataObject()
             if (teamData.team.length > 2) {
-                dbClient.putTeam(teamData);
+                saveTeam(teamData);
                 refreshTeams();
             }
         });
@@ -516,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getElem(numInputs, 'queryAll').forEach( input => {
-        input.value = '0';
+        input.placeholder = '0';
         input.type = 'number';
         input.min = '0';
     });
@@ -524,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getElem(`textarea, input`, 'queryAll').forEach(input => {
         input.addEventListener('change', event => {
             // if (validTeam()) {
-                dbClient.putTeam(fillDataObject());
+                saveTeam(fillDataObject());
                 refreshTeams();
             // }
         });

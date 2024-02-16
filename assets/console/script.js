@@ -1,3 +1,7 @@
+"use strict";
+
+console.log('console/script.js started load');
+
 const consoleContainer = document.getElementById('console-container');
 const consoleInput = document.getElementById('console-input');
 const consoleOutput = document.getElementById('console-output');
@@ -12,17 +16,17 @@ let consoleKey = {
     keys: ['`'],
 };
 
-(function () {
-    const consolelog = console.log;
+// (function () {
+//     const consolelog = console.log;
 
-    console.log = function (...args) {
-        const message = args.map(arg => {
-            return typeof arg === 'object' ? JSON.stringify(arg) : arg;
-        }).join(' ');
-        consolelog(message);
-        log(message);
-    };
-})();
+//     console.log = function (...args) {
+//         const message = args.map(arg => {
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         }).join(' ');
+//         consolelog(message);
+//         log(message);
+//     };
+// })();
 
 function setConsoleKey(...args) {
     consoleKey.ctrlKey = false;
@@ -151,3 +155,5 @@ document.addEventListener('keydown', function(event) { openConsole(event) });
 consoleInput.addEventListener('keydown', function(event) { keyDown(event) });
 
 toggleConsole();
+
+console.log('console/script.js finished load');

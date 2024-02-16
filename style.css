@@ -111,6 +111,10 @@ select:not(#teams) {
     align-items: center;
 }
 
+/* button {
+    height: 24px;
+} */
+
 #cameraStream {
     width: 80%;
     max-width: 600px;
