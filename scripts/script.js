@@ -6,20 +6,26 @@ import { DBClient } from "../app-client.js";
 const dbClient = new DBClient();
 
 const dataObject = JSON.stringify({
+    'comp': 'Eagan week 0',
+    'round': '',
     'team': '',
+
     'auto': {
         'left-zone': null,
         'a-stop': null,
         'a-reason': '',
-        'succeed': {},
-        'fail': {},
+
+        'succeeds': {},
+        'fails': {},
         'method': {}
     },
+
     'teleop': {
         'e-stop': null,
         'e-reason': '',
-        'succeed': {},
-        'fail': {},
+
+        'succeeds': {},
+        'fails': {},
         'method': {}
     }
 });
@@ -84,14 +90,38 @@ const refreshTeams = async () => {
 
 const onLoad = async () => {
     let currentTeam = '';
+    const cats = ['con', 'succeeds', 'fails', 'method'];
+    const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
-        let tr = num.closest('tr');
-        let sec = tr.closest('table').dataset['sec'];
-        let cat = tr.dataset['cat'];
-        let con = num.getAttribute('con');
+    // for (let num of getElem(`${numInputs}, textarea`, 'queryAll')) {
+    //     let tr = num.closest('tr');
+    //     let sec = tr.closest('table').dataset['sec'];
+    //     let cat = tr.dataset['cat'];
+    //     let con = num.getAttribute('con');
 
-        num.setAttribute('id', `${sec}-${cat}-${con}`);
+    //     num.setAttribute('id', `${sec}-${cat}-${con}`);
+    // }
+
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+        const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
+        // console.log(catItems)
+
+        for(let i = 1; i < count + 1; i++) {
+            // console.log(cons[i + 1]);
+            const th = document.createElement('th')
+            th.innerHTML = '32'
+
+            // console.log(catItems[i])
+
+            catItems[i].appendChild(th)
+
+            // const conItem = getElem(con.class, 'class');
+
+            // console.log(cats)
+            // console.log(con)
+            // console.log(con.className)
+            // console.log(con.closest('table').dataset['sec'])
+        }
     }
 
     openSection('auto');
@@ -207,7 +237,7 @@ const encodeData = async data => {
 }
 
 const fillTeamData = teamData => {
-    var con = ['succeed', 'fail', 'method'];
+    var con = ['succeeds', 'fails', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     if (teamData) {
