@@ -54,9 +54,9 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const saveTeam = (data) => dbClient.putTeam(data)
+const saveTeam = (data) => validTeam(data) && dbClient.putTeam(data);
 
-const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team)
+const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team);
 
 const getTeam = () => {
     return currentTeam;
