@@ -1,4 +1,6 @@
-"mode strict";
+"use strict";
+
+import validTeam from './scripts/script.js'
 
 class CacheController extends EventTarget {
     constructor() {
@@ -13,15 +15,22 @@ class CacheController extends EventTarget {
         }
     }
     async fetch(request) {
+        console.log(`fetch ${request.url}`)
         let cached = await this.cache.match(request, { ignoreSearch: true });
         console.log("in cache", cached);
         if (!cached || navigator.onLine) {
             console.log("caching");
-            let f = globalThis.fetch(request, { cache: "reload" });
+            let f = globalThis.fetch(request, { cache: "no-store" });
             return f.then((r) => {
+                console.log("resp", r);
                 let z = r.clone();
                 this.cache.put(request, r);
                 return z;
+            }).catch(e => {
+                console.log("fail", e);
+                if (cached) {
+                    return cached;
+                }
             });
         } else {
             console.log("returning cached");
@@ -64,15 +73,17 @@ class DBController extends EventTarget {
         });
     }
 
-    async saveTeam(team) {
-        const tx = this.db.transaction("team", "readwrite");
-        const store = tx.objectStore("team");
-        const rq = store.put(team);
-        let p = new Promise((r) => {
-            rq.onsuccess = (e) => {
-                r(e.target.result)
-            };
-        });
+    async putTeam(team) {
+        if (validTeam(team)) {
+            const tx = this.db.transaction("team", "readwrite");
+            const store = tx.objectStore("team");
+            const rq = store.put(team);
+            let p = new Promise((r) => {
+                rq.onsuccess = (e) => {
+                    r(e.target.result)
+                };
+            });
+        }
     }
 
     async deleteTeam(team) {
@@ -162,4 +173,4 @@ class App {
     }
 }
 
-app = new App();
+const app = new App();
