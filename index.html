@@ -180,8 +180,12 @@
         </div>
 
         <script type="module">
-            let reg = await navigator.serviceWorker.register('app.js')
-            await reg.update();
+          try {
+              const reg = await navigator.serviceWorker.register('app.js')
+              await reg.update();
+          } catch (e) {
+              console.log('service worker registration failed', e);
+          }
         </script>
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>

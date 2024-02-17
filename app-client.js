@@ -42,24 +42,28 @@ class DBClient {
     constructor() {
     }
 
-    async putTeam(team) {
-        return call("db.putTeam", team);
+    async putMatch(data) {
+        return call("db.putMatch", data);
     }
 
     async deleteTeam(team) {
         return call("db.deleteTeam", team);
     }
 
-    async getTeam(team) {
-        return call("db.getTeam", team);
+    async getMatch(comp, round, team) {
+        return call("db.getMatch", comp, round, team);
     }
 
-    async getAllTeams() {
-        return call("db.getAllTeams");
+    async getAllMatches() {
+        return call("db.getAllMatches");
     }
 
-    async getAllTeamNumbers() {
-        return call("db.getAllTeamNumbers");
+    async getAllMatchKeys() {
+        return call("db.getAllMatchKeys");
+    }
+
+    async getMatchKeysForMatch(comp, round) {
+        return call("db.getMatchKeysForMatch", comp, round);
     }
 }
 
