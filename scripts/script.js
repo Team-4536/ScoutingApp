@@ -7,7 +7,7 @@ const dbClient = new DBClient();
 let currentTeam;
 
 const dataObject = JSON.stringify({
-    'comp': 'Eagan week 0',
+    'comp': '',
     'round': '',
     'team': '',
 
@@ -130,7 +130,7 @@ const onLoad = async () => {
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            await saveTeam(presentTeamData());
+                            await saveTeam(scrapeDataObject());
                         });
                     }
 
@@ -215,7 +215,7 @@ const eStop = () => {
 }
 
 const scrapeDataObject = () => {
-    var teamData = JSON.parse(dataObject);
+    let teamData = JSON.parse(dataObject);
 
     // mark
     let teams = getElem('teams', 'id')
@@ -233,6 +233,8 @@ const scrapeDataObject = () => {
     teamData.auto['a-reason'] = getElem('a-reason', 'id').value;
     teamData.teleop['e-stop'] = getElem('e-stop', 'id').checked;
     teamData.teleop['e-reason'] = getElem('e-reason', 'id').value;
+    teamData.comp = getElem('comp', 'id').value;
+    teamData.round = getElem('round', 'id').value;
 
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
@@ -249,6 +251,7 @@ const scrapeDataObject = () => {
         }
     }
     
+    console.log('scraped teamdata', teamData)
     return teamData;
 }
 
@@ -289,6 +292,8 @@ const presentTeamData = async(teamData) => {
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
         getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] || '';
         getElem('e-reason', 'id').value = teamData.teleop['e-reason'] || '';
+        getElem('round', 'id').value = teamData.round;
+        getElem('comp', 'id').value = teamData.comp;
     
         for (let a = 0; a < 3; a++) {
             for (let b = 0; b < 3; b++) {
@@ -421,10 +426,13 @@ const switchTeam = async event => {
         teamData.team = team;
         await saveTeam(teamData);
         await refreshTeams();
+        push(team)
         getElem('teams', 'id').value = team;
         presentTeamData(teamData);
+        currentTeam = team
     } else if (team != '') {
         const teamData = await dbClient.getTeam(team);
+        currentTeam = team
 
         if (teamData) {
             presentTeamData(teamData);
