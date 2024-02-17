@@ -11,7 +11,7 @@
     --darkGrey: #00000020;
 }
 
-body:not(#team) {
+body {
     margin: 2px;
     cursor: default;
 }
@@ -80,13 +80,13 @@ input[type="text"]:disabled {
     background-color: var(--disabledBackground);
 }
 
-select:not(#teams) {
+select:not(#comp, #round, #teams) {
     width: 7em;
     font-size: 16px;
 }
 
-#teams {
-    width: 10em;
+#comp, #round, #teams {
+    width: auto;
     font-size: 16px;
 }
 
