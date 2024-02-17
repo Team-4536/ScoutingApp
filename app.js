@@ -1,5 +1,7 @@
 "use strict";
 
+const OBJECT_STORE = "team";
+
 class CacheController extends EventTarget {
     constructor() {
         super();
@@ -54,15 +56,36 @@ class DBController extends EventTarget {
     openError(event) {
     }
 
-    upgrade(event) {
+    async upgrade(event) {
         console.log("initializing/upgrading");
         let db = event.target.result;
-        db.createObjectStore("team", { keyPath: "team" });
+        switch (event.newVersion) {
+        case 1:
+            db.createObjectStore(OBJECT_STORE, { keyPath: "team" });
+        default:
+            try {
+                db.deleteObjectStore(OBJECT_STORE);
+            } catch {
+            }
+            let store = db.createObjectStore(OBJECT_STORE, {
+                keyPath: [ "team", "comp", "round" ]
+            });
+            try {
+                store.createIndex("byComp", ["comp", "team", "round"]);
+            } catch (e) {
+                console.log(e);
+            }
+            try {
+                store.createIndex("byCompRound", ["comp", "round", "team"]);
+            } catch (e) {
+                console.log(e);
+            }
+        }
     };
 
     teamRead(reader) {
-        const tx = this.db.transaction("team");
-        const store = tx.objectStore("team");
+        const tx = this.db.transaction(OBJECT_STORE);
+        const store = tx.objectStore(OBJECT_STORE);
         const rq = reader(store);
         return new Promise((r) => {
             rq.onsuccess = (e) => {
@@ -71,9 +94,9 @@ class DBController extends EventTarget {
         });
     }
 
-    async putTeam(team) {
-        const tx = this.db.transaction("team", "readwrite");
-        const store = tx.objectStore("team");
+    async putMatch(team) {
+        const tx = this.db.transaction(OBJECT_STORE, "readwrite");
+        const store = tx.objectStore(OBJECT_STORE);
         const rq = store.put(team);
         let p = new Promise((r) => {
             rq.onsuccess = (e) => {
@@ -83,8 +106,8 @@ class DBController extends EventTarget {
     }
 
     async deleteTeam(team) {
-        const tx = this.db.transaction("team", "readwrite");
-        const store = tx.objectStore("team");
+        const tx = this.db.transaction(OBJECT_STORE, "readwrite");
+        const store = tx.objectStore(OBJECT_STORE);
         const rq = store.delete(team);
         let p = new Promise((r) => {
             rq.onsuccess = (e) => {
@@ -93,23 +116,50 @@ class DBController extends EventTarget {
         });
     }
 
-    getTeam(team) {
-        return this.teamRead((store) => { return store.get(team); });
+    getMatch(comp, round, team) {
+        return this.teamRead((store) => {
+            return store.get([team,comp,round]);
+        });
     }
 
-    getAllTeams() {
-        return this.teamRead((store) => { return store.getAll(); });
-    }
+    getMatchKeysForMatch(comp, round) {
+        const tx = this.db.transaction(OBJECT_STORE);
+        const store = tx.objectStore(OBJECT_STORE);
+        const idx = store.index("byCompRound");
+        let rq = idx.openKeyCursor(
+            IDBKeyRange.bound([comp, round, ""],
+                              [comp, round, "99999999"])
+        );
 
-    getAllTeamNumbers() {
-        return this.teamRead((store) => { return store.getAllKeys(); });
+        let p = new Promise((r) => {
+            let results = [];
+            console.log('rq = ', rq);
+            rq.onerror = (e) => {
+                console.log('error', e);
+            }
+            rq.onsuccess = (e) => {
+                const cursor = e.target.result;
+                console.log(cursor);
+                if (cursor) {
+                    console.log('value', cursor.key);
+                    console.log('primary', cursor.primaryKey);
+                    results.push(cursor.primaryKey);
+                    cursor.continue();
+                } else {
+                    console.log('done');
+                    r(results);
+                }
+            }
+        });
+
+        return p;
     }
 }
 
 class App {
     constructor() {
         this.cacheController = new CacheController();
-        this.dbController = new DBController("scouting");
+        this.dbController = new DBController("scouting", 16);
 
         globalThis.addEventListener("message", this.message.bind(this));
         globalThis.addEventListener("install", this.install.bind(this));

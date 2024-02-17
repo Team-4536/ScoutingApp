@@ -31,7 +31,7 @@ const dataObject = JSON.stringify({
     }
 });
 
-const getElem = (value, type, head = document) => {
+const getElem = (value, type = 'id', head = document) => {
     const typeMap = {
         id: head.getElementById,
         name: head.getElementsByName,
@@ -55,18 +55,37 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const saveTeam = async (data) => { console.log(validTeam(data ? data.team: undefined)); validTeam(data ? data.team: undefined) && await dbClient.putTeam(data);};
+const saveTeam = async (data) => {
+    console.log(validTeam(data ? data.team: undefined));
+    if (validTeam(data ? data.team: undefined)) {
+        if (data.comp && data.round) {
+            await dbClient.putMatch(data);
+        }
+    }
+    console.log('save done');
+};
 
-const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team);
+const push = (data) => {
+    history.pushState(
+        {
+            team: data.team,
+            comp: data.comp,
+            round: data.round
+        }, null,
+        `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`)
+};
 
 const getTeam = () => {
     return currentTeam;
 }
 
 const refreshTeams = async () => {
-    const teams = getElem('teams', 'id');
+    const teams = getElem('teams');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
-    const teamNumbers = await dbClient.getAllTeamNumbers() || [];
+    const comp = getElem('comp').value;
+    const round = getElem('round').value;
+    const teamNumbers = await dbClient.getMatchKeysForMatch(comp, round) || [];
+    console.log('teams - refresh', teamNumbers);
     let newSelect = document.createElement('select');
     
     newSelect.addEventListener('change', async event => switchTeam(event));
@@ -85,13 +104,9 @@ const refreshTeams = async () => {
     }
 
     for (const team of teamNumbers) {
-        if (typeof team != "string") {
-            // filter out bad keys from dev times
-            continue;
-        }
         let teamOption = document.createElement('option');
         teamOption.value = team;
-        teamOption.textContent = team;
+        teamOption.textContent = team[0];
         if (team == selectedTeam) {
             teamOption.selected = true
         }
@@ -157,7 +172,9 @@ const loadData = async () => {
 
         if (search.has('team')) {
             const team = search.get('team');
-            let teamData = await dbClient.getTeam(team);
+            const comp = search.get('comp');
+            const round = search.get('round');
+            let teamData = await dbClient.getMatch(comp, round, team);
 
             if (teamData) {
                 currentTeam = teamData.team ?? undefined
@@ -169,15 +186,16 @@ const loadData = async () => {
                     teamData.team = team;
                     await saveTeam(teamData);
                     currentTeam = team;
-                    console.lot(currentTeam)
+                    console.log(currentTeam)
                 } else {
-                    confirm('searched team ' + team + ' does not exist, and is invalid')
+                    confirm('searched team ' + team + ' does not exist, and is invalid');
+                    history.replaceState(null, null, location.origin + location.pathname);
                 }
             }
 
             console.log(currentTeam)
             await presentTeamData(teamData);
-            getElem('teams', 'id').value = currentTeam;
+            getElem('teams').value = currentTeam;
         } else {
             const data = await decodeData(url);
 
@@ -186,7 +204,7 @@ const loadData = async () => {
                 const team = data.team;
                 
                 if (team) {
-                    push(team);
+                    push(data);
                     await saveTeam(data);
                     currentTeam = team;
                 }
@@ -201,24 +219,24 @@ const loadData = async () => {
     refreshTeams();
     console.log(currentTeam)
     if (validTeam(currentTeam)) {
-        getElem('teams', 'id').value = currentTeam;
+        getElem('teams').value = currentTeam;
     }
     console.log('called!')
 }
 
 const aStop = () => {
-    getElem('a-reason', 'id').disabled = !getElem('a-stop', 'id').checked;
+    getElem('a-reason').disabled = !getElem('a-stop').checked;
 }
 
 const eStop = () => {
-    getElem('e-reason', 'id').disabled = !getElem('e-stop', 'id').checked;
+    getElem('e-reason').disabled = !getElem('e-stop').checked;
 }
 
 const scrapeDataObject = () => {
     let teamData = JSON.parse(dataObject);
 
     // mark
-    let teams = getElem('teams', 'id')
+    let teams = getElem('teams')
     console.log(teams);
     console.log(teams.selectedIndex);
     if (teams.selectedIndex < 2) {
@@ -226,15 +244,15 @@ const scrapeDataObject = () => {
     }
     // not mark
 
-    teamData.team = teams.options[teams.selectedIndex].value
-    //teamData.team = getElem('team', 'id').value;
-    teamData.auto['left-zone'] = getElem('left-zone', 'id').checked;
-    teamData.auto['a-stop'] = getElem('a-stop', 'id').checked;
-    teamData.auto['a-reason'] = getElem('a-reason', 'id').value;
-    teamData.teleop['e-stop'] = getElem('e-stop', 'id').checked;
-    teamData.teleop['e-reason'] = getElem('e-reason', 'id').value;
-    teamData.comp = getElem('comp', 'id').value;
-    teamData.round = getElem('round', 'id').value;
+    teamData.team = getTeam(); //teams.options[teams.selectedIndex].value
+    //teamData.team = getElem('team').value;
+    teamData.auto['left-zone'] = getElem('left-zone').checked;
+    teamData.auto['a-stop'] = getElem('a-stop').checked;
+    teamData.auto['a-reason'] = getElem('a-reason').value;
+    teamData.teleop['e-stop'] = getElem('e-stop').checked;
+    teamData.teleop['e-reason'] = getElem('e-reason').value;
+    teamData.comp = getElem('comp').value;
+    teamData.round = getElem('round').value;
 
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
@@ -246,7 +264,7 @@ const scrapeDataObject = () => {
                 const cat = catItems[j].className
                 const con = cons[i]
                 
-                teamData[table][cat][con] = getElem([table, cat, con].join('-'), 'id').value
+                teamData[table][cat][con] = getElem([table, cat, con].join('-')).value
             }
         }
     }
@@ -285,21 +303,23 @@ const presentTeamData = async(teamData) => {
 
     console.log('teamdata', teamData)
     if (teamData) {
-        // getElem('team', 'id').value = teamData.team || '';
-        // getElem('teams', 'id').value = teamData.team || '';
-        getElem('left-zone', 'id').checked = teamData.auto['left-zone'] || '';
-        getElem('a-stop', 'id').checked = teamData.auto['a-stop'] || '';
-        getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
-        getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] || '';
-        getElem('e-reason', 'id').value = teamData.teleop['e-reason'] || '';
-        getElem('round', 'id').value = teamData.round;
-        getElem('comp', 'id').value = teamData.comp;
+        // getElem('team').value = teamData.team || '';
+        // getElem('teams').value = teamData.team || '';
+        getElem('left-zone').checked = teamData.auto['left-zone'] || '';
+        getElem('a-stop').checked = teamData.auto['a-stop'] || '';
+        getElem('a-reason').value = teamData.auto['a-reason'] || '';
+        getElem('e-stop').checked = teamData.teleop['e-stop'] || '';
+        getElem('e-reason').value = teamData.teleop['e-reason'] || '';
+        const comp = teamData.comp;
+        if (comp) { getElem('comp').value = comp }
+        const round = teamData.round;
+        if (round) { getElem('round').value = round }
     
         for (let a = 0; a < 3; a++) {
             for (let b = 0; b < 3; b++) {
                 try {
                     let value = teamData?.auto?.[con[a]]?.[cat[b]] || '';
-                    getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = value;
+                    getElem(`auto-${con[a]}-${cat[b]}`).value = value;
                 } catch (error) {
                     console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
                 }
@@ -310,7 +330,7 @@ const presentTeamData = async(teamData) => {
             for (let d = 0; d < 6; d++) {
                 try {
                     let value = teamData?.teleop?.[con[c]]?.[cat[d]] || '';
-                    getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = value;
+                    getElem(`teleop-${con[c]}-${cat[d]}`).value = value;
                 }
                 catch (error) {
                     console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
@@ -392,15 +412,15 @@ const beginScan = async () => {
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
 
-const closeScanner = () => { getElem('scanner', 'id').style.display = 'none' }
+const closeScanner = () => { getElem('scanner').style.display = 'none' }
 
 const generateQRCode = () => {
     encodeData().then((data) => {
-        getElem('qrcode', 'id').innerHTML = '';
+        getElem('qrcode').innerHTML = '';
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-        new QRCode(getElem('qrcode', 'id'), {
+        new QRCode(getElem('qrcode'), {
             text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
             correctLevel: QRCode.CorrectLevel.Q,
             width: 400,
@@ -408,7 +428,7 @@ const generateQRCode = () => {
         });
     });
 
-    getElem('qrcode-container', 'id').style.display = 'block';
+    getElem('qrcode-container').style.display = 'block';
 }
 
 const validTeam = (team) => {
@@ -418,32 +438,40 @@ const validTeam = (team) => {
 }
 
 const switchTeam = async event => {
-    let team = event.target.value;
+    let select = event.target.value;
 
-    if (team == 'new') {
-        team = prompt('new team');
+    if (select == 'new') {
+        let team = prompt('new team');
         let teamData = JSON.parse(dataObject);
         teamData.team = team;
+        teamData.comp = getElem('comp').value;
+        teamData.round = getElem('round').value;
         await saveTeam(teamData);
         await refreshTeams();
-        push(team)
-        getElem('teams', 'id').value = team;
+        push(teamData)
+        getElem('teams').value = team;
         presentTeamData(teamData);
         currentTeam = team
-    } else if (team != '') {
-        const teamData = await dbClient.getTeam(team);
+    } else if (select != '') {
+        console.log('splitting', select);
+        let s = select.split(',');
+        console.log('split', s);
+        let [team, comp, round] = s;
+        console.log('reading', comp, round, team);
+        const teamData = await dbClient.getMatch(comp, round, team);
+        console.log('got', teamData);
         currentTeam = team
 
         if (teamData) {
             presentTeamData(teamData);
-            push(team);
-            await saveTeam(teamData);
+            push(teamData);
+            // why?? await saveTeam(teamData);
         }
     }
 }
 
 function openSection(id) {
-    const section = getElem(id, 'id');
+    const section = getElem(id);
 
     const sections = getElem('collapsible', 'class')
 
@@ -457,6 +485,14 @@ function openSection(id) {
     section.nextElementSibling.style.display = "block";
 }
 
+const sync = async (event) => {
+    const teamData = scrapeDataObject();
+
+    if (teamData.team.length > 2) {
+        await saveTeam(teamData);
+    }
+};
+
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', () => loadData, true);
     setTimeout(loadData, 200);
@@ -466,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onLoad();
 
-    getElem('teams', 'id').addEventListener('change', async event => switchTeam(event));
+    getElem('teams').addEventListener('change', async event => switchTeam(event));
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
         input.addEventListener("click", (event) => {
@@ -475,32 +511,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getElem(`textarea, input`, 'queryAll').forEach((input) => {
-        input.addEventListener('change', async () => {
-            const teamData = scrapeDataObject()
-
-            if (teamData.team.length > 2) {
-                await saveTeam(teamData);
-                refreshTeams();
-            }
-        });
+        input.addEventListener('change', sync);
     });
 
-    getElem('open-scanner', 'id').addEventListener('click', beginScan);
+    getElem('open-scanner').addEventListener('click', beginScan);
 
-    getElem('close-scanner', 'id').addEventListener('click', closeScanner);
+    getElem('close-scanner').addEventListener('click', closeScanner);
 
-    getElem('a-stop', 'id').addEventListener('input', aStop);
+    getElem('a-stop').addEventListener('input', aStop);
 
-    getElem('e-stop', 'id').addEventListener('input', eStop);
+    getElem('e-stop').addEventListener('input', eStop);
 
-    getElem('open-qrcode', 'id').addEventListener('click', generateQRCode);
+    getElem('open-qrcode').addEventListener('click', generateQRCode);
 
     getElem('textarea', 'queryAll').forEach( (textarea) =>
         textarea.addEventListener('input', resizeText(textarea))
     );
 
-    getElem('close-qrcode', 'id').addEventListener('click', () =>
-        getElem('qrcode-container', 'id').style.display = 'none'
+    getElem('close-qrcode').addEventListener('click', () =>
+        getElem('qrcode-container').style.display = 'none'
     );
 
     getElem(numInputs, 'queryAll').forEach((input) =>
