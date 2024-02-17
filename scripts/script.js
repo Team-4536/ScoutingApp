@@ -10,6 +10,7 @@ const dataObject = JSON.stringify({
     'comp': '',
     'round': '',
     'team': '',
+    'key': '',
 
     'auto': {
         'left-zone': null,
@@ -55,7 +56,15 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const saveTeam = async (data) => { console.log(validTeam(data ? data.team: undefined)); validTeam(data ? data.team: undefined) && await dbClient.putTeam(data);};
+const saveTeam = async (data) => {
+    console.log('validTeam:', validTeam(data ? data.team: undefined));
+    
+    if (data && data.key) {
+        data.key = [data.comp, data.team, data.round].join('-');
+
+        validTeam(data ? data.team: undefined) && await dbClient.putTeam(data);
+    }
+};
 
 const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team);
 
@@ -80,7 +89,7 @@ const refreshTeams = async () => {
 
         let newOption = document.createElement('option')
         newOption.value = 'new';
-        newOption.textContent = "New team ...";
+        newOption.textContent = "New game ...";
         newSelect.add(newOption);
     }
 
@@ -292,8 +301,8 @@ const presentTeamData = async(teamData) => {
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
         getElem('e-stop', 'id').checked = teamData.teleop['e-stop'] || '';
         getElem('e-reason', 'id').value = teamData.teleop['e-reason'] || '';
-        getElem('round', 'id').value = teamData.round;
-        getElem('comp', 'id').value = teamData.comp;
+        getElem('comp', 'id').value = teamData.comp || '';
+        getElem('round', 'id').value = teamData.round || '';
     
         for (let a = 0; a < 3; a++) {
             for (let b = 0; b < 3; b++) {
@@ -417,13 +426,15 @@ const validTeam = (team) => {
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
-const switchTeam = async event => {
+const switchTeam = async (event) => {
     let team = event.target.value;
 
     if (team == 'new') {
         team = prompt('new team');
         let teamData = JSON.parse(dataObject);
         teamData.team = team;
+        teamData.comp = getElem('comp', 'id').value;
+        teamData.round = getElem('round', 'id').value;
         await saveTeam(teamData);
         await refreshTeams();
         push(team)

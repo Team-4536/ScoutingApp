@@ -38,7 +38,7 @@ class CacheController extends EventTarget {
 }
 
 class DBController extends EventTarget {
-    constructor(dbName, version=1) {
+    constructor(dbName, version=2) {
         super();
         this.dbrq = indexedDB.open(dbName, version);
         this.dbrq.addEventListener("success", this.openSuccess.bind(this));
@@ -57,7 +57,7 @@ class DBController extends EventTarget {
     upgrade(event) {
         console.log("initializing/upgrading");
         let db = event.target.result;
-        db.createObjectStore("team", { keyPath: "team" });
+        db.createObjectStore("team", { keyPath: "key" });
     };
 
     teamRead(reader) {
