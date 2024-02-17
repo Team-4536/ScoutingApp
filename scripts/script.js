@@ -4,6 +4,7 @@ const numInputs = 'input:not([type="text"], [type="checkbox"], #team)';
 import { DBClient } from "../app-client.js";
 
 const dbClient = new DBClient();
+let currentTeam;
 
 const dataObject = JSON.stringify({
     'comp': 'Eagan week 0',
@@ -54,7 +55,7 @@ const getElem = (value, type, head = document) => {
     return result;
 }
 
-const saveTeam = (data) => validTeam(data.team) && dbClient.putTeam(data)
+const saveTeam = async (data) => { console.log(validTeam(data ? data.team: undefined)); validTeam(data ? data.team: undefined) && await dbClient.putTeam(data);};
 
 const push = (team) => history.pushState(null, null, location.origin + location.pathname + '?team=' + team);
 
@@ -101,7 +102,6 @@ const refreshTeams = async () => {
 }
 
 const onLoad = async () => {
-    let currentTeam = '';
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
@@ -110,30 +110,34 @@ const onLoad = async () => {
         for (let i = 0; i < count; i++) {
             for (let j = 0; j < 4; j++) {
                 const th = document.createElement('th');
+                let input;
 
                 if (j === 0) {
                     th.innerHTML = cons[i];
                 } else {
                     if (j === 3) {
-                        th.appendChild(document.createElement('select'));
+                        input = document.createElement('select');
+                        
+                        th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
-                        const input = document.createElement('input');
+                        input = document.createElement('input');
 
                         plus.innerHTML = '+'
 
                         th.appendChild(plus);
                         th.appendChild(input);
-                        plus.addEventListener('click', () => {
+
+                        plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            saveTeam(presentTeamData());
+                            await saveTeam(presentTeamData());
                         });
                     }
 
                     const cat = catItems[j].className
                     const con = cons[i]
 
-                    th.id = [table, cat, con].join('-');
+                    input.setAttribute('id', [table, cat, con].join('-'));
                 }
 
                 catItems[j].appendChild(th);
@@ -142,7 +146,9 @@ const onLoad = async () => {
     }
 
     openSection('auto');
+}
 
+const loadData = async () => {
     let url = window.location.search
     
     if (url) {
@@ -153,19 +159,25 @@ const onLoad = async () => {
             const team = search.get('team');
             let teamData = await dbClient.getTeam(team);
 
-            if (!teamData) {
+            if (teamData) {
+                currentTeam = teamData.team ?? undefined
+                console.log()
+            } else {
                 teamData = JSON.parse(dataObject);
 
                 if (validTeam(team)) {
                     teamData.team = team;
-                    saveTeam(teamData);
+                    await saveTeam(teamData);
                     currentTeam = team;
+                    console.lot(currentTeam)
                 } else {
                     confirm('searched team ' + team + ' does not exist, and is invalid')
                 }
             }
 
-            presentTeamData(teamData);
+            console.log(currentTeam)
+            await presentTeamData(teamData);
+            getElem('teams', 'id').value = currentTeam;
         } else {
             const data = await decodeData(url);
 
@@ -175,7 +187,7 @@ const onLoad = async () => {
                 
                 if (team) {
                     push(team);
-                    saveTeam(data);
+                    await saveTeam(data);
                     currentTeam = team;
                 }
             } else {
@@ -185,6 +197,13 @@ const onLoad = async () => {
     } else {
         presentTeamData(JSON.parse(dataObject));
     }
+
+    refreshTeams();
+    console.log(currentTeam)
+    if (validTeam(currentTeam)) {
+        getElem('teams', 'id').value = currentTeam;
+    }
+    console.log('called!')
 }
 
 const aStop = () => {
@@ -257,13 +276,14 @@ const encodeData = async data => {
     return btoa(String.fromCharCode(...new Uint8Array(ab)));
 }
 
-const presentTeamData = (teamData) => {
+const presentTeamData = async(teamData) => {
     var con = ['succeeds', 'fails', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
+    console.log('teamdata', teamData)
     if (teamData) {
         // getElem('team', 'id').value = teamData.team || '';
-        getElem('teams', 'id').value = teamData.team || '';
+        // getElem('teams', 'id').value = teamData.team || '';
         getElem('left-zone', 'id').checked = teamData.auto['left-zone'] || '';
         getElem('a-stop', 'id').checked = teamData.auto['a-stop'] || '';
         getElem('a-reason', 'id').value = teamData.auto['a-reason'] || '';
@@ -273,7 +293,8 @@ const presentTeamData = (teamData) => {
         for (let a = 0; a < 3; a++) {
             for (let b = 0; b < 3; b++) {
                 try {
-                    getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = teamData.auto[con[a]][cat[b]] || '';
+                    let value = teamData?.auto?.[con[a]]?.[cat[b]] || '';
+                    getElem(`auto-${con[a]}-${cat[b]}`, 'id').value = value;
                 } catch (error) {
                     console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
                 }
@@ -283,7 +304,8 @@ const presentTeamData = (teamData) => {
         for (let c = 0; c < 3; c++) {
             for (let d = 0; d < 6; d++) {
                 try {
-                    getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = teamData.teleop[con[c]][cat[d]] || '';
+                    let value = teamData?.teleop?.[con[c]]?.[cat[d]] || '';
+                    getElem(`teleop-${con[c]}-${cat[d]}`, 'id').value = value;
                 }
                 catch (error) {
                     console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
@@ -292,9 +314,9 @@ const presentTeamData = (teamData) => {
         }
     }
 
-    refreshTeams();
     aStop();
     eStop();
+    await refreshTeams();
 }
 
 const formatTeam = event => {
@@ -385,11 +407,9 @@ const generateQRCode = () => {
 }
 
 const validTeam = (team) => {
-    if ([3, 4].includes(team.length) && Number.isInteger(parseInt(team))) {
-        return true;
-    } else {
-        return false;
-    }
+    const teamNum = parseInt(team) ?? false;
+
+    return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
 const switchTeam = async event => {
@@ -399,25 +419,43 @@ const switchTeam = async event => {
         team = prompt('new team');
         let teamData = JSON.parse(dataObject);
         teamData.team = team;
-        saveTeam(teamData);
-        refreshTeams();
+        await saveTeam(teamData);
+        await refreshTeams();
+        getElem('teams', 'id').value = team;
         presentTeamData(teamData);
-    }
-
-    if (team === '') {
-        presentTeamData(JSON.parse(dataObject));
-    } else {
+    } else if (team != '') {
         const teamData = await dbClient.getTeam(team);
 
         if (teamData) {
             presentTeamData(teamData);
             push(team);
-            saveTeam(teamData);
+            await saveTeam(teamData);
         }
     }
 }
 
+function openSection(id) {
+    const section = getElem(id, 'id');
+
+    const sections = getElem('collapsible', 'class')
+
+    for (let s of sections) {
+        s.classList.remove("active");
+        s.classList.add("inactive");
+        s.nextElementSibling.style.display = "none";
+    }
+    section.classList.remove("inactive");
+    section.classList.add("active");
+    section.nextElementSibling.style.display = "block";
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('load', () => loadData, true);
+    setTimeout(loadData, 200);
+
+    console.log('DOM')
+    console.log(document.readyState)
+
     onLoad();
 
     getElem('teams', 'id').addEventListener('change', async event => switchTeam(event));
@@ -429,11 +467,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getElem(`textarea, input`, 'queryAll').forEach((input) => {
-        input.addEventListener('change', () => {
+        input.addEventListener('change', async () => {
             const teamData = scrapeDataObject()
 
             if (teamData.team.length > 2) {
-                saveTeam(teamData);
+                await saveTeam(teamData);
                 refreshTeams();
             }
         });
@@ -472,32 +510,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     getElem(`textarea, input`, 'queryAll').forEach((input) => {
-        input.addEventListener('change', () => {
-            saveTeam(scrapeDataObject());
+        input.addEventListener('change', async () => {
+            await saveTeam(scrapeDataObject());
             refreshTeams();
         });
     });
-
-    // document.querySelectorAll(numInputs).forEach(function (input) {
-    //     input.addEventListener('input', function (event) {
-    //         event.target.value = event.target.value.replace(/\D/g, '');
-    //     });
-    // });
 });
 
-function openSection(id) {
-    const section = getElem(id, 'id');
-
-    const sections = getElem('collapsible', 'class')
-
-    for (let s of sections) {
-        s.classList.remove("active");
-        s.classList.add("inactive");
-        s.nextElementSibling.style.display = "none";
-    }
-    section.classList.remove("inactive");
-    section.classList.add("active");
-    section.nextElementSibling.style.display = "block";
-}
-
-window.scrapeDataObject = scrapeDataObject
+window.scrapeDataObject = scrapeDataObject;
