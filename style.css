@@ -34,21 +34,24 @@ th {
 
 input, button:not(.collapsible), textarea, select {
     border-radius: 7px;
-    border-width: 3px;
+    border-width: 1px;
     border-top-color: black;
     border-left-color: black;
     border-bottom-color: var(--borderRed);
     border-right-color: var(--borderRed);
     background-color: var(--backgroundColor);
     font-weight: bold;
+    color: black;
     cursor: pointer;
 }
 
 input:not(.incr, [type="text"], [type="checkbox"], #team), textarea {
-    width: 8em;
-    height: 16px;
+    width: 4em;
+    height: 32px;
+    margin: 2px;
     font-family: Arial, sans-serif;
-    font-size: smaller;
+    font-size: 13pt;
+    color: black;
 }
 
 input[type="checkbox"] {
@@ -72,7 +75,7 @@ input[type="checkbox"]:disabled {
 } */
 
 input[type="text"]:disabled {
-    border-width: 3px;
+    border-width: 1px;
     border-top-color: var(--disabledTopBorder);
     border-left-color: var(--disabledTopBorder);
     border-bottom-color: var(--disabledBottomBorder);
@@ -232,4 +235,11 @@ select:not(#comp, #round, #teams) {
 .incr {
     height: 50px;
     width: 50px;
+    margin: 3px;
+    font-size: 20px;
+    corner-radius: 30px;
+    border-width: 0 !important;
+    background-color: #bbbbbb !important;
+    text-align: center;
+    touch-action: manipulation;
 }
