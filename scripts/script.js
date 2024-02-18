@@ -147,7 +147,7 @@ const onLoad = async () => {
                         plus.className = "incr";
                         input = document.createElement('input');
 
-                        plus.innerHTML = '+'
+                        plus.textContent = '+'
 
                         th.appendChild(input);
                         th.appendChild(plus);
