@@ -144,12 +144,13 @@ const onLoad = async () => {
                         th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
+                        plus.className = "incr";
                         input = document.createElement('input');
 
                         plus.innerHTML = '+'
 
-                        th.appendChild(plus);
                         th.appendChild(input);
+                        th.appendChild(plus);
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
@@ -198,6 +199,7 @@ const loadData = async () => {
 
             console.log(teamData);
             await presentTeamData(teamData);
+            openSection('auto');
         } else {
             const data = await decodeData(url);
 
@@ -345,9 +347,12 @@ const presentTeamData = async(teamData, push=false) => {
             getElem('round').selectedIndex = 0;
         }
 
-        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
-        getElem('teams').value = selected;
-        console.log(getElem('teams'));
+        if (teamData.team) {
+            const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+            getElem('teams').value = selected;
+        } else {
+            getElem('teams').value = 'select';
+        }
         currentTeam = teamData.team;
         if (push) {
             pushState(teamData);
@@ -471,12 +476,20 @@ const clearTeam = () => {
 const switchTeam = async (event) => {
     let select = event.target.value;
 
+    if (select == 'select') {
+        currentTeam = "";
+        clearTeam();
+        closeSections();
+        return
+    }
     if (select == 'new') {
-        currentTeam = prompt('new team');
+        const newTeam = prompt('new team');
         // TODO validate team
         let teamData = emptyTeam();
 
-        teamData.team = team;
+        currentTeam = newTeam;
+
+        teamData.team = currentTeam;
         teamData.comp = getElem('comp').value;
         teamData.round = getElem('round').value;
 
@@ -518,9 +531,12 @@ function openSection(id) {
 
     closeSections();
 
-    section.classList.remove("inactive");
-    section.classList.add("active");
-    section.nextElementSibling.style.display = "block";
+    if (currentTeam) {
+        console.log("current team", currentTeam);
+        section.classList.remove("inactive");
+        section.classList.add("active");
+        section.nextElementSibling.style.display = "block";
+    }
 }
 
 const sync = async (event) => {
@@ -545,9 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getElem('teams').addEventListener('change', switchTeam);
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
-        input.addEventListener("click", (event) => {
-            openSection(event.target.id);
-        });
+        input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
     getElem(`textarea, input`, 'queryAll').forEach((input) => {
@@ -575,10 +589,6 @@ document.addEventListener('DOMContentLoaded', () => {
     getElem(numInputs, 'queryAll').forEach((input) =>
         input.addEventListener('input', formatNumber)
     );
-
-    getElem('.collapsible', 'queryAll').forEach((input) => {
-        input.addEventListener("click", (event) => openSection(event.target.id));
-    });
 
     getElem(numInputs, 'queryAll').forEach( (input) => {
         input.placeholder = '0';

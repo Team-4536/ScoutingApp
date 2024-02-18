@@ -44,7 +44,7 @@ input, button:not(.collapsible), textarea, select {
     cursor: pointer;
 }
 
-input:not([type="text"], [type="checkbox"], #team), textarea {
+input:not(.incr, [type="text"], [type="checkbox"], #team), textarea {
     width: 8em;
     height: 16px;
     font-family: Arial, sans-serif;
@@ -227,4 +227,9 @@ select:not(#comp, #round, #teams) {
     float: left;
     min-width: 100vw;
     padding: 18px;
+}
+
+.incr {
+    height: 50px;
+    width: 50px;
 }
