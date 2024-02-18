@@ -3,6 +3,8 @@
 const numInputs = 'input:not([type="text"], [type="checkbox"], #team)';
 import { DBClient } from "../app-client.js";
 
+import { stringify as csv_stringify } from "./csv-stringify.js";
+
 const dbClient = new DBClient();
 let currentTeam;
 
