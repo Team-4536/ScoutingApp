@@ -67,14 +67,20 @@ const saveTeam = async (data) => {
     console.log('save done');
 };
 
-const push = (data) => {
-    history.pushState(
-        {
-            team: data.team,
-            comp: data.comp,
-            round: data.round
-        }, null,
-        `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`)
+const pushState = (data, replace=false) => {
+    const state = {
+        team: data.team,
+        comp: data.comp,
+        round: data.round
+    };
+    const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`
+    const url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+
+    if (replace) {
+        history.replaceState(state, title, url);
+    } else {
+        history.pushState(state, title, url);
+    }
 };
 
 const getTeam = () => {
@@ -90,7 +96,7 @@ const refreshTeams = async () => {
     console.log('teams - refresh', teamNumbers);
     let newSelect = document.createElement('select');
     
-    newSelect.addEventListener('change', async event => switchTeam(event));
+    newSelect.addEventListener('change', switchTeam);
 
     newSelect.setAttribute('id', 'teams')
     {
@@ -138,12 +144,13 @@ const onLoad = async () => {
                         th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
+                        plus.className = "incr";
                         input = document.createElement('input');
 
                         plus.innerHTML = '+'
 
-                        th.appendChild(plus);
                         th.appendChild(input);
+                        th.appendChild(plus);
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
@@ -165,9 +172,15 @@ const onLoad = async () => {
     openSection('auto');
 }
 
+const popState = async () => {
+    loadData();
+}
+
 const loadData = async () => {
     let url = window.location.search
     
+    await refreshTeams();
+
     if (url) {
         const search = new URLSearchParams(url);
         url = url.slice(1);
@@ -178,26 +191,15 @@ const loadData = async () => {
             const round = search.get('round');
             let teamData = await dbClient.getMatch(comp, round, team);
 
-            if (teamData) {
-                currentTeam = teamData.team ?? undefined
-                console.log()
-            } else {
-                teamData = JSON.parse(dataObject);
-
-                if (validTeam(team)) {
-                    teamData.team = team;
-                    await saveTeam(teamData);
-                    currentTeam = team;
-                    console.log(currentTeam)
-                } else {
-                    confirm('searched team ' + team + ' does not exist, and is invalid');
-                    history.replaceState(null, null, location.origin + location.pathname);
-                }
+            if (!teamData) {
+                confirm('searched team ' + team + ' does not exist, and is invalid');
+                teamData = emptyTeam();
+                history.replaceState(null, null, location.origin + location.pathname);
             }
 
-            console.log(currentTeam)
+            console.log(teamData);
             await presentTeamData(teamData);
-            getElem('teams').value = currentTeam;
+            openSection('auto');
         } else {
             const data = await decodeData(url);
 
@@ -206,7 +208,7 @@ const loadData = async () => {
                 const team = data.team;
                 
                 if (team) {
-                    push(data);
+                    pushState(data, true);
                     await saveTeam(data);
                     currentTeam = team;
                 }
@@ -215,15 +217,10 @@ const loadData = async () => {
             }
         }
     } else {
-        presentTeamData(JSON.parse(dataObject));
+        presentTeamData(emptyTeam());
     }
 
     refreshTeams();
-    console.log(currentTeam)
-    if (validTeam(currentTeam)) {
-        getElem('teams').value = currentTeam;
-    }
-    console.log('called!')
 }
 
 const aStop = () => {
@@ -235,7 +232,7 @@ const eStop = () => {
 }
 
 const scrapeDataObject = () => {
-    let teamData = JSON.parse(dataObject);
+    let teamData = emptyTeam();
 
     // mark
     let teams = getElem('teams')
@@ -299,7 +296,7 @@ const encodeData = async data => {
     return btoa(String.fromCharCode(...new Uint8Array(ab)));
 }
 
-const presentTeamData = async(teamData) => {
+const presentTeamData = async(teamData, push=false) => {
     var con = ['succeeds', 'fails', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
@@ -339,13 +336,34 @@ const presentTeamData = async(teamData) => {
                 }
             }
         }
+        if (teamData.comp) {
+            getElem('comp').value = teamData.comp;
+        } else {
+            getElem('comp').selectedIndex = 0;
+        }
+        if (teamData.round) {
+            getElem('round').value = teamData.round;
+        } else {
+            getElem('round').selectedIndex = 0;
+        }
+
+        if (teamData.team) {
+            const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+            getElem('teams').value = selected;
+        } else {
+            getElem('teams').value = 'select';
+        }
+        currentTeam = teamData.team;
+        if (push) {
+            pushState(teamData);
+        }
     }
 
     aStop();
     eStop();
-    await refreshTeams();
 }
 
+/*
 const formatTeam = event => {
     const value = event.target.value;
 
@@ -366,7 +384,8 @@ const formatTeam = event => {
     } else if (value.length > 4 && value[0] == '0') {
         event.target.value = value.slice(1);
     }
-}
+    }
+*/
 
 const formatNumber = event => {
     if (event.target.value[0] == '0') {
@@ -439,21 +458,47 @@ const validTeam = (team) => {
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
-const switchTeam = async event => {
+const switchMatch = (event) => {
+    console.log("switchMatch");
+    getElem('teams').value = "select";
+    closeSections();
+    refreshTeams();
+};
+
+const emptyTeam = () => {
+    return JSON.parse(dataObject);
+}
+
+const clearTeam = () => {
+    presentTeamData(emptyTeam());
+};
+
+const switchTeam = async (event) => {
     let select = event.target.value;
 
+    if (select == 'select') {
+        currentTeam = "";
+        clearTeam();
+        closeSections();
+        return
+    }
     if (select == 'new') {
-        let team = prompt('new team');
-        let teamData = JSON.parse(dataObject);
-        teamData.team = team;
+        const newTeam = prompt('new team');
+        // TODO validate team
+        let teamData = emptyTeam();
+
+        currentTeam = newTeam;
+
+        teamData.team = currentTeam;
         teamData.comp = getElem('comp').value;
         teamData.round = getElem('round').value;
+
         await saveTeam(teamData);
         await refreshTeams();
-        push(teamData)
-        getElem('teams').value = team;
-        presentTeamData(teamData);
-        currentTeam = team
+
+        //pushState(teamData)
+
+        presentTeamData(teamData, true);
     } else if (select != '') {
         console.log('splitting', select);
         let s = select.split(',');
@@ -465,16 +510,13 @@ const switchTeam = async event => {
         currentTeam = team
 
         if (teamData) {
-            presentTeamData(teamData);
-            push(teamData);
-            // why?? await saveTeam(teamData);
+            presentTeamData(teamData, true);
         }
     }
+    openSection('auto');
 }
 
-function openSection(id) {
-    const section = getElem(id);
-
+function closeSections(id) {
     const sections = getElem('collapsible', 'class')
 
     for (let s of sections) {
@@ -482,9 +524,19 @@ function openSection(id) {
         s.classList.add("inactive");
         s.nextElementSibling.style.display = "none";
     }
-    section.classList.remove("inactive");
-    section.classList.add("active");
-    section.nextElementSibling.style.display = "block";
+}
+
+function openSection(id) {
+    const section = getElem(id);
+
+    closeSections();
+
+    if (currentTeam) {
+        console.log("current team", currentTeam);
+        section.classList.remove("inactive");
+        section.classList.add("active");
+        section.nextElementSibling.style.display = "block";
+    }
 }
 
 const sync = async (event) => {
@@ -496,20 +548,20 @@ const sync = async (event) => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('load', () => loadData, true);
-    setTimeout(loadData, 200);
+    window.addEventListener('load', loadData);
+    window.addEventListener('popstate', popState);
 
     console.log('DOM')
     console.log(document.readyState)
 
     onLoad();
 
-    getElem('teams').addEventListener('change', async event => switchTeam(event));
+    getElem('comp').addEventListener('change', switchMatch);
+    getElem('round').addEventListener('change', switchMatch);
+    getElem('teams').addEventListener('change', switchTeam);
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
-        input.addEventListener("click", (event) => {
-            openSection(event.target.id);
-        });
+        input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
     getElem(`textarea, input`, 'queryAll').forEach((input) => {
@@ -535,12 +587,8 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
     getElem(numInputs, 'queryAll').forEach((input) =>
-        input.addEventListener('input', (event) => formatNumber(event))
+        input.addEventListener('input', formatNumber)
     );
-
-    getElem('.collapsible', 'queryAll').forEach((input) => {
-        input.addEventListener("click", (event) => openSection(event.target.id));
-    });
 
     getElem(numInputs, 'queryAll').forEach( (input) => {
         input.placeholder = '0';
