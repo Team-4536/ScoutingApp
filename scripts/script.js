@@ -1,7 +1,7 @@
-"use strict";
+'use strict';
 
 const numInputs = 'input:not([type="text"], [type="checkbox"], #team)';
-import { DBClient } from "../app-client.js";
+import { DBClient } from '../app-client.js';
 
 import { stringify as csv_stringify } from "./csv-stringify.js";
 
@@ -57,8 +57,7 @@ const getElem = (value, type = 'id', head = document) => {
     return result;
 }
 
-const saveTeam = async (data) => {
-    console.log(validTeam(data ? data.team: undefined));
+const saveTeam = async (data) => {    
     if (validTeam(data ? data.team: undefined)) {
         if (data.comp && data.round) {
             await dbClient.putMatch(data);
@@ -98,16 +97,16 @@ const refreshTeams = async () => {
     
     newSelect.addEventListener('change', switchTeam);
 
-    newSelect.setAttribute('id', 'teams')
+    newSelect.setAttribute('id', 'teams');
     {
         let selectOption = document.createElement('option')
         selectOption.value = 'select';
-        selectOption.textContent = "Select team ...";
+        selectOption.textContent = 'Select team ...';
         newSelect.add(selectOption);
 
         let newOption = document.createElement('option')
         newOption.value = 'new';
-        newOption.textContent = "New team ...";
+        newOption.textContent = 'New team ...';
         newSelect.add(newOption);
     }
 
@@ -234,45 +233,60 @@ const eStop = () => {
 const scrapeDataObject = () => {
     let teamData = emptyTeam();
 
-    // mark
-    let teams = getElem('teams')
-    console.log(teams);
-    console.log(teams.selectedIndex);
-    if (teams.selectedIndex < 2) {
-        return teamData
-    }
-    // not mark
+    let teams = getElem('teams');
 
-    teamData.team = getTeam(); //teams.options[teams.selectedIndex].value
-    //teamData.team = getElem('team').value;
-    teamData.auto['left-zone'] = getElem('left-zone').checked;
-    teamData.auto['a-stop'] = getElem('a-stop').checked;
-    teamData.auto['a-reason'] = getElem('a-reason').value;
-    teamData.teleop['e-stop'] = getElem('e-stop').checked;
-    teamData.teleop['e-reason'] = getElem('e-reason').value;
+    if (teams.selectedIndex < 2) {
+        return teamData;
+    }
+
+    teamData.team = getTeam();
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
 
+    const elements = [
+        {elem: 'left-zone', sec: 'auto'},
+        {elem: 'a-stop', sec: 'auto'},
+        {elem: 'a-reason', sec: 'auto'},
+        {elem: 'e-stop', sec: 'teleop'},
+        {elem: 'e-reason', sec: 'teleop'}
+    ];
+
+    for (const {elem, sec} of elements) {
+        const element = getElem(elem);
+
+        let state;
+        if (element.type === 'checkbox') {
+            state = element.checked;
+        } else {
+            state = element.value;
+        }
+
+        teamData[sec][elem] = state;
+    }
+
     const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+    for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
             for (let j = 1; j < 4; j++) {
-                const cat = catItems[j].className
-                const con = cons[i]
-                
-                teamData[table][cat][con] = getElem([table, cat, con].join('-')).value
+                const cat = catItems[j].className;
+                const con = cons[i];
+                const value = getElem([table, cat, con].join('-')).value;
+
+                if (value) {
+                    teamData[table][cat][con] = value;
+                }
             }
         }
     }
     
-    console.log('scraped teamdata', teamData)
+    console.log('scraped teamdata', teamData);
     return teamData;
 }
 
-const decodeData = async encodedData => {
+const decodeData = async (encodedData) => {
     try {
         const data = JSON.parse(decodeURI(encodedData));
         const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
@@ -300,39 +314,31 @@ const presentTeamData = async(teamData, push=false) => {
     var con = ['succeeds', 'fails', 'method'];
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-    console.log('teamdata', teamData)
     if (teamData) {
-        // getElem('team').value = teamData.team || '';
-        // getElem('teams').value = teamData.team || '';
         getElem('left-zone').checked = teamData.auto['left-zone'] || '';
         getElem('a-stop').checked = teamData.auto['a-stop'] || '';
         getElem('a-reason').value = teamData.auto['a-reason'] || '';
         getElem('e-stop').checked = teamData.teleop['e-stop'] || '';
         getElem('e-reason').value = teamData.teleop['e-reason'] || '';
+
         const comp = teamData.comp;
         if (comp) { getElem('comp').value = comp }
         const round = teamData.round;
         if (round) { getElem('round').value = round }
     
-        for (let a = 0; a < 3; a++) {
-            for (let b = 0; b < 3; b++) {
-                try {
-                    let value = teamData?.auto?.[con[a]]?.[cat[b]] || '';
-                    getElem(`auto-${con[a]}-${cat[b]}`).value = value;
-                } catch (error) {
-                    console.error(`Error retrieving 'teamData.auto.${con[a]}.${cat[b]}': "${error}"`);
-                }
-            }
-        }
+        const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
-        for (let c = 0; c < 3; c++) {
-            for (let d = 0; d < 6; d++) {
-                try {
-                    let value = teamData?.teleop?.[con[c]]?.[cat[d]] || '';
-                    getElem(`teleop-${con[c]}-${cat[d]}`).value = value;
-                }
-                catch (error) {
-                    console.error(`Error retrieving 'teamData.teleop.${con[c]}.${cat[d]}': "${error}"`);
+        for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+            const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
+    
+            for (let i = 0; i < count; i++) {
+                for (let j = 1; j < 4; j++) {
+                    const cat = catItems[j].className;
+                    const con = cons[i];
+                    const element = getElem([table, cat, con].join('-'));
+                    const value = teamData?.[table]?.[con]?.[cat] || '';
+
+                    element.value = value;
                 }
             }
         }
@@ -402,15 +408,11 @@ const resizeText = textarea => {
     textarea.style.height = (textarea.scrollHeight) + 'px';
 }
 
-// function createCSV(teamData) {
-//     return teamData.map(obj => Object.values(obj).join(',')).join('\n');
-// }
-
 const beginScan = async () => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
 
-    let scanner = new Html5Qrcode("cameraStream", {
+    let scanner = new Html5Qrcode('cameraStream', {
     formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
     verbose: false
     });
@@ -461,6 +463,10 @@ const generateQRCode = () => {
 const validTeam = (team) => {
     const teamNum = parseInt(team) ?? false;
 
+    console.log('valid team', team)
+    console.log('valid num', teamNum)
+    console.log('valid int', Number.isInteger(teamNum))
+    console.log('valid length', [3,4].includes(team.length))
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
@@ -526,9 +532,9 @@ function closeSections(id) {
     const sections = getElem('collapsible', 'class')
 
     for (let s of sections) {
-        s.classList.remove("active");
-        s.classList.add("inactive");
-        s.nextElementSibling.style.display = "none";
+        s.classList.remove('active');
+        s.classList.add('inactive');
+        s.nextElementSibling.style.display = 'none';
     }
 }
 
@@ -543,6 +549,9 @@ function openSection(id) {
         section.classList.add("active");
         section.nextElementSibling.style.display = "block";
     }
+    section.classList.remove('inactive');
+    section.classList.add('active');
+    section.nextElementSibling.style.display = 'block';
 }
 
 const sync = async (event) => {
@@ -553,12 +562,59 @@ const sync = async (event) => {
     }
 };
 
+const exportTeam = async () => {
+    const exportSelect = getElem('export', 'id');
+
+    switch (exportSelect.value) {
+        case 'export-url':
+            console.log('encode, decode, data', await decodeData(await encodeData(await scrapeDataObject())));
+            navigator.share({url: 'https://scouting.minutebots.org/?' + (await encodeData(scrapeDataObject()))});
+
+            break;
+        case 'export-data':
+            navigator.share({data: JSON.stringify(scrapeDataObject())});
+
+            break;
+        case 'export-csv':
+
+            break;
+        case 'export-qrcode':
+            generateQRCode();
+
+            break;
+        case 'export-qrcode':
+
+            break;
+        case 'download-csv':
+            csv = document.createElement('a');
+            const csvData = 'data:text/csv;charset=utf-8,' +
+                            'a,b,c,d,e\n' +
+                            '1,2,3,4,5\n' +
+                            'hola,hello,"blah blah blah!! (:","testy","this be a test"';
+            csv.setAttribute('href', encodeURI(csvData));
+            csv.setAttribute('download', 'test.csv');
+            csv.click();
+
+            break;
+        case 'download':
+            const jsonString = JSON.stringify(scrapeDataObject());
+
+            const blob = new Blob([jsonString], { type: 'application/json' });
+
+            const data = document.createElement('a');
+            data.setAttribute('href', URL.createObjectURL(blob));
+            data.setAttribute('download', 'data.json');
+            data.click();
+            
+            break;
+    }
+
+    exportSelect.value = 'share';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', loadData);
     window.addEventListener('popstate', popState);
-
-    console.log('DOM')
-    console.log(document.readyState)
 
     onLoad();
 
@@ -574,15 +630,13 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('change', sync);
     });
 
-    getElem('open-scanner').addEventListener('click', beginScan);
+    getElem('export').addEventListener('change', exportTeam)
 
     getElem('close-scanner').addEventListener('click', closeScanner);
 
     getElem('a-stop').addEventListener('input', aStop);
 
     getElem('e-stop').addEventListener('input', eStop);
-
-    getElem('open-qrcode').addEventListener('click', generateQRCode);
 
     getElem('textarea', 'queryAll').forEach( (textarea) =>
         textarea.addEventListener('input', resizeText(textarea))
@@ -611,3 +665,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 window.scrapeDataObject = scrapeDataObject;
+window.presentTeamData = presentTeamData;
+window.getTeam = getTeam;

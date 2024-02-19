@@ -45,9 +45,22 @@
         </select>
         <br>
 
-        <button id="open-qrcode">Generate QRCode</button>
-        <button id="open-scanner">Open Scanner</button>
-        <button onclick="navigator.share({url: 'https://scouting.minutebots.org'})">Share</button>
+        <select id="export">
+            <option value="share">share ...</option>
+            <option value="export-url">share current team's url</option>
+            <option value="export-data">share current team's data</option>
+            <option value="export-csv">share csv</option>
+            <option value="export-qrcode">generate qrcode</option>
+            <option value="download-csv">download csv</option>
+            <option value="download">download all data</option>
+        </select>
+        <select id="import">
+            <option value="open">open ...</option>
+            <option value="enter">enter team data</option>
+            <option value="enter-csv">enter csv</option>
+            <option value="enter-qrcode">scan qrcode</option>
+            <option value="enter-encoded">decode encoded data</option>
+        </select>
         <hr>
 
         <button class="collapsible" id="auto">Auto</button>
