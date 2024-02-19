@@ -66,14 +66,14 @@
         <button class="collapsible" id="auto">Auto</button>
         <div class="content">
             <label for="left-zone">Left alliance zone</label>
-            <input type="checkbox" id="left-zone" style="margin-bottom: 10px;"></input>
+            <input type="checkbox" id="left-zone" class="input" style="margin-bottom: 10px;"></input>
             <br>
 
             <label for="a-stop">A-Stop</label>
-            <input type="checkbox" id="a-stop">
+            <input type="checkbox" id="a-stop" class="input">
 
             <label>Reason:</label>
-            <input type="text" id="a-reason" placeholder="" disabled>
+            <input type="text" id="a-reason" class="input" placeholder="" disabled>
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
@@ -86,10 +86,10 @@
         <button class="collapsible" id="teleop">Teleop</button>
         <div class="content">
             <label for="e-stop">E-Stop</label>
-            <input type="checkbox" id="e-stop">
+            <input type="checkbox" id="e-stop" class="input">
 
             <label>Reason:</label>
-            <input type="text" id="e-reason" disabled>
+            <input type="text" id="e-reason" class="input" disabled>
             <br><br>
 
             <table data-sec="teleop">
@@ -100,86 +100,81 @@
             </table>
         </div>
 
-        <!-- <button class="collapsible" id="scoring">Scoring</button> -->
+        <button class="collapsible" id="scoring">Scoring</button>
         <div class="content">
             <div class="score">
-                <label>Collisions</label>
-                <input type="checkbox">
+                <label for="collisions">Collisions</label>
+                <input id="collisions" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Climb With Others</label>
-                <input type="checkbox">
+                <label for="climb">Climb With Others</label>
+                <input id="climb" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Total Game Score</label>
-                <input>
+                <label for="score">Total Game Score</label>
+                <input id="score" class="input">
             </div>
 
             <div class="score indented">
-                <label>Total Amp Score</label>
-                <input>
+                <label for="amp">Total Amp Score</label>
+                <input id="amp" class="input">
             </div>
 
             <div class="score double-indented">
-                <label>Amp Auto Score</label>
-                <input>
+                <label for="amp-auto">Amp Auto Score</label>
+                <input id="amp-auto" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Amp Teleop Score</label>
-                <input>
+                <label for="amp-teleop">Amp Teleop Score</label>
+                <input id="amp-teleop" class="input">
             </div>
 
             <div class="score indented">
-                <label>Total Speaker Score</label>
-                <input>
+                <label for="spkr">Total Speaker Score</label>
+                <input id="spkr" class="input">
             </div>
 
             <div class="score double-indented">
-                <label>Speaker Auto Score</label>
-                <input>
+                <label for="spkr-auto">Speaker Auto Score</label>
+                <input id="spkr-auto" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Speaker Teleop Score</label>
-                <input>
+                <label for="spkr-teleop">Speaker Teleop Score</label>
+                <input id="spkr-teleop" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Speaker Amplified Score</label>
-                <input>
+                <label for="spkr-amp">Speaker Amplified Score</label>
+                <input id="spkr-amp" class="input">
             </div>
 
             <div class="score">
-                <label>Cooperation</label>
-                <input type="checkbox">
+                <label for="coop">Cooperation</label>
+                <input id="coop" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Melody</label>
-                <input type="checkbox">
+                <label for="melody">Melody</label>
+                <input id="melody" class="input" type="checkbox">
             </div>
 
             <div class="score"> 
-                <label>Ensemble</label>
-                <input type="checkbox">
+                <label for="ensemble">Ensemble</label>
+                <input id="ensemble" class="input" type="checkbox">
             </div>
 
             <div class="score">
-                <label>Win</label>
-                <input type="checkbox">
-            </div>
-
-            <div class="score indented">
-                <label>By How Much</label>
-                <input>
+                <label for="win">Win</label>
+                <input id="win" class="input" type="checkbox">
             </div>
 
             <div class="score">
-                <label>Tie</label>
-                <input type="checkbox">
+                <label for="tie">Tie</label>
+                <input id="tie" class="input" type="checkbox">
             </div>
         </div>
         

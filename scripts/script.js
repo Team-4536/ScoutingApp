@@ -1,7 +1,7 @@
 'use strict';
 
-const numInputs = 'input:not([type="text"], [type="checkbox"], #team)';
 import { DBClient } from '../app-client.js';
+import { stringify as csv_stringify } from "./csv-stringify.js";
 
 import { stringify as csv_stringify } from "./csv-stringify.js";
 
@@ -63,7 +63,6 @@ const saveTeam = async (data) => {
             await dbClient.putMatch(data);
         }
     }
-    console.log('save done');
 };
 
 const pushState = (data, replace=false) => {
@@ -86,13 +85,16 @@ const getTeam = () => {
     return currentTeam;
 }
 
+const getMatch = () => {
+    return [getTeam(), getElem('comp').value, getElem('round').value].join(',');
+}
+
 const refreshTeams = async () => {
     const teams = getElem('teams');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
     const comp = getElem('comp').value;
     const round = getElem('round').value;
     const teamNumbers = await dbClient.getMatchKeys(comp, round) || [];
-    console.log('teams - refresh', teamNumbers);
     let newSelect = document.createElement('select');
     
     newSelect.addEventListener('change', switchTeam);
@@ -145,6 +147,7 @@ const onLoad = async () => {
                         const plus = document.createElement('button');
                         plus.className = "incr";
                         input = document.createElement('input');
+                        input.classList.add('number');
 
                         plus.textContent = '+'
 
@@ -161,6 +164,7 @@ const onLoad = async () => {
                     const con = cons[i]
 
                     input.setAttribute('id', [table, cat, con].join('-'));
+                    input.classList.add('table-input');
                 }
 
                 catItems[j].appendChild(th);
@@ -176,7 +180,8 @@ const popState = async () => {
 }
 
 const loadData = async () => {
-    let url = window.location.search
+    let url = window.location.search;
+    let teamData = JSON.parse(dataObject);
     
     await refreshTeams();
 
@@ -184,11 +189,11 @@ const loadData = async () => {
         const search = new URLSearchParams(url);
         url = url.slice(1);
 
-        if (search.has('team')) {
+        if (search.has('team')) { // if data param is in URL
             const team = search.get('team');
             const comp = search.get('comp');
             const round = search.get('round');
-            let teamData = await dbClient.getMatch(comp, round, team);
+            const storedTeamData = await dbClient.getMatch(comp, round, team);
 
             if (!teamData) {
                 confirm('searched team ' + team + ' does not exist, and is invalid');
@@ -202,8 +207,8 @@ const loadData = async () => {
         } else {
             const data = await decodeData(url);
 
-            if (data) {
-                presentTeamData(data);
+            if (data) { // if data could be read
+                teamData = data;
                 const team = data.team;
                 
                 if (team) {
@@ -211,7 +216,7 @@ const loadData = async () => {
                     await saveTeam(data);
                     currentTeam = team;
                 }
-            } else {
+            } else { // if data could not be read
                 // Add visable error message
             }
         }
@@ -282,7 +287,6 @@ const scrapeDataObject = () => {
         }
     }
     
-    console.log('scraped teamdata', teamData);
     return teamData;
 }
 
@@ -315,17 +319,31 @@ const presentTeamData = async(teamData, push=false) => {
     var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
     if (teamData) {
-        getElem('left-zone').checked = teamData.auto['left-zone'] || '';
-        getElem('a-stop').checked = teamData.auto['a-stop'] || '';
-        getElem('a-reason').value = teamData.auto['a-reason'] || '';
-        getElem('e-stop').checked = teamData.teleop['e-stop'] || '';
-        getElem('e-reason').value = teamData.teleop['e-reason'] || '';
+        getElem('teams').value = getMatch();
+        getElem('comp').value = teamData.comp || '';
+        getElem('round').value = teamData.round || '';
 
-        const comp = teamData.comp;
-        if (comp) { getElem('comp').value = comp }
-        const round = teamData.round;
-        if (round) { getElem('round').value = round }
+        const elements = [
+            {elem: 'left-zone', sec: 'auto'},
+            {elem: 'a-stop', sec: 'auto'},
+            {elem: 'a-reason', sec: 'auto'},
+            {elem: 'e-stop', sec: 'teleop'},
+            {elem: 'e-reason', sec: 'teleop'}
+        ];
     
+        for (const {elem, sec} of elements) {
+            const element = getElem(elem);
+    
+            let state;
+            if (element.type === 'checkbox') {
+                state = element.checked;
+            } else {
+                state = element.value;
+            }
+    
+            teamData[sec][elem] = state;
+        }
+
         const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
 
         for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
@@ -403,11 +421,6 @@ const formatNumber = event => {
     }
 }
 
-const resizeText = textarea => {
-    textarea.style.height = 'auto';
-    textarea.style.height = (textarea.scrollHeight) + 'px';
-}
-
 const beginScan = async () => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
@@ -463,10 +476,6 @@ const generateQRCode = () => {
 const validTeam = (team) => {
     const teamNum = parseInt(team) ?? false;
 
-    console.log('valid team', team)
-    console.log('valid num', teamNum)
-    console.log('valid int', Number.isInteger(teamNum))
-    console.log('valid length', [3,4].includes(team.length))
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
@@ -554,7 +563,7 @@ function openSection(id) {
     section.nextElementSibling.style.display = 'block';
 }
 
-const sync = async (event) => {
+const sync = async () => {
     const teamData = scrapeDataObject();
 
     if (teamData.team.length > 2) {
@@ -626,11 +635,11 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
-    getElem(`textarea, input`, 'queryAll').forEach((input) => {
+    getElem('.table-input', 'queryAll').forEach((input) => {
         input.addEventListener('change', sync);
     });
 
-    getElem('export').addEventListener('change', exportTeam)
+    getElem('export').addEventListener('change', exportTeam);
 
     getElem('close-scanner').addEventListener('click', closeScanner);
 
@@ -638,25 +647,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem('e-stop').addEventListener('input', eStop);
 
-    getElem('textarea', 'queryAll').forEach( (textarea) =>
-        textarea.addEventListener('input', resizeText(textarea))
-    );
+    getElem('.collapsible', 'queryAll').forEach((input) => {
+        input.addEventListener('click', (event) => openSection(event.target.id));
+    });
 
-    getElem('close-qrcode').addEventListener('click', () =>
-        getElem('qrcode-container').style.display = 'none'
-    );
+    getElem('.number', 'queryAll').forEach( (input) => {
+        input.addEventListener('input', (event) => formatNumber(event));
 
-    getElem(numInputs, 'queryAll').forEach((input) =>
-        input.addEventListener('input', formatNumber)
-    );
-
-    getElem(numInputs, 'queryAll').forEach( (input) => {
         input.placeholder = '0';
         input.type = 'number';
         input.min = '0';
     });
 
-    getElem(`textarea, input`, 'queryAll').forEach((input) => {
+    getElem('.table-input', 'queryAll').forEach((input) => {
         input.addEventListener('change', async () => {
             await saveTeam(scrapeDataObject());
             refreshTeams();
@@ -667,3 +670,6 @@ document.addEventListener('DOMContentLoaded', () => {
 window.scrapeDataObject = scrapeDataObject;
 window.presentTeamData = presentTeamData;
 window.getTeam = getTeam;
+window.getMatch = getMatch;
+window.getElem = getElem;
+window.dbClient = dbClient;
