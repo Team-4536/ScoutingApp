@@ -30,6 +30,10 @@ const dataObject = JSON.stringify({
         'succeeds': {},
         'fails': {},
         'method': {}
+    },
+
+    'scoring': {
+        
     }
 });
 
@@ -44,24 +48,22 @@ const getElem = (value, type = 'id', head = document) => {
     };
 
     if (!(type in typeMap)) {
-        console.warn(`Unrecognized element type: ${type}`);
+        console.warn('Unrecognized element type: ' + type);
         return undefined;
     }
 
     const result = typeMap[type].call(head, value);
 
     if (!result) {
-        console.error(`Element with type '${type}' of '${value}' was not found`);
+        console.error('Element with type \'' + type + '\' of \'' + value +  '\' was not found');
     }
 
     return result;
 }
 
-const saveTeam = async (data) => {    
-    if (validTeam(data ? data.team: undefined)) {
-        if (data.comp && data.round) {
-            await dbClient.putMatch(data);
-        }
+const saveMatch = async (data) => {    
+    if (validTeam(data ? data.team: undefined) && data.comp && data.round) {
+        await dbClient.putMatch(data);
     }
 };
 
@@ -71,7 +73,8 @@ const pushState = (data, replace=false) => {
         comp: data.comp,
         round: data.round
     };
-    const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`
+    
+    const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
     const url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
 
     if (replace) {
@@ -91,7 +94,7 @@ const getMatch = () => {
 
 const refreshTeams = async () => {
     const teams = getElem('teams');
-    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
+    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null;
     const comp = getElem('comp').value;
     const round = getElem('round').value;
     const teamNumbers = await dbClient.getMatchKeys(comp, round) || [];
@@ -100,29 +103,53 @@ const refreshTeams = async () => {
     newSelect.addEventListener('change', switchTeam);
 
     newSelect.setAttribute('id', 'teams');
+
     {
-        let selectOption = document.createElement('option')
+        let selectOption = document.createElement('option');
+
         selectOption.value = 'select';
         selectOption.textContent = 'Select team ...';
+
         newSelect.add(selectOption);
 
-        let newOption = document.createElement('option')
+        let newOption = document.createElement('option');
+
         newOption.value = 'new';
         newOption.textContent = 'New team ...';
+
         newSelect.add(newOption);
     }
 
     for (const team of teamNumbers) {
         let teamOption = document.createElement('option');
+
         teamOption.value = team;
         teamOption.textContent = team[0];
+
         if (team == selectedTeam) {
-            teamOption.selected = true
+            teamOption.selected = true;
         }
-        newSelect.appendChild(teamOption);
+        
+        console.log(teamOption.value.split(',').slice(1).join(','))
+        console.log([getElem('comp').value, getElem('round').value].join(','))
+
+        if (getMatch().split(',').slice(1).join(',') === teamOption.value.split(',').slice(1).join(',')) {
+            newSelect.appendChild(teamOption);
+        }
     }
 
     teams.replaceWith(newSelect);
+
+    teams.value = getMatch();
+
+    console.log('team options', teams.options);
+    console.log('selected team', teams.value);
+}
+
+const method = (event) => {
+    if (event.target.value === 'add') {
+        confirm('what method?');
+    }
 }
 
 const onLoad = async () => {
@@ -137,27 +164,41 @@ const onLoad = async () => {
                 let input;
 
                 if (j === 0) {
-                    th.innerHTML = cons[i];
+                    th.textContent = cons[i];
                 } else {
                     if (j === 3) {
+                        const options = [['a', 'a'], ['b', 'a'], ['c', 'c'], ['d', 'd'], ['Add method', 'add']];
+
                         input = document.createElement('select');
+                        input.classList.add('input');
                         
+                        options.forEach((option) => {
+                            const method = document.createElement('option');
+                            
+                            method.textContent = option[0];
+                            method.value = option[1];
+
+                            input.appendChild(method);
+                        });
+
+                        input.addEventListener('change', (event) => method(event));
+                                                
                         th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
-                        plus.className = "incr";
                         input = document.createElement('input');
-                        input.classList.add('number');
+                        input.classList.add('number', 'input');
 
-                        plus.textContent = '+'
-
-                        th.appendChild(input);
-                        th.appendChild(plus);
+                        plus.textContent = '+';
+                        plus.classList.add('incr');
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            await saveTeam(scrapeDataObject());
+                            await saveMatch(scrapeTeamData());
                         });
+
+                        th.appendChild(plus);
+                        th.appendChild(input);
                     }
 
                     const cat = catItems[j].className
@@ -185,43 +226,82 @@ const loadData = async () => {
     
     await refreshTeams();
 
-    if (url) {
+    if (url) { // if URL data (replace later with checks for data param, else if team, comp, round params)
+        console.log('url:', location.origin + location.pathname + url)
+
         const search = new URLSearchParams(url);
-        url = url.slice(1);
 
-        if (search.has('team')) { // if data param is in URL
-            const team = search.get('team');
-            const comp = search.get('comp');
-            const round = search.get('round');
-            const storedTeamData = await dbClient.getMatch(comp, round, team);
+        if (search.has('data')) {
+            const dataParam = search.get('data');
 
-            if (!teamData) {
-                confirm('searched team ' + team + ' does not exist, and is invalid');
-                teamData = emptyTeam();
-                history.replaceState(null, null, location.origin + location.pathname);
-            }
+            console.log('has data param:', dataParam);
 
-            console.log(teamData);
-            await presentTeamData(teamData);
-            openSection('auto');
-        } else {
-            const data = await decodeData(url);
+            const data = await decodeData(dataParam);
 
-            if (data) { // if data could be read
+            if (data) {
+                console.log('decoded data:', data);
+
                 teamData = data;
-                const team = data.team;
-                
-                if (team) {
-                    pushState(data, true);
-                    await saveTeam(data);
-                    currentTeam = team;
-                }
-            } else { // if data could not be read
-                // Add visable error message
+            } else {
+                console.error('unable to decode data from URL');
+
+                presentTeamData(dataParam);
+            }
+        } else if (search.has('comp') && search.has('round')) {
+            const compParam = search.get('comp');
+            const roundParam = search.get('round');
+
+            teamData.comp = compParam;
+            teamData.round = roundParam;
+
+            if (search.has('team')) {
+                const teamParam = search.get('team');
+
+                teamData.team = teamParam;
+
+                console.log('has team, comp, and round params:', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
+            } else {
+                console.log('has comp and round params:', 'comp=' + compParam + ', round=' + roundParam);
             }
         }
-    } else {
-        presentTeamData(emptyTeam());
+
+        // const search = new URLSearchParams(url);
+        // url = url.slice(1);
+
+        // if (search.has('team')) { // if data param is in URL
+        //     const team = search.get('team');
+        //     const comp = search.get('comp');
+        //     const round = search.get('round');
+        //     const storedTeamData = await dbClient.getMatch(comp, round, team);
+
+        //     if (storedTeamData) { // if team exists
+        //         currentTeam = storedTeamData.team ?? undefined;
+        //     } else { // if team does not exist
+        //         if (validTeam(team)) { // if new team is valid
+        //             teamData.team = team;
+        //             await saveMatch(teamData);
+        //             currentTeam = team;
+        //         } else { // if new team is not valid
+        //             confirm('searched team ' + team + ' does not exist, and is invalid');
+        //             history.replaceState(null, null, location.origin + location.pathname);
+        //         }
+        //     }
+        // } else { // if data param is not in URL
+        //     const data = await decodeData(url);
+
+        //     if (data) { // if data could be read
+        //         d = data;
+        //         const team = data.team;
+                
+        //         if (team) { // if team is in data
+        //             pushState(data);
+        //             await saveMatch(data);
+        //             currentTeam = team;
+        //         }
+        //     } else { // if data could not be read
+        //         // Add visable error message
+        //     }
+        // }
     }
 
     refreshTeams();
@@ -235,10 +315,63 @@ const eStop = () => {
     getElem('e-reason').disabled = !getElem('e-stop').checked;
 }
 
-const scrapeDataObject = () => {
-    let teamData = emptyTeam();
+const presentTeamData = async (teamData) => {
+    await refreshTeams();
 
-    let teams = getElem('teams');
+    if (teamData && typeof teamData === 'object') {
+        if (teamData.team) {
+            currentTeam = teamData.team;
+        }
+
+        getElem('comp').value = teamData.comp || '';
+        getElem('round').value = teamData.round || '';
+
+        const elements = [
+            {elem: 'left-zone', sec: 'auto'},
+            {elem: 'a-stop', sec: 'auto'},
+            {elem: 'a-reason', sec: 'auto'},
+            {elem: 'e-stop', sec: 'teleop'},
+            {elem: 'e-reason', sec: 'teleop'}
+        ];
+    
+        for (const {elem, sec} of elements) {
+            const element = getElem(elem);
+    
+            let state;
+            if (element.type === 'checkbox') {
+                state = element.checked;
+            } else {
+                state = element.value;
+            }
+    
+            teamData[sec][elem] = state;
+        }
+
+        const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+
+        for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+            const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
+    
+            for (let i = 0; i < count; i++) {
+                for (let j = 1; j < 4; j++) {
+                    const cat = catItems[j].className;
+                    const con = cons[i];
+                    const element = getElem([table, cat, con].join('-'));
+                    const value = teamData?.[table]?.[con]?.[cat] || '';
+
+                    element.value = value;
+                }
+            }
+        }
+    }
+
+    aStop();
+    eStop();
+}
+
+const scrapeTeamData = () => {
+    let teamData = JSON.parse(dataObject);
+    const teams = getElem('teams');
 
     if (teams.selectedIndex < 2) {
         return teamData;
@@ -290,21 +423,6 @@ const scrapeDataObject = () => {
     return teamData;
 }
 
-const decodeData = async (encodedData) => {
-    try {
-        const data = JSON.parse(decodeURI(encodedData));
-        const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
-        let blob = new Blob([bytes]);
-        const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
-        blob = await new Response(decoder).blob();
-        const text = await blob.text();
-        return JSON.parse(text);
-    } catch (error) {
-        console.error(`Error decoding data due to invalid data: "${error.message}"`);
-        return undefined
-    }
-}
-
 const encodeData = async data => {
     const stream = new Blob([JSON.stringify(data)], { type: 'application/json' }).stream();
     const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
@@ -314,77 +432,21 @@ const encodeData = async data => {
     return btoa(String.fromCharCode(...new Uint8Array(ab)));
 }
 
-const presentTeamData = async(teamData, push=false) => {
-    var con = ['succeeds', 'fails', 'method'];
-    var cat = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+const decodeData = async (encodedData) => {
+    try {
+        const data = JSON.parse(decodeURI(encodedData));
+        const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
+        let blob = new Blob([bytes]);
+        const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+        blob = await new Response(decoder).blob();
+        const text = await blob.text();
 
-    if (teamData) {
-        getElem('teams').value = getMatch();
-        getElem('comp').value = teamData.comp || '';
-        getElem('round').value = teamData.round || '';
+        return JSON.parse(text);
+    } catch (error) {
+        console.error(`Error decoding data due to invalid data: "${error.message}"`);
 
-        const elements = [
-            {elem: 'left-zone', sec: 'auto'},
-            {elem: 'a-stop', sec: 'auto'},
-            {elem: 'a-reason', sec: 'auto'},
-            {elem: 'e-stop', sec: 'teleop'},
-            {elem: 'e-reason', sec: 'teleop'}
-        ];
-    
-        for (const {elem, sec} of elements) {
-            const element = getElem(elem);
-    
-            let state;
-            if (element.type === 'checkbox') {
-                state = element.checked;
-            } else {
-                state = element.value;
-            }
-    
-            teamData[sec][elem] = state;
-        }
-
-        const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-        for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
-            const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
-    
-            for (let i = 0; i < count; i++) {
-                for (let j = 1; j < 4; j++) {
-                    const cat = catItems[j].className;
-                    const con = cons[i];
-                    const element = getElem([table, cat, con].join('-'));
-                    const value = teamData?.[table]?.[con]?.[cat] || '';
-
-                    element.value = value;
-                }
-            }
-        }
-        if (teamData.comp) {
-            getElem('comp').value = teamData.comp;
-        } else {
-            getElem('comp').selectedIndex = 0;
-        }
-        if (teamData.round) {
-            getElem('round').value = teamData.round;
-        } else {
-            getElem('round').selectedIndex = 0;
-        }
-
-        if (teamData.team) {
-            const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
-            getElem('teams').value = selected;
-        } else {
-            getElem('teams').value = 'select';
-        }
-        currentTeam = teamData.team;
-        if (push) {
-            pushState(teamData);
-        }
+        return undefined;
     }
-
-    aStop();
-    eStop();
 }
 
 /*
@@ -458,7 +520,7 @@ const closeScanner = () => {
 
 const generateQRCode = () => {
     encodeData().then((data) => {
-        getElem('qrcode').innerHTML = '';
+        getElem('qrcode').textContent = '';
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
@@ -528,7 +590,7 @@ const switchTeam = async (event) => {
         console.log('reading', comp, round, team);
         const teamData = await dbClient.getMatch(comp, round, team);
         console.log('got', teamData);
-        currentTeam = team
+        currentTeam = team;
 
         if (teamData) {
             presentTeamData(teamData, true);
@@ -564,10 +626,10 @@ function openSection(id) {
 }
 
 const sync = async () => {
-    const teamData = scrapeDataObject();
+    const teamData = scrapeTeamData();
 
     if (teamData.team.length > 2) {
-        await saveTeam(teamData);
+        await saveMatch(teamData);
     }
 };
 
@@ -576,12 +638,12 @@ const exportTeam = async () => {
 
     switch (exportSelect.value) {
         case 'export-url':
-            console.log('encode, decode, data', await decodeData(await encodeData(await scrapeDataObject())));
-            navigator.share({url: 'https://scouting.minutebots.org/?' + (await encodeData(scrapeDataObject()))});
+            console.log('encode, decode, data', await decodeData(await encodeData(await scrapeTeamData())));
+            navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
 
             break;
         case 'export-data':
-            navigator.share({data: JSON.stringify(scrapeDataObject())});
+            navigator.share({data: JSON.stringify(scrapeTeamData())});
 
             break;
         case 'export-csv':
@@ -606,7 +668,7 @@ const exportTeam = async () => {
 
             break;
         case 'download':
-            const jsonString = JSON.stringify(scrapeDataObject());
+            const jsonString = JSON.stringify(scrapeTeamData());
 
             const blob = new Blob([jsonString], { type: 'application/json' });
 
@@ -661,15 +723,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem('.table-input', 'queryAll').forEach((input) => {
         input.addEventListener('change', async () => {
-            await saveTeam(scrapeDataObject());
+            await saveMatch(scrapeTeamData());
             refreshTeams();
         });
     });
 });
 
-window.scrapeDataObject = scrapeDataObject;
+window.scrapeTeamData = scrapeTeamData;
 window.presentTeamData = presentTeamData;
 window.getTeam = getTeam;
 window.getMatch = getMatch;
 window.getElem = getElem;
+window.saveMatch = saveMatch;
+window.encodeData = encodeData;
+window.refreshTeams = refreshTeams;
+window.decodeData = decodeData;
+
 window.dbClient = dbClient;
