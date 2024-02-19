@@ -224,87 +224,85 @@ const loadData = async () => {
     let url = window.location.search;
     let teamData = JSON.parse(dataObject);
     
-    await refreshTeams();
+    console.log('url', location.origin + location.pathname + url)
 
-    if (url) { // if URL data (replace later with checks for data param, else if team, comp, round params)
-        console.log('url:', location.origin + location.pathname + url)
+    const search = new URLSearchParams(url);
 
-        const search = new URLSearchParams(url);
+    if (search.has('data')) { // if URL has data param
+        const dataParam = search.get('data');
 
-        if (search.has('data')) {
-            const dataParam = search.get('data');
+        console.log('has data param', dataParam);
 
-            console.log('has data param:', dataParam);
+        const data = await decodeData(dataParam);
 
-            const data = await decodeData(dataParam);
+        if (data) { // if data param could be decoded
+            console.log('decoded data', data);
 
-            if (data) {
-                console.log('decoded data:', data);
-
-                teamData = data;
-            } else {
-                console.error('unable to decode data from URL');
-
-                presentTeamData(dataParam);
-            }
-        } else if (search.has('comp') && search.has('round')) {
-            const compParam = search.get('comp');
-            const roundParam = search.get('round');
-
-            teamData.comp = compParam;
-            teamData.round = roundParam;
-
-            if (search.has('team')) {
-                const teamParam = search.get('team');
-
-                teamData.team = teamParam;
-
-                console.log('has team, comp, and round params:', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
-            } else {
-                console.log('has comp and round params:', 'comp=' + compParam + ', round=' + roundParam);
-            }
+            teamData = data;
+        } else { // if data param could not be decoded
+            console.error('unable to decode data from URL');
         }
 
-        // const search = new URLSearchParams(url);
-        // url = url.slice(1);
+    } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
+        const compParam = search.get('comp');
+        const roundParam = search.get('round');
 
-        // if (search.has('team')) { // if data param is in URL
-        //     const team = search.get('team');
-        //     const comp = search.get('comp');
-        //     const round = search.get('round');
-        //     const storedTeamData = await dbClient.getMatch(comp, round, team);
+        teamData.comp = compParam;
+        teamData.round = roundParam;
 
-        //     if (storedTeamData) { // if team exists
-        //         currentTeam = storedTeamData.team ?? undefined;
-        //     } else { // if team does not exist
-        //         if (validTeam(team)) { // if new team is valid
-        //             teamData.team = team;
-        //             await saveMatch(teamData);
-        //             currentTeam = team;
-        //         } else { // if new team is not valid
-        //             confirm('searched team ' + team + ' does not exist, and is invalid');
-        //             history.replaceState(null, null, location.origin + location.pathname);
-        //         }
-        //     }
-        // } else { // if data param is not in URL
-        //     const data = await decodeData(url);
+        if (search.has('team')) { // if URL has team param
+            const teamParam = search.get('team');
 
-        //     if (data) { // if data could be read
-        //         d = data;
-        //         const team = data.team;
-                
-        //         if (team) { // if team is in data
-        //             pushState(data);
-        //             await saveMatch(data);
-        //             currentTeam = team;
-        //         }
-        //     } else { // if data could not be read
-        //         // Add visable error message
-        //     }
-        // }
+            console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
+
+            teamData.team = teamParam;
+        } else { // if URL does not have team param
+            console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
+        }
     }
 
-    refreshTeams();
+
+
+
+    // const asearch = new URLSearchParams(url);
+    // url = url.slice(1);
+
+    // if (search.has('team')) { // if data param is in URL
+    //     const team = asearch.get('team');
+    //     const comp = asearch.get('comp');
+    //     const round = asearch.get('round');
+    //     const storedTeamData = await dbClient.getMatch(comp, round, team);
+
+    //     if (storedTeamData) { // if team exists
+    //         currentTeam = storedTeamData.team ?? undefined;
+    //     } else { // if team does not exist
+    //         if (validTeam(team)) { // if new team is valid
+    //             teamData.team = team;
+    //             await saveMatch(teamData);
+    //             currentTeam = team;
+    //         } else { // if new team is not valid
+    //             confirm('searched team ' + team + ' does not exist, and is invalid');
+    //             history.replaceState(null, null, location.origin + location.pathname);
+    //         }
+    //     }
+    // } else { // if data param is not in URL
+    //     const data = await decodeData(url);
+
+    //     if (data) { // if data could be read
+    //         d = data;
+    //         const team = data.team;
+            
+    //         if (team) { // if team is in data
+    //             pushState(data);
+    //             await saveMatch(data);
+    //             currentTeam = team;
+    //         }
+    //     } else { // if data could not be read
+    //         // Add visable error message
+    //     }
+    // }
+
+    // refreshTeams();
 }
 
 const aStop = () => {
