@@ -237,7 +237,7 @@ select:not(#comp, #round, #teams) {
     width: 50px;
     margin: 3px;
     font-size: 20px;
-    corner-radius: 30px;
+    border-radius: 30px;
     border-width: 0 !important;
     background-color: #bbbbbb !important;
     text-align: center;
