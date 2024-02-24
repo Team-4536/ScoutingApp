@@ -5,23 +5,25 @@ var rqId = 1;
 var pendingRequests = {};
 
 const rqTimeout = (rqId) => {
-    console.warn(`request ${rqId} timed out`);
+    console.warn(`request ${rqId} timed out`, pendingRequests[rqId]);
     delete pendingRequests[rqId];
 }
 
-const call = (method, ...args) => {
+const call = async (method, ...args) => {
     let rq = {
         requestId: ++rqId,
         method: method,
         args: args
     }
 
+    await navigator.serviceWorker.ready
     navigator.serviceWorker.controller.postMessage(rq);
     return new Promise((resolve, reject) => {
         pendingRequests[rqId] = {
+            request: rq,
             resolve: resolve,
             reject: reject,
-            timer: setTimeout(rqTimeout, 1000, rqId)
+            timer: setTimeout(rqTimeout, 1000, rqId),
         };
     });
 }
