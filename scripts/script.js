@@ -3,36 +3,34 @@
 import { DBClient } from '../app-client.js';
 import { stringify as csv_stringify } from "./csv-stringify.js";
 
-import { stringify as csv_stringify } from "./csv-stringify.js";
-
 const dbClient = new DBClient();
 let currentTeam;
 
 const dataObject = JSON.stringify({
-    'comp': '',
-    'round': '',
-    'team': '',
+    comp: '',
+    round: '',
+    team: '',
 
-    'auto': {
+    auto: {
         'left-zone': null,
         'a-stop': null,
         'a-reason': '',
 
-        'succeeds': {},
-        'fails': {},
-        'method': {}
+        succeeds: {},
+        fails: {},
+        method: {}
     },
 
-    'teleop': {
+    teleop: {
         'e-stop': null,
         'e-reason': '',
 
-        'succeeds': {},
-        'fails': {},
-        'method': {}
+        succeeds: {},
+        fails: {},
+        method: {}
     },
 
-    'scoring': {
+    scoring: {
         
     }
 });
@@ -68,6 +66,9 @@ const saveMatch = async (data) => {
 };
 
 const pushState = (data, replace=false) => {
+    console.log('push data', data)
+    console.log('replace', replace)
+
     const state = {
         team: data.team,
         comp: data.comp,
@@ -94,7 +95,7 @@ const getMatch = () => {
 
 const refreshTeams = async () => {
     const teams = getElem('teams');
-    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null;
+    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
     const comp = getElem('comp').value;
     const round = getElem('round').value;
     const teamNumbers = await dbClient.getMatchKeys(comp, round) || [];
@@ -102,48 +103,30 @@ const refreshTeams = async () => {
     
     newSelect.addEventListener('change', switchTeam);
 
-    newSelect.setAttribute('id', 'teams');
-
+    newSelect.setAttribute('id', 'teams')
     {
         let selectOption = document.createElement('option');
-
         selectOption.value = 'select';
-        selectOption.textContent = 'Select team ...';
-
+        selectOption.textContent = "Select team ...";
         newSelect.add(selectOption);
 
         let newOption = document.createElement('option');
-
         newOption.value = 'new';
-        newOption.textContent = 'New team ...';
-
+        newOption.textContent = "New team ...";
         newSelect.add(newOption);
     }
 
     for (const team of teamNumbers) {
         let teamOption = document.createElement('option');
-
         teamOption.value = team;
         teamOption.textContent = team[0];
-
         if (team == selectedTeam) {
             teamOption.selected = true;
         }
-        
-        console.log(teamOption.value.split(',').slice(1).join(','))
-        console.log([getElem('comp').value, getElem('round').value].join(','))
-
-        if (getMatch().split(',').slice(1).join(',') === teamOption.value.split(',').slice(1).join(',')) {
-            newSelect.appendChild(teamOption);
-        }
+        newSelect.appendChild(teamOption);
     }
 
     teams.replaceWith(newSelect);
-
-    teams.value = getMatch();
-
-    console.log('team options', teams.options);
-    console.log('selected team', teams.value);
 }
 
 const method = (event) => {
@@ -194,15 +177,16 @@ const onLoad = async () => {
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            await saveMatch(scrapeTeamData());
+
+                            await sync();
                         });
 
                         th.appendChild(plus);
                         th.appendChild(input);
                     }
 
-                    const cat = catItems[j].className
-                    const con = cons[i]
+                    const cat = catItems[j].className;
+                    const con = cons[i];
 
                     input.setAttribute('id', [table, cat, con].join('-'));
                     input.classList.add('table-input');
@@ -212,8 +196,6 @@ const onLoad = async () => {
             }
         }
     }
-
-    openSection('auto');
 }
 
 const popState = async () => {
@@ -222,7 +204,8 @@ const popState = async () => {
 
 const loadData = async () => {
     let url = window.location.search;
-    let teamData = JSON.parse(dataObject);
+    let teamData = emptyTeam();
+    let push = false;
     
     console.log('url', location.origin + location.pathname + url)
 
@@ -233,12 +216,14 @@ const loadData = async () => {
 
         console.log('has data param', dataParam);
 
-        const data = await decodeData(dataParam);
+        const data = await decodeData(JSON.stringify({data: dataParam}));
 
         if (data) { // if data param could be decoded
             console.log('decoded data', data);
 
             teamData = data;
+
+            push = true;
         } else { // if data param could not be decoded
             console.error('unable to decode data from URL');
         }
@@ -256,53 +241,26 @@ const loadData = async () => {
             console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
 
             teamData.team = teamParam;
+
+            const match = await dbClient.getMatch(compParam, roundParam, teamParam);
+
+            if (match) { // if match exists
+                console.log('match exists', match);
+
+                teamData = match;
+            } else { // if match does not exist
+                console.log('match does not exist', teamParam, compParam, roundParam);
+            }
+
         } else { // if URL does not have team param
             console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
         }
     }
 
-
-
-
-    // const asearch = new URLSearchParams(url);
-    // url = url.slice(1);
-
-    // if (search.has('team')) { // if data param is in URL
-    //     const team = asearch.get('team');
-    //     const comp = asearch.get('comp');
-    //     const round = asearch.get('round');
-    //     const storedTeamData = await dbClient.getMatch(comp, round, team);
-
-    //     if (storedTeamData) { // if team exists
-    //         currentTeam = storedTeamData.team ?? undefined;
-    //     } else { // if team does not exist
-    //         if (validTeam(team)) { // if new team is valid
-    //             teamData.team = team;
-    //             await saveMatch(teamData);
-    //             currentTeam = team;
-    //         } else { // if new team is not valid
-    //             confirm('searched team ' + team + ' does not exist, and is invalid');
-    //             history.replaceState(null, null, location.origin + location.pathname);
-    //         }
-    //     }
-    // } else { // if data param is not in URL
-    //     const data = await decodeData(url);
-
-    //     if (data) { // if data could be read
-    //         d = data;
-    //         const team = data.team;
-            
-    //         if (team) { // if team is in data
-    //             pushState(data);
-    //             await saveMatch(data);
-    //             currentTeam = team;
-    //         }
-    //     } else { // if data could not be read
-    //         // Add visable error message
-    //     }
-    // }
-
-    // refreshTeams();
+    refreshTeams();
+    console.log('teamdata from loaddata', teamData)
+    presentTeamData(teamData, push);
+    openSection('auto');
 }
 
 const aStop = () => {
@@ -313,14 +271,9 @@ const eStop = () => {
     getElem('e-reason').disabled = !getElem('e-stop').checked;
 }
 
-const presentTeamData = async (teamData) => {
-    await refreshTeams();
-
-    if (teamData && typeof teamData === 'object') {
-        if (teamData.team) {
-            currentTeam = teamData.team;
-        }
-
+const presentTeamData = async (teamData, push=false) => {
+    if (teamData) {
+        currentTeam = teamData.team || '';
         getElem('comp').value = teamData.comp || '';
         getElem('round').value = teamData.round || '';
 
@@ -335,14 +288,13 @@ const presentTeamData = async (teamData) => {
         for (const {elem, sec} of elements) {
             const element = getElem(elem);
     
-            let state;
-            if (element.type === 'checkbox') {
-                state = element.checked;
+            const data = teamData[sec][elem];
+
+            if (typeof data === 'boolean') {
+                element.checked = data;
             } else {
-                state = element.value;
+                element.value = data;
             }
-    
-            teamData[sec][elem] = state;
         }
 
         const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
@@ -355,12 +307,28 @@ const presentTeamData = async (teamData) => {
                     const cat = catItems[j].className;
                     const con = cons[i];
                     const element = getElem([table, cat, con].join('-'));
-                    const value = teamData?.[table]?.[con]?.[cat] || '';
+                    const value = teamData?.[table]?.[cat]?.[con] || '';
 
                     element.value = value;
                 }
             }
         }
+
+        console.log('presented', teamData);
+    }
+
+    await refreshTeams();
+
+    if (validTeam(teamData.team)) {
+        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+
+        getElem('teams').value = selected;
+    } else {
+        getElem('teams').value = 'select';
+    }
+
+    if (push) {
+        pushState(teamData);
     }
 
     aStop();
@@ -368,7 +336,7 @@ const presentTeamData = async (teamData) => {
 }
 
 const scrapeTeamData = () => {
-    let teamData = JSON.parse(dataObject);
+    let teamData = emptyTeam();
     const teams = getElem('teams');
 
     if (teams.selectedIndex < 2) {
@@ -418,16 +386,18 @@ const scrapeTeamData = () => {
         }
     }
     
+    console.log('scraped', teamData)
+
     return teamData;
 }
 
-const encodeData = async data => {
+const encodeData = async (data) => {
     const stream = new Blob([JSON.stringify(data)], { type: 'application/json' }).stream();
     const compressedReadableStream = stream.pipeThrough(new CompressionStream('gzip'));
     const blob = await new Response(compressedReadableStream).blob();
     const ab = await blob.arrayBuffer();
 
-    return btoa(String.fromCharCode(...new Uint8Array(ab)));
+    return encodeURIComponent(btoa(String.fromCharCode(...new Uint8Array(ab))));
 }
 
 const decodeData = async (encodedData) => {
@@ -477,7 +447,7 @@ const formatNumber = event => {
     }
 
     if (parseInt(event.target.value) > 999) {
-        event.target.value = '999';
+        event.target.value = event.target.value.slice(0, -1);
     }
 }
 
@@ -539,7 +509,7 @@ const validTeam = (team) => {
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
-const switchMatch = (event) => {
+const switchMatch = () => {
     console.log("switchMatch");
     getElem('teams').value = "select";
     closeSections();
@@ -563,6 +533,7 @@ const switchTeam = async (event) => {
         closeSections();
         return
     }
+
     if (select == 'new') {
         const newTeam = prompt('new team');
         // TODO validate team
@@ -574,10 +545,12 @@ const switchTeam = async (event) => {
         teamData.comp = getElem('comp').value;
         teamData.round = getElem('round').value;
 
-        await saveTeam(teamData);
-        await refreshTeams();
+        await saveMatch(teamData);
+        // await refreshTeams();
 
         //pushState(teamData)
+
+        await refreshTeams();
 
         presentTeamData(teamData, true);
     } else if (select != '') {
@@ -591,13 +564,14 @@ const switchTeam = async (event) => {
         currentTeam = team;
 
         if (teamData) {
+            console.log(teamData)
             presentTeamData(teamData, true);
         }
     }
     openSection('auto');
 }
 
-function closeSections(id) {
+const closeSections = (id) => {
     const sections = getElem('collapsible', 'class')
 
     for (let s of sections) {
@@ -607,20 +581,16 @@ function closeSections(id) {
     }
 }
 
-function openSection(id) {
+const openSection = (id) => {
     const section = getElem(id);
 
     closeSections();
 
-    if (currentTeam) {
-        console.log("current team", currentTeam);
+    if (getTeam()) {
         section.classList.remove("inactive");
         section.classList.add("active");
         section.nextElementSibling.style.display = "block";
     }
-    section.classList.remove('inactive');
-    section.classList.add('active');
-    section.nextElementSibling.style.display = 'block';
 }
 
 const sync = async () => {
@@ -628,15 +598,14 @@ const sync = async () => {
 
     if (teamData.team.length > 2) {
         await saveMatch(teamData);
+
+        console.log('synced', teamData);
     }
 };
 
-const exportTeam = async () => {
-    const exportSelect = getElem('export', 'id');
-
-    switch (exportSelect.value) {
+const exportTeam = async (input) => {
+    switch (input) {
         case 'export-url':
-            console.log('encode, decode, data', await decodeData(await encodeData(await scrapeTeamData())));
             navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
 
             break;
@@ -655,7 +624,7 @@ const exportTeam = async () => {
 
             break;
         case 'download-csv':
-            csv = document.createElement('a');
+            const csv = document.createElement('a');
             const csvData = 'data:text/csv;charset=utf-8,' +
                             'a,b,c,d,e\n' +
                             '1,2,3,4,5\n' +
@@ -678,7 +647,7 @@ const exportTeam = async () => {
             break;
     }
 
-    exportSelect.value = 'share';
+    getElem('export').value = 'share';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -695,46 +664,59 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
-    getElem('.table-input', 'queryAll').forEach((input) => {
-        input.addEventListener('change', sync);
+    getElem('.input', 'queryAll').forEach((input) => {
+        input.addEventListener('input', sync);
     });
 
-    getElem('export').addEventListener('change', exportTeam);
-
-    getElem('close-scanner').addEventListener('click', closeScanner);
+    getElem('export').addEventListener('change', (input) => exportTeam(input.target.value));
 
     getElem('a-stop').addEventListener('input', aStop);
 
     getElem('e-stop').addEventListener('input', eStop);
 
-    getElem('.collapsible', 'queryAll').forEach((input) => {
-        input.addEventListener('click', (event) => openSection(event.target.id));
-    });
-
     getElem('.number', 'queryAll').forEach( (input) => {
         input.addEventListener('input', (event) => formatNumber(event));
 
+        input.addEventListener('input', (event) => {
+            event.target.value = event.target.value.replace(/\D/g, '');
+        });
+
         input.placeholder = '0';
-        input.type = 'number';
         input.min = '0';
     });
 
-    getElem('.table-input', 'queryAll').forEach((input) => {
-        input.addEventListener('change', async () => {
-            await saveMatch(scrapeTeamData());
-            refreshTeams();
-        });
+    // getElem('.input', 'queryAll').forEach((input) => {
+    //     console.log('test')
+    //     input.addEventListener('input', async () => {
+    //         await saveMatch(scrapeTeamData());
+    //     });
+    // });
+
+    getElem('a-reason').addEventListener('input', (input) => {
+        if (input.target.value === 'sudoku') {
+            const a = document.createElement('a');
+            a.setAttribute('href', './sudoku/index.html');
+            a.click();
+        }
     });
 });
 
-window.scrapeTeamData = scrapeTeamData;
-window.presentTeamData = presentTeamData;
-window.getTeam = getTeam;
-window.getMatch = getMatch;
-window.getElem = getElem;
-window.saveMatch = saveMatch;
-window.encodeData = encodeData;
-window.refreshTeams = refreshTeams;
+window.closeScanner = closeScanner;
+window.closeSections = closeSections;
 window.decodeData = decodeData;
+window.emptyTeam = emptyTeam;
+window.encodeData = encodeData;
+window.getElem = getElem;
+window.getMatch = getMatch;
+window.getTeam = getTeam;
+window.loadData = loadData;
+window.onLoad = onLoad;
+window.openSection = openSection;
+window.presentTeamData = presentTeamData;
+window.refreshTeams = refreshTeams;
+window.saveMatch = saveMatch;
+window.scrapeTeamData = scrapeTeamData;
+
+window.exportTeam = exportTeam;
 
 window.dbClient = dbClient;

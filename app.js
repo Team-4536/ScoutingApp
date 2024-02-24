@@ -119,7 +119,7 @@ class DBController extends EventTarget {
 
     getMatch(comp, round, team) {
         return this.teamRead((store) => {
-            return store.get([team,comp,round]);
+            return store.get([team, comp, round]);
         });
     }
 

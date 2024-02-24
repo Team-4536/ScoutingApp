@@ -14,6 +14,18 @@ let consoleKey = {
     keys: ['`'],
 };
 
+// (function () {
+//     const consolelog = console.log;
+
+//     console.log = function (...args) {
+//         const message = args.map(arg => {
+//             return typeof arg === 'object' ? JSON.stringify(arg) : arg;
+//         }).join(' ');
+//         consolelog(message);
+//         log(message);
+//     };
+// })();
+
 function setConsoleKey(...args) {
     consoleKey.ctrlKey = false;
     consoleKey.altKey = false;

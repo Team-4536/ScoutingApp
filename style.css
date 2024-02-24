@@ -14,6 +14,9 @@
 body {
     margin: 2px;
     cursor: default;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 h1, h2, label, th {
@@ -34,7 +37,7 @@ th {
 
 input, button:not(.collapsible), textarea, select {
     border-radius: 7px;
-    border-width: 1px;
+    border-width: 2px;
     border-top-color: black;
     border-left-color: black;
     border-bottom-color: var(--borderRed);
@@ -45,7 +48,7 @@ input, button:not(.collapsible), textarea, select {
     cursor: pointer;
 }
 
-input:not(.incr, [type="text"], [type="checkbox"], #team), textarea {
+.number, .score, textarea {
     width: 4em;
     height: 32px;
     margin: 2px;
@@ -58,24 +61,13 @@ input[type="checkbox"] {
     transform: scale(1.35);
 }
 
-/* input[type="checkbox"]:not(:disabled) {} */
-
 input[type="checkbox"]:disabled {
     border-color: var(--borderRed);
     background-color: var(--disabledBackground);
 }
 
-/* textarea {
-    width: 70px;
-    height: 24px;
-    min-width: 90px;
-    min-height: 24px;
-    max-width: 220px;
-    max-height: 145px;
-} */
-
 input[type="text"]:disabled {
-    border-width: 1px;
+    border-width: 2px;
     border-top-color: var(--disabledTopBorder);
     border-left-color: var(--disabledTopBorder);
     border-bottom-color: var(--disabledBottomBorder);
@@ -237,7 +229,7 @@ select:not(#comp, #round, #teams) {
     width: 50px;
     margin: 3px;
     font-size: 20px;
-    corner-radius: 30px;
+    border-radius: 30px;
     border-width: 0 !important;
     background-color: #bbbbbb !important;
     text-align: center;
