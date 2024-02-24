@@ -1,5 +1,6 @@
 "use strict";
 
+const DB_NAME = "scouting";
 const OBJECT_STORE = "team";
 
 class CacheController extends EventTarget {
@@ -122,33 +123,53 @@ class DBController extends EventTarget {
         });
     }
 
-    getMatchKeysForMatch(comp, round) {
+    getMatches(comp=null, round=null) {
         const tx = this.db.transaction(OBJECT_STORE);
         const store = tx.objectStore(OBJECT_STORE);
         const idx = store.index("byCompRound");
-        let rq = idx.openKeyCursor(
-            IDBKeyRange.bound([comp, round, ""],
-                              [comp, round, "99999999"])
-        );
+        //let rq = idx.openKeyCursor(
+        let rq;
+        if (comp) {
+            const lower = [comp, round ? round : "", ""];
+            const upper = [comp, round ? round : "99", "9999999"];
+            rq = idx.getAll(IDBKeyRange.bound(lower, upper));
+        } else {
+            rq = idx.getAll();
+        };
 
         let p = new Promise((r) => {
-            let results = [];
             console.log('rq = ', rq);
             rq.onerror = (e) => {
                 console.log('error', e);
             }
             rq.onsuccess = (e) => {
-                const cursor = e.target.result;
-                console.log(cursor);
-                if (cursor) {
-                    console.log('value', cursor.key);
-                    console.log('primary', cursor.primaryKey);
-                    results.push(cursor.primaryKey);
-                    cursor.continue();
-                } else {
-                    console.log('done');
-                    r(results);
-                }
+                r(e.target.result);
+            }
+        });
+
+        return p;
+    }
+
+    getMatchKeys(comp=null, round=null) {
+    }
+
+    getMatchKeysForMatch(comp, round) {
+        const tx = this.db.transaction(OBJECT_STORE);
+        const store = tx.objectStore(OBJECT_STORE);
+        const idx = store.index("byCompRound");
+        //let rq = idx.openKeyCursor(
+        let rq = idx.getAllKeys(
+            IDBKeyRange.bound([comp, round, ""],
+                              [comp, round, "99999999"])
+        );
+
+        let p = new Promise((r) => {
+            console.log('rq = ', rq);
+            rq.onerror = (e) => {
+                console.log('error', e);
+            }
+            rq.onsuccess = (e) => {
+                r(e.target.result);
             }
         });
 
@@ -159,7 +180,7 @@ class DBController extends EventTarget {
 class App {
     constructor() {
         this.cacheController = new CacheController();
-        this.dbController = new DBController("scouting", 16);
+        this.dbController = new DBController(DB_NAME, 16);
 
         globalThis.addEventListener("message", this.message.bind(this));
         globalThis.addEventListener("install", this.install.bind(this));
