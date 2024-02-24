@@ -54,16 +54,12 @@ class DBClient {
         return call("db.getMatch", comp, round, team);
     }
 
-    async getAllMatches() {
-        return call("db.getAllMatches");
+    async getMatches(comp, round) {
+        return call("db.getAllMatches", comp, round);
     }
 
-    async getAllMatchKeys() {
-        return call("db.getAllMatchKeys");
-    }
-
-    async getMatchKeysForMatch(comp, round) {
-        return call("db.getMatchKeysForMatch", comp, round);
+    async getMatchKeys(comp, round) {
+        return call("db.getMatchKeys", comp, round);
     }
 }
 

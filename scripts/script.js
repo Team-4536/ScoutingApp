@@ -92,7 +92,7 @@ const refreshTeams = async () => {
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
     const comp = getElem('comp').value;
     const round = getElem('round').value;
-    const teamNumbers = await dbClient.getMatchKeysForMatch(comp, round) || [];
+    const teamNumbers = await dbClient.getMatchKeys(comp, round) || [];
     console.log('teams - refresh', teamNumbers);
     let newSelect = document.createElement('select');
     
@@ -429,8 +429,7 @@ const beginScan = async () => {
     let framerate = 15;
     let cameras = await Html5Qrcode.getCameras()
     console.log(cameras);
-    let camera = cameras[0].id;
-    await scanner.start(camera, { fps: framerate, verbose: true },
+    await scanner.start({ facingMode: "environment" }, { fps: framerate, verbose: true },
                         callback, errorCallback);
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
