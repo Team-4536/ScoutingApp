@@ -415,13 +415,15 @@ const beginScan = async () => {
     verbose: false
     });
 
+    popup.scanner = scanner;
+
     const callback = (text, detail) => {
         console.log('got scan', text, detail);
         scanner.pause(true);
     };
 
     const errorCallback = (error) => {
-    console.log('scanner error', error);
+        console.log('scanner error', error);
     };
 
     let framerate = 15;
@@ -433,7 +435,12 @@ const beginScan = async () => {
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
 
-const closeScanner = () => { getElem('scanner').style.display = 'none' }
+const closeScanner = () => {
+    let popup = document.getElementById('scanner');
+    popup.style.display = 'none';
+    popup.scanner && popup.scanner.stop();
+    popup.scanner = null;
+}
 
 const generateQRCode = () => {
     encodeData().then((data) => {
