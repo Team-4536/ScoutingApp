@@ -48,7 +48,7 @@ input, button:not(.collapsible), textarea, select {
     cursor: pointer;
 }
 
-.number, .score, textarea {
+.number, textarea {
     width: 4em;
     height: 32px;
     margin: 2px;
