@@ -1,37 +1,39 @@
 'use strict';
 
 import { DBClient } from '../app-client.js';
-import { stringify as csv_stringify } from "./csv-stringify.js";
+import { stringify } from "./csv-stringify.js";
 
 const dbClient = new DBClient();
 let currentTeam;
 
 const dataObject = JSON.stringify({
-    comp: '',
-    round: '',
-    team: '',
+    'comp': '',
+    'round': '',
+    'team': '',
 
-    auto: {
+    'auto': {
         'left-zone': null,
         'a-stop': null,
         'a-reason': '',
 
-        succeeds: {},
-        fails: {},
-        method: {}
+        'succeeds': {},
+        'fails': {},
+        'method': {}
     },
 
-    teleop: {
+    'teleop': {
         'e-stop': null,
         'e-reason': '',
 
-        succeeds: {},
-        fails: {},
-        method: {}
+        'succeeds': {},
+        'fails': {},
+        'method': {}
     },
 
-    scoring: {
-        
+    'scoring': {
+        'collisions' : null,
+        'climb': null,
+        'total-score': ''
     }
 });
 
@@ -120,13 +122,14 @@ const refreshTeams = async () => {
         let teamOption = document.createElement('option');
         teamOption.value = team;
         teamOption.textContent = team[0];
-        if (team == selectedTeam) {
+        if (team === selectedTeam) {
             teamOption.selected = true;
         }
         newSelect.appendChild(teamOption);
     }
 
     teams.replaceWith(newSelect);
+    teams.value = getMatch();
 }
 
 const method = (event) => {
@@ -200,6 +203,8 @@ const onLoad = async () => {
 
 const popState = async () => {
     loadData();
+
+    console.log('popState called')
 }
 
 const loadData = async () => {
@@ -261,6 +266,8 @@ const loadData = async () => {
     console.log('teamdata from loaddata', teamData)
     presentTeamData(teamData, push);
     openSection('auto');
+
+    exportTeam('download-csv')
 }
 
 const aStop = () => {
@@ -277,44 +284,21 @@ const presentTeamData = async (teamData, push=false) => {
         getElem('comp').value = teamData.comp || '';
         getElem('round').value = teamData.round || '';
 
-        const elements = [
-            {elem: 'left-zone', sec: 'auto'},
-            {elem: 'a-stop', sec: 'auto'},
-            {elem: 'a-reason', sec: 'auto'},
-            {elem: 'e-stop', sec: 'teleop'},
-            {elem: 'e-reason', sec: 'teleop'}
-        ];
-    
-        for (const {elem, sec} of elements) {
-            const element = getElem(elem);
-    
-            const data = teamData[sec][elem];
+        const secs = ['auto', 'teleop'];
 
-            if (typeof data === 'boolean') {
-                element.checked = data;
-            } else {
-                element.value = data;
-            }
-        }
+        for (const sec of secs) {
+            getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
+                const id = input.id.split('-');
 
-        const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-        for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
-            const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
-    
-            for (let i = 0; i < count; i++) {
-                for (let j = 1; j < 4; j++) {
-                    const cat = catItems[j].className;
-                    const con = cons[i];
-                    const element = getElem([table, cat, con].join('-'));
-                    const value = teamData?.[table]?.[cat]?.[con] || '';
-
-                    element.value = value;
+                if (secs.includes(id[0])) {
+                    input.value = teamData[id[0]][id[1]][id[2]] ?? '';
+                } else {
+                    const state = input.type === 'checkbox' ? 'checked': 'value';
+                    
+                    input[state] = teamData[sec][id.join('-')]; // id.join('-') is not a great way of doing this
                 }
-            }
+            });
         }
-
-        console.log('presented', teamData);
     }
 
     await refreshTeams();
@@ -347,46 +331,27 @@ const scrapeTeamData = () => {
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
 
-    const elements = [
-        {elem: 'left-zone', sec: 'auto'},
-        {elem: 'a-stop', sec: 'auto'},
-        {elem: 'a-reason', sec: 'auto'},
-        {elem: 'e-stop', sec: 'teleop'},
-        {elem: 'e-reason', sec: 'teleop'}
-    ];
+    const secs = ['auto', 'teleop'];
 
-    for (const {elem, sec} of elements) {
-        const element = getElem(elem);
+    // getElem('.input', 'queryAll', getElem('scoring').nextElementSibling).forEach((input) => {
+    //     console.log(input.id);
+    // });
 
-        let state;
-        if (element.type === 'checkbox') {
-            state = element.checked;
-        } else {
-            state = element.value;
-        }
+    for (const sec of secs) {
+        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
+            const id = input.id.split('-');
 
-        teamData[sec][elem] = state;
-    }
-
-    const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
-
-    for (const {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
-        const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
-
-        for (let i = 0; i < count; i++) {
-            for (let j = 1; j < 4; j++) {
-                const cat = catItems[j].className;
-                const con = cons[i];
-                const value = getElem([table, cat, con].join('-')).value;
-
-                if (value) {
-                    teamData[table][cat][con] = value;
-                }
+            if (secs.includes(id[0])) {
+                teamData[id[0]][id[1]][id[2]] = input.value;
+            } else {
+                const state = input.type === 'checkbox' ? 'checked': 'value';
+                
+                teamData[sec][id.join('-')] = input[state]; // id.join('-') is not a great way of doing this
             }
-        }
+        });
     }
     
-    console.log('scraped', teamData)
+    console.log('scraped', teamData);
 
     return teamData;
 }
@@ -421,28 +386,28 @@ const decodeData = async (encodedData) => {
 const formatTeam = event => {
     const value = event.target.value;
 
-    if (parseInt(value) == 0) {
+    if (parseInt(value) ===0) {
         event.target.value = '';
     }
 
     if (parseInt(value) > 9999) {
-        if (value != '10000') {
+        if (value !== '10000') {
             event.target.value = value.slice(0, -1);
         } else {
             event.target.value = '9999';
         }
     }
 
-    if (value.length < 4 && parseInt(value) != 0) {
+    if (value.length < 4 && parseInt(value) !== 0) {
         event.target.value = '0'.repeat(4 - value.length) + value;
-    } else if (value.length > 4 && value[0] == '0') {
+    } else if (value.length > 4 && value[0] ==='0') {
         event.target.value = value.slice(1);
     }
     }
 */
 
 const formatNumber = event => {
-    if (event.target.value[0] == '0') {
+    if (event.target.value[0] ==='0') {
         event.target.value = event.target.value.slice(1);
     }
 
@@ -503,6 +468,53 @@ const generateQRCode = () => {
     getElem('qrcode-container').style.display = 'block';
 }
 
+const generateCSV = () => {
+    const flattenTeams = async () => {
+        let matchList = [];
+        const matches = await dbClient.getMatches();
+
+        for (let match of matches.entries()) {
+            match = match[1];
+            const matchIndex = [];
+
+            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 6}]) {
+                const cats = ['succeeds', 'fails', 'method'];
+                const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+
+                for (let i = 0; i < count; i++) {
+                    for (let j = 0; j < 3; j++) {
+                        matchIndex.push(match?.[sec]?.[cats[j]]?.[cons[i]] ?? 'N/A');
+                    }
+                }
+            }
+
+            matchList.push(matchIndex);
+        }
+
+        // console.log(getElem('scoring').nextElementSibling)
+        console.log(getElem('.input', 'queryAll', getElem('scoring').nextElementSibling));
+        console.log(getElem('.input', 'queryAll', getElem('auto').nextElementSibling));
+
+        console.log('matchList', matchList);
+        return matchList;
+    }
+
+    const teamList = flattenTeams();
+    const csv = stringify(teamList);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const file = new File([blob], 'csv.csv');
+
+    return file;
+}
+
+const download = (file, fileName) => {
+    const a = document.createElement('a');
+    a.setAttribute('href', URL.createObjectURL(file));
+    a.setAttribute('download', fileName);
+
+    a.click();
+}
+
 const validTeam = (team) => {
     const teamNum = parseInt(team) ?? false;
 
@@ -527,14 +539,14 @@ const clearTeam = () => {
 const switchTeam = async (event) => {
     let select = event.target.value;
 
-    if (select == 'select') {
+    if (select ==='select') {
         currentTeam = "";
         clearTeam();
         closeSections();
         return
     }
 
-    if (select == 'new') {
+    if (select ==='new') {
         const newTeam = prompt('new team');
         // TODO validate team
         let teamData = emptyTeam();
@@ -553,7 +565,7 @@ const switchTeam = async (event) => {
         await refreshTeams();
 
         presentTeamData(teamData, true);
-    } else if (select != '') {
+    } else if (select !== '') {
         console.log('splitting', select);
         let s = select.split(',');
         console.log('split', s);
@@ -624,14 +636,13 @@ const exportTeam = async (input) => {
 
             break;
         case 'download-csv':
-            const csv = document.createElement('a');
-            const csvData = 'data:text/csv;charset=utf-8,' +
-                            'a,b,c,d,e\n' +
-                            '1,2,3,4,5\n' +
-                            'hola,hello,"blah blah blah!! (:","testy","this be a test"';
-            csv.setAttribute('href', encodeURI(csvData));
-            csv.setAttribute('download', 'test.csv');
-            csv.click();
+            const date = new Date();
+            const currentDate = [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') + 
+                                ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
+
+            const fileName = 'teams ' + currentDate + '.csv';
+
+            download(generateCSV(), fileName);
 
             break;
         case 'download':
@@ -684,21 +695,6 @@ document.addEventListener('DOMContentLoaded', () => {
         input.placeholder = '0';
         input.min = '0';
     });
-
-    // getElem('.input', 'queryAll').forEach((input) => {
-    //     console.log('test')
-    //     input.addEventListener('input', async () => {
-    //         await saveMatch(scrapeTeamData());
-    //     });
-    // });
-
-    getElem('a-reason').addEventListener('input', (input) => {
-        if (input.target.value === 'sudoku') {
-            const a = document.createElement('a');
-            a.setAttribute('href', './sudoku/index.html');
-            a.click();
-        }
-    });
 });
 
 window.closeScanner = closeScanner;
@@ -716,6 +712,7 @@ window.presentTeamData = presentTeamData;
 window.refreshTeams = refreshTeams;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
+window.generateCSV = generateCSV;
 
 window.exportTeam = exportTeam;
 

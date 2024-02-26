@@ -151,17 +151,19 @@ class DBController extends EventTarget {
     }
 
     getMatchKeys(comp=null, round=null) {
-    }
-
-    getMatchKeysForMatch(comp, round) {
         const tx = this.db.transaction(OBJECT_STORE);
         const store = tx.objectStore(OBJECT_STORE);
         const idx = store.index("byCompRound");
-        //let rq = idx.openKeyCursor(
-        let rq = idx.getAllKeys(
-            IDBKeyRange.bound([comp, round, ""],
-                              [comp, round, "99999999"])
-        );
+
+        let rq;
+
+        if (comp) {
+            const lower = [comp, round ? round : "", ""];
+            const upper = [comp, round ? round : "99", "9999999"];
+            rq = idx.getAllKeys(IDBKeyRange.bound(lower, upper));
+        } else {
+            rq = idx.getAllKeys();
+        };
 
         let p = new Promise((r) => {
             console.log('rq = ', rq);
