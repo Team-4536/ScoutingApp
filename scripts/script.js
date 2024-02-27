@@ -296,10 +296,12 @@ const eStop = () => {
 }
 
 const presentTeamData = async (teamData, push=false) => {
+    console.log('tem dataa', teamData)
     if (teamData) {
         const comp = getElem('comp');
         const round = getElem('round');
 
+        console.log('team', teamData.team)
         currentTeam = teamData.team || '';
         comp.value = teamData.comp || comp[0].value;
         round.value = teamData.round || round[0].value;
@@ -562,7 +564,6 @@ const switchTeam = async (event) => {
     if (select === 'select') {
         clearTeam();
         closeSections();
-        return
     }
 
     if (select ==='new') {
@@ -577,21 +578,14 @@ const switchTeam = async (event) => {
         teamData.round = getElem('round').value;
 
         await saveMatch(teamData);
-        // await refreshTeams();
-
-        //pushState(teamData)
 
         await refreshTeams();
 
         presentTeamData(teamData, true);
     } else if (select !== '') {
-        console.log('splitting', select);
         let s = select.split(',');
-        console.log('split', s);
         let [team, comp, round] = s;
-        console.log('reading', comp, round, team);
         const teamData = await dbClient.getMatch(comp, round, team);
-        console.log('got', teamData);
         currentTeam = team;
 
         if (teamData) {
@@ -599,6 +593,7 @@ const switchTeam = async (event) => {
             presentTeamData(teamData, true);
         }
     }
+
     openSection('auto');
 }
 
