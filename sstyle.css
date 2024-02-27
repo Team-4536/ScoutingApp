@@ -11,16 +11,18 @@
     --darkGrey: #00000020;
 }
 
-body:not(#team) {
-    text-align: center;
-    margin: 0px;
+body {
+    margin: 2px;
     cursor: default;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 h1, h2, label, th {
     font-family: Arial, sans-serif;
     color: var(--MinutebotsColor);
-    margin: 0px;
+    margin: 2px;
 }
 
 hr {
@@ -30,49 +32,42 @@ hr {
 
 th {
     text-align: right;
+    white-space: nowrap;
 }
 
 input, button:not(.collapsible), textarea, select {
     border-radius: 7px;
-    border-width: 3px;
+    border-width: 2px;
     border-top-color: black;
     border-left-color: black;
     border-bottom-color: var(--borderRed);
     border-right-color: var(--borderRed);
     background-color: var(--backgroundColor);
     font-weight: bold;
+    color: black;
     cursor: pointer;
 }
 
-input:not([type="text"], [type="checkbox"], #team), textarea {
-    width: 90px;
-    height: 16px;
+.number, textarea {
+    width: 4em;
+    height: 32px;
+    margin: 2px;
     font-family: Arial, sans-serif;
-    font-size: smaller;
+    font-size: 13pt;
+    color: black;
 }
 
 input[type="checkbox"] {
     transform: scale(1.35);
 }
 
-/* input[type="checkbox"]:not(:disabled) {} */
-
 input[type="checkbox"]:disabled {
     border-color: var(--borderRed);
     background-color: var(--disabledBackground);
 }
 
-textarea {
-    width: 70px;
-    height: 24px;
-    min-width: 90px;
-    min-height: 24px;
-    max-width: 220px;
-    max-height: 145px;
-}
-
 input[type="text"]:disabled {
-    border-width: 3px;
+    border-width: 2px;
     border-top-color: var(--disabledTopBorder);
     border-left-color: var(--disabledTopBorder);
     border-bottom-color: var(--disabledBottomBorder);
@@ -80,8 +75,14 @@ input[type="text"]:disabled {
     background-color: var(--disabledBackground);
 }
 
-#team, select {
-    width: 90px;
+select:not(#comp, #round, #teams) {
+    width: 7em;
+    font-size: 16px;
+}
+
+#comp, #round, #teams {
+    width: auto;
+    font-size: 16px;
 }
 
 #overlay {
@@ -104,6 +105,10 @@ input[type="text"]:disabled {
     justify-content: center;
     align-items: center;
 }
+
+/* button {
+    height: 24px;
+} */
 
 #cameraStream {
     width: 80%;
@@ -198,6 +203,7 @@ input[type="text"]:disabled {
 
 .collapsible.active {
     margin-bottom: 0px;
+    display: block;
 }
 
 .collapsible:not(.active) {
@@ -216,4 +222,16 @@ input[type="text"]:disabled {
     float: left;
     min-width: 100vw;
     padding: 18px;
+}
+
+.incr {
+    height: 50px;
+    width: 50px;
+    margin: 3px;
+    font-size: 20px;
+    border-radius: 30px;
+    border-width: 0 !important;
+    background-color: #bbbbbb !important;
+    text-align: center;
+    touch-action: manipulation;
 }
