@@ -7,7 +7,6 @@ const consoleImport = `
 			<link rel="stylesheet" type="text/css" href="assets/console/style.css">
 		</head>
 		<body>
-			<div id="resize-handle"></div>
 			<div id="console-container">
 				<div id="console-output"></div>
 				<input type="text" id="console-input" placeholder="Enter command...">

@@ -57,7 +57,7 @@ class DBClient {
     }
 
     async getMatches(comp, round) {
-        return call("db.getAllMatches", comp, round);
+        return call("db.getMatches", comp, round);
     }
 
     async getMatchKeys(comp, round) {

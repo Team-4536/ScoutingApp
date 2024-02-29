@@ -2,7 +2,7 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Minutebots Scouting</title>
+        <title>MinuteBots Scouting</title>
         <meta name="viewport" content="width=960, initial-scale=1.0">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="icon" href="assets/minutebots-logo.ico" type="image/x-icon">
@@ -12,12 +12,13 @@
     <body>
         <img align="right" src="assets/minutebots-logo.png" width=325px>
 
-        <h1>Minutebots Scouting</h1>
+        <h1>MinuteBots Scouting</h1>
         <br>
 
         <label>Competition:</label>
 
         <select id="comp">
+            <option value="grand-forks">Great Northern Regional (Grand Forks)</option>
             <option value="eagan">Blue Twilight Week 0 (Eagan)</option>
         </select>
 
@@ -45,22 +46,35 @@
         </select>
         <br>
 
-        <button id="open-qrcode">Generate QRCode</button>
-        <button id="open-scanner">Open Scanner</button>
-        <button onclick="navigator.share({url: 'https://scouting.minutebots.org'})">Share</button>
+        <select id="export">
+            <option value="share">share ...</option>
+            <option value="export-url">share current team's url</option>
+            <option value="export-data">share current team's data</option>
+            <option value="export-csv">share csv</option>
+            <option value="export-qrcode">generate qrcode</option>
+            <option value="download-csv">download csv</option>
+            <option value="download">download all data</option>
+        </select>
+        <select id="import">
+            <option value="open">open ...</option>
+            <option value="enter">enter team data</option>
+            <option value="enter-csv">enter csv</option>
+            <option value="enter-qrcode">scan qrcode</option>
+            <option value="enter-encoded">decode encoded data</option>
+        </select>
         <hr>
 
         <button class="collapsible" id="auto">Auto</button>
         <div class="content">
             <label for="left-zone">Left alliance zone</label>
-            <input type="checkbox" id="left-zone" style="margin-bottom: 10px;"></input>
+            <input type="checkbox" id="left-zone" class="input" style="margin-bottom: 10px;"></input>
             <br>
 
             <label for="a-stop">A-Stop</label>
-            <input type="checkbox" id="a-stop">
+            <input type="checkbox" id="a-stop" class="input">
 
             <label>Reason:</label>
-            <input type="text" id="a-reason" placeholder="" disabled>
+            <input type="text" id="a-reason" class="input" placeholder="" disabled>
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
@@ -73,10 +87,10 @@
         <button class="collapsible" id="teleop">Teleop</button>
         <div class="content">
             <label for="e-stop">E-Stop</label>
-            <input type="checkbox" id="e-stop">
+            <input type="checkbox" id="e-stop" class="input">
 
             <label>Reason:</label>
-            <input type="text" id="e-reason" disabled>
+            <input type="text" id="e-reason" class="input" disabled>
             <br><br>
 
             <table data-sec="teleop">
@@ -87,86 +101,81 @@
             </table>
         </div>
 
-        <!-- <button class="collapsible" id="scoring">Scoring</button> -->
+        <button class="collapsible" id="scoring">Scoring</button>
         <div class="content">
             <div class="score">
-                <label>Collisions</label>
-                <input type="checkbox">
+                <label for="collisions">Collisions</label>
+                <input id="collisions" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Climb With Others</label>
-                <input type="checkbox">
+                <label for="climb">Climb With Others</label>
+                <input id="climb" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Total Game Score</label>
-                <input>
+                <label for="score">Total Game Score</label>
+                <input id="score" class="input">
             </div>
 
             <div class="score indented">
-                <label>Total Amp Score</label>
-                <input>
+                <label for="amp">Total Amp Score</label>
+                <input id="amp" class="input">
             </div>
 
             <div class="score double-indented">
-                <label>Amp Auto Score</label>
-                <input>
+                <label for="amp-auto">Amp Auto Score</label>
+                <input id="amp-auto" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Amp Teleop Score</label>
-                <input>
+                <label for="amp-teleop">Amp Teleop Score</label>
+                <input id="amp-teleop" class="input">
             </div>
 
             <div class="score indented">
-                <label>Total Speaker Score</label>
-                <input>
+                <label for="spkr">Total Speaker Score</label>
+                <input id="spkr" class="input">
             </div>
 
             <div class="score double-indented">
-                <label>Speaker Auto Score</label>
-                <input>
+                <label for="spkr-auto">Speaker Auto Score</label>
+                <input id="spkr-auto" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Speaker Teleop Score</label>
-                <input>
+                <label for="spkr-teleop">Speaker Teleop Score</label>
+                <input id="spkr-teleop" class="input">
             </div>
             
             <div class="score double-indented">
-                <label>Speaker Amplified Score</label>
-                <input>
+                <label for="spkr-amp">Speaker Amplified Score</label>
+                <input id="spkr-amp" class="input">
             </div>
 
             <div class="score">
-                <label>Cooperation</label>
-                <input type="checkbox">
+                <label for="coop">Cooperation</label>
+                <input id="coop" class="input" type="checkbox">
             </div>
             
             <div class="score">
-                <label>Melody</label>
-                <input type="checkbox">
+                <label for="melody">Melody</label>
+                <input id="melody" class="input" type="checkbox">
             </div>
 
             <div class="score"> 
-                <label>Ensemble</label>
-                <input type="checkbox">
+                <label for="ensemble">Ensemble</label>
+                <input id="ensemble" class="input" type="checkbox">
             </div>
 
             <div class="score">
-                <label>Win</label>
-                <input type="checkbox">
-            </div>
-
-            <div class="score indented">
-                <label>By How Much</label>
-                <input>
+                <label for="win">Win</label>
+                <input id="win" class="input" type="checkbox">
             </div>
 
             <div class="score">
-                <label>Tie</label>
-                <input type="checkbox">
+                <label for="tie">Tie</label>
+                <input id="tie" class="input" type="checkbox">
             </div>
         </div>
         
@@ -191,7 +200,7 @@
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>
         <script src="scripts/script.js" type="module"></script>
-        <!-- <script src="assets/console/console-import.js"></script>
-        <script>document.write(consoleImport)</script> -->
+        <script src="assets/console/console-import.js"></script>
+        <script>document.write(consoleImport)</script>
     </body>
 </html>
