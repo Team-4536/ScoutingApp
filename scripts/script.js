@@ -98,20 +98,42 @@ const pushState = (data, replace=false) => {
     }
 };
 
+const setTeam = (team) => {
+    currentTeam = team;
+
+    const session = sessionStorage.getItem('session');
+
+    if (localStorage.getItem(session)) {
+        console.log('match', getMatch())
+        localStorage.setItem(session, getMatch());
+    } else {
+        session();
+    }
+}
+
 const getTeam = () => {
     return currentTeam;
+}
+
+const setMatch = (team, comp, round) => {
+    team && setTeam(team);
+
+    if (comp) {
+        getElem('comp').value = comp;
+    } else if (round) {
+        getElem('round').value = round;
+    }
 }
 
 const getMatch = () => {
     return [getTeam(), getElem('comp').value, getElem('round').value].join(',');
 }
 
-const refreshTeams = async () => {
+const refreshTeams = async (team = false) => {
     const teams = getElem('teams');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
-    const comp = getElem('comp').value;
-    const round = getElem('round').value;
-    const teamNumbers = await dbClient.getMatchKeys(comp, round) || [];
+    const match = getMatch().split(',');
+    const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
     let newSelect = document.createElement('select');
     
     newSelect.addEventListener('change', switchTeam);
@@ -150,9 +172,9 @@ const method = (event) => {
 }
 
 const onLoad = async () => {
-    const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+    const cons = ['amp', 'spkr', 'flr', 'src'];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 6}]) {
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
@@ -212,10 +234,22 @@ const onLoad = async () => {
     }
 }
 
+const session = () => {
+    let session = sessionStorage.getItem('session');
+    
+    if (!session) {
+        session = Math.random();
+
+        sessionStorage.setItem('session', session);
+    }
+
+    window.localStorage.setItem(session, getMatch());
+}
+
 const popState = async () => {
     loadData();
 
-    console.log('popState called')
+    console.log('popState called');
 }
 
 const loadData = async () => {
@@ -278,7 +312,7 @@ const loadData = async () => {
     presentTeamData(teamData, push);
     refreshTeams();
 
-    const sec = localStorage.getItem('sec');
+    const sec = sessionStorage.getItem('sec');
 
     if (sec) {
         openSection(sec);
@@ -296,15 +330,9 @@ const eStop = () => {
 }
 
 const presentTeamData = async (teamData, push=false) => {
-    console.log('tem dataa', teamData)
     if (teamData) {
-        const comp = getElem('comp');
-        const round = getElem('round');
-
         console.log('team', teamData.team)
-        currentTeam = teamData.team || '';
-        comp.value = teamData.comp || comp[0].value;
-        round.value = teamData.round || round[0].value;
+        setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value)
 
         const secs = ['auto', 'teleop', 'scoring'];
 
@@ -378,8 +406,6 @@ const scrapeTeamData = () => {
         });
     }
     
-    console.log('scraped', teamData);
-
     return teamData;
 }
 
@@ -466,7 +492,7 @@ const beginScan = async () => {
     let framerate = 15;
     let cameras = await Html5Qrcode.getCameras()
     console.log(cameras);
-    await scanner.start({ facingMode: "environment" }, { fps: framerate, verbose: true },
+    await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
                         callback, errorCallback);
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
@@ -504,13 +530,16 @@ const generateCSV = () => {
             match = match[1];
             const matchIndex = [];
 
-            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 6}]) {
+            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 4}]) {
                 const cats = ['succeeds', 'fails', 'method'];
-                const cons = ['amp', 'spkr', 'flr', 'src', 'clmb', 'trp'];
+                const cons = ['amp', 'spkr', 'flr', 'src'];
 
-                for (let i = 0; i < count; i++) {
-                    for (let j = 0; j < 3; j++) {
-                        matchIndex.push(match?.[sec]?.[cats[j]]?.[cons[i]] ?? 'N/A');
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < count; j++) {
+                        matchIndex.push(match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A');
+                        console.log('generateCSV', [match.team, match.comp, match.round].join(','),
+                                    [sec, cats[i], cons[j]].join('-'),
+                                    match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A')
                     }
                 }
             }
@@ -544,10 +573,10 @@ const validTeam = (team) => {
 }
 
 const switchMatch = () => {
-    getElem('teams').value = "select";
-    currentTeam = '';
+    getElem('teams').value = 'select';
     closeSections();
     refreshTeams();
+    console.log('current match', getMatch())
 };
 
 const emptyTeam = () => {
@@ -571,7 +600,7 @@ const switchTeam = async (event) => {
         // TODO validate team
         let teamData = emptyTeam();
 
-        currentTeam = newTeam;
+        setTeam(newTeam);
 
         teamData.team = currentTeam;
         teamData.comp = getElem('comp').value;
@@ -583,10 +612,10 @@ const switchTeam = async (event) => {
 
         presentTeamData(teamData, true);
     } else if (select !== '') {
-        let s = select.split(',');
-        let [team, comp, round] = s;
+        let splitMatch = select.split(',');
+        let [team, comp, round] = splitMatch;
         const teamData = await dbClient.getMatch(comp, round, team);
-        currentTeam = team;
+        setTeam(team);
 
         if (teamData) {
             console.log(teamData)
@@ -606,7 +635,7 @@ const closeSections = (saveSec = '') => {
         s.nextElementSibling.style.display = 'none';
     }
 
-    localStorage.setItem('sec', saveSec);
+    sessionStorage.setItem('sec', saveSec);
 }
 
 const openSection = (id) => {
@@ -626,8 +655,6 @@ const sync = async () => {
 
     if (teamData.team.length > 2) {
         await saveMatch(teamData);
-
-        console.log('synced', teamData);
     }
 };
 
@@ -682,6 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', popState);
 
     onLoad();
+    session();
 
     getElem('comp').addEventListener('change', switchMatch);
     getElem('round').addEventListener('change', switchMatch);
@@ -713,6 +741,22 @@ document.addEventListener('DOMContentLoaded', () => {
         input.placeholder = '0';
         input.min = '0';
     });
+
+    window.addEventListener('beforeunload', () => {
+        const session = sessionStorage.getItem('session');
+
+        if (localStorage.getItem(session)) {
+            localStorage.removeItem(session);
+            sessionStorage.removeItem('session');
+        }
+    });
+
+    // window.addEventListener("beforeunload", function (e) {
+    //     var confirmationMessage = "\o/";
+        
+    //     (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+    //     return confirmationMessage;                            //Webkit, Safari, Chrome
+    // });
 });
 
 window.closeScanner = closeScanner;
