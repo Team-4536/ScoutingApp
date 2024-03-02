@@ -30,9 +30,11 @@ const call = async (method, ...args) => {
 
 navigator.serviceWorker.addEventListener("message", (m) => {
     let reply = m.data.reply;
+    console.log('request id', reply.requestId)
     let rq = pendingRequests[reply.requestId];
     if (!rq) {
-        console.log(`received unexpected reply for ${reply.requestid}`);
+        console.log('message', m)
+        console.log(`received unexpected reply for ${reply.requestId}`);
     } else {
         rq.resolve(reply.result);
         clearTimeout(rq.timer);
