@@ -238,7 +238,6 @@ const onLoad = async () => {
             }
         }
     }
-}
 
     const shareOptions = [['csv', 'csv file'],
                          ['json', 'json file'],
@@ -373,6 +372,8 @@ const popState = async () => {
 }
 
 const loadData = async () => {
+    await navigator.serviceWorker.ready;
+
     let url = window.location.search;
     let teamData = emptyTeam();
     let push = false;
@@ -752,54 +753,9 @@ const generateCSV = async (includeTopRow) => {
     return file;
 }
 
-const download = async (file, fileName = 'untitled.txt') => {
+const download = async (file, fileName) => {
     const a = document.createElement('a');
     a.setAttribute('href', URL.createObjectURL(await file));
-    a.setAttribute('download', fileName);
-
-    a.click();
-}
-
-const generateCSV = () => {
-    const flattenTeams = async () => {
-        let matchList = [];
-        const matches = await dbClient.getMatches();
-
-        for (let match of matches.entries()) {
-            match = match[1];
-            const matchIndex = [];
-
-            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 4}]) {
-                const cats = ['succeeds', 'fails', 'method'];
-                const cons = ['amp', 'spkr', 'flr', 'src'];
-
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < count; j++) {
-                        matchIndex.push(match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A');
-                        console.log('generateCSV', [match.team, match.comp, match.round].join(','),
-                                    [sec, cats[i], cons[j]].join('-'),
-                                    match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A')
-                    }
-                }
-            }
-
-            matchList.push(matchIndex);
-        }
-
-        return matchList;
-    }
-
-    const teamList = flattenTeams();
-    const csv = stringify(teamList);
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const file = new File([blob], 'csv.csv');
-
-    return file;
-}
-
-const download = (file, fileName) => {
-    const a = document.createElement('a');
-    a.setAttribute('href', URL.createObjectURL(file));
     a.setAttribute('download', fileName);
 
     a.click();
@@ -877,7 +833,6 @@ const downloadCSV = () => {
                         ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
 
     const fileName = 'teams ' + currentDate + '.csv';
-
     const includeTopRow = getElem('csv-top-row').checked;
 
     download(generateCSV(includeTopRow), fileName);
