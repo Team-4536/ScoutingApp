@@ -238,6 +238,7 @@ const onLoad = async () => {
             }
         }
     }
+}
 
     const shareOptions = [['csv', 'csv file'],
                          ['json', 'json file'],
@@ -759,6 +760,51 @@ const download = async (file, fileName = 'untitled.txt') => {
     a.click();
 }
 
+const generateCSV = () => {
+    const flattenTeams = async () => {
+        let matchList = [];
+        const matches = await dbClient.getMatches();
+
+        for (let match of matches.entries()) {
+            match = match[1];
+            const matchIndex = [];
+
+            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 4}]) {
+                const cats = ['succeeds', 'fails', 'method'];
+                const cons = ['amp', 'spkr', 'flr', 'src'];
+
+                for (let i = 0; i < 3; i++) {
+                    for (let j = 0; j < count; j++) {
+                        matchIndex.push(match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A');
+                        console.log('generateCSV', [match.team, match.comp, match.round].join(','),
+                                    [sec, cats[i], cons[j]].join('-'),
+                                    match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A')
+                    }
+                }
+            }
+
+            matchList.push(matchIndex);
+        }
+
+        return matchList;
+    }
+
+    const teamList = flattenTeams();
+    const csv = stringify(teamList);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const file = new File([blob], 'csv.csv');
+
+    return file;
+}
+
+const download = (file, fileName) => {
+    const a = document.createElement('a');
+    a.setAttribute('href', URL.createObjectURL(file));
+    a.setAttribute('download', fileName);
+
+    a.click();
+}
+
 const validTeam = (team) => {
     const teamNum = parseInt(team) ?? false;
 
@@ -865,6 +911,8 @@ const toggleQRCode = (boolean) => {
         qrcode.style.display = none ? 'inline-block': 'none';
         qrcodeButton.textContent = none ? 'hide qrcode': 'show qrcode';
     }
+
+    sessionStorage.setItem('sec', saveSec);
 }
 
 const openSection = (id) => {
@@ -985,6 +1033,13 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.removeItem('session');
         }
     });
+
+    // window.addEventListener("beforeunload", function (e) {
+    //     var confirmationMessage = "\o/";
+        
+    //     (e || window.event).returnValue = confirmationMessage; //Gecko + IE
+    //     return confirmationMessage;                            //Webkit, Safari, Chrome
+    // });
 });
 
 window.beginScan = beginScan;
