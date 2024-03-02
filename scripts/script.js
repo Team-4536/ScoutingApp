@@ -123,6 +123,10 @@ const setMatch = (team, comp, round) => {
     } else if (round) {
         getElem('round').value = round;
     }
+
+    console.log('set match', team, comp, round);
+
+    getElem('teams').value = getMatch();
 }
 
 const getMatch = () => {
@@ -142,6 +146,8 @@ const refreshTeams = async (team = false) => {
     {
         let selectOption = document.createElement('option');
         selectOption.value = 'select';
+        selectOption.disabled = true;
+        selectOption.selected = true;
         selectOption.textContent = "Select team ...";
         newSelect.add(selectOption);
 
@@ -172,7 +178,7 @@ const method = (event) => {
 }
 
 const onLoad = async () => {
-    const cons = ['amp', 'spkr', 'flr', 'src'];
+    const cons = ['amp', 'speaker', 'floor intake', 'source intake'];
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
@@ -232,6 +238,119 @@ const onLoad = async () => {
             }
         }
     }
+
+    const shareOptions = [['csv', 'csv file'],
+                         ['json', 'json file'],
+                         ['txt', 'text file'],
+                         ['url', 'url'],
+                         ['scan', 'qrcode']];
+
+    shareOptions.forEach((option) => {
+        const button = document.createElement('button');
+        button.innerHTML = '&times;';
+        button.classList.add('share-as-button');
+        button.addEventListener('click', startShare);
+
+        const label = document.createElement('b');
+        label.textContent = option[1];
+        label.style.margin = '10px';
+
+        const div = document.getElementById((option[0] ? option[0]:option) + '-div');
+        div.insertBefore(label, div.firstChild);
+        div.insertBefore(button, div.firstChild);
+    });
+
+    // download(generateCSV(), 'csv')
+}
+
+const populateQRCode = async () => {
+    const qrcodeComp = getElem('qrcode-comp');
+    const qrcodeRound = getElem('qrcode-round');
+    const qrcodeTeam = getElem('qrcode-team');
+
+    const compList = [];
+    const roundList = [];
+    const teamList = [];
+
+    await dbClient.getMatches().forEach((match) => {
+        const [team, comp, round] = [match?.team, match?.comp, match?.round];
+
+        if (team && validTeam(team) && comp && round) {
+            teamList.push(team);
+
+            if (!compList.includes(comp)) {
+                compList.push(comp);
+            }
+            
+            if (!roundList.includes(round)) {
+                roundList.push(round);
+            }
+        }
+    });
+
+    teamList.sort();
+    compList.sort();
+    roundList.sort();
+
+    const [team, comp, round] = getMatch().split(',');
+
+    qrcodeComp.value = comp;
+    qrcodeRound.value = round;
+    qrcodeTeam.value = team;
+}
+
+const share = async (shareOption) => {
+	startShare();
+
+    switch (shareOption) {
+        case 'scan':
+            const match = getMatch().split(',');
+            const qrcodeButton = getElem('qrcode-button');
+
+            if (match[0] && match[1] && match[2]) {
+                generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
+                            Math.min(innerHeight, innerWidth) * .4,
+                            Math.min(innerHeight, innerWidth) * .4);
+                
+                qrcodeButton.style.display = 'block';
+                populateQRCode();
+            } else {
+                qrcodeButton.style.display = 'none';
+            }
+
+            break;
+    }
+
+	document.getElementById(shareOption + '-div').style.display = 'block';
+
+	const select = document.getElementById('share-as');
+	select.hidden = true;
+	select.value = 'select';
+}
+
+const startShare = () => {
+	document.getElementById('share-as').hidden = false;
+
+	Array.from(document.getElementById('share-modal')
+                       .getElementsByClassName('option-div')).forEach(
+                          (div) => div.style.display = 'none');
+
+	document.getElementById('share-modal').style.display = 'block';
+}
+
+const closeModal = (id) => {
+	if (typeof id === 'string' || id.id) {
+		id = id.id ? id.id: id;
+		const modal = document.getElementById(id);
+
+		if (id === 'share-modal') {
+			modal.style.display = 'none';
+		}
+	} else {
+		Array.from(document.getElementsByClassName('modal')).forEach((modal) => {
+			modal.style.display = 'none';
+		});
+	}
 }
 
 const session = () => {
@@ -253,6 +372,8 @@ const popState = async () => {
 }
 
 const loadData = async () => {
+    await navigator.serviceWorker.ready;
+
     let url = window.location.search;
     let teamData = emptyTeam();
     let push = false;
@@ -331,9 +452,6 @@ const eStop = () => {
 
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
-        console.log('team', teamData.team)
-        setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value)
-
         const secs = ['auto', 'teleop', 'scoring'];
 
         for (const sec of secs) {
@@ -355,6 +473,7 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     await refreshTeams();
+    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value);
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -504,53 +623,129 @@ const closeScanner = () => {
     popup.scanner = null;
 }
 
-const generateQRCode = () => {
-    encodeData().then((data) => {
+const generateQRCode = (teamData, length = screen.height * .8) => {
+    console.log(teamData)
+    encodeData(teamData).then((data) => {
         getElem('qrcode').textContent = '';
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
         new QRCode(getElem('qrcode'), {
-            text: `https://team-4536.github.io/ScoutingApp/?${JSON.stringify(qrcodeDataObject)}`,
+            text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
             correctLevel: QRCode.CorrectLevel.Q,
-            width: 400,
-            height: 400
+            width: length,
+            height: length
         });
+
+        console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     });
 
-    getElem('qrcode-container').style.display = 'block';
+    // getElem('qrcode-div').style.display = 'block';
+    // getElem('qrcode').style.display = 'block';
 }
 
-const generateCSV = () => {
+const generateCSV = async (includeTopRow) => {
     const flattenTeams = async () => {
         let matchList = [];
         const matches = await dbClient.getMatches();
 
+        if (includeTopRow) {
+            matchList.push([
+                'Team',
+                'Alliance',
+                'Round',
+                'Scouter',
+                'Auto-A Stop',
+                'Teleop-E Stop',
+                'Auto-Left Alliance Zone',
+
+                'Auto-Amp Succeed',
+                'Auto-Amp Fail',
+                'Teleop-Amp Succeed',
+                'Teleop-Amp Fail',
+                'Amp Method',
+
+                'Auto-Speaker Succeed',
+                'Auto-Speaker Fail',
+                'Teleop-Speaker Succeed',
+                'Teleop-Speaker Fail',
+                'Speaker Method',
+
+                'Auto-Floor Intake Succeed',
+                'Auto-Floor Intake Fail',
+                'Teleop-Floor Intake Succeed',
+                'Teleop-Floor Intake Fail',
+                'Floor Intake Method',
+
+                'Teleop-Source Intake Succeed',
+                'Teleop-Source Intake Fail',
+                'Source Intake Method',
+
+                'Climb',
+                'Trap',
+                'Total Score',
+                'Win / Lose / Tie',
+                'Harmony',
+                'Ensemble',
+                'Cooperation',
+                'Collisions',
+                'Made Spotlight Notes',
+                'Missed Spotlight Notes'
+            ]);
+        } else {
+            matchList.push([]);
+        }
+
         for (let match of matches.entries()) {
             match = match[1];
             const matchIndex = [];
+            
+            [
+                match?.team ?? 'NaN',
+                'NaN',
+                match?.round ?? 'NaN',
+                'NaN',
+                match?.auto?.['a-stop'] ?? 'NaN',
+                match?.teleop?.['e-stop'] ?? 'NaN',
+                match?.auto?.['left-zone'] ?? 'NaN'
+            ].forEach(value => matchIndex.push(`${value}`));
 
-            for (const {sec, count} of [{sec: 'auto', count: 3}, {sec: 'teleop', count: 4}]) {
-                const cats = ['succeeds', 'fails', 'method'];
-                const cons = ['amp', 'spkr', 'flr', 'src'];
+            const cons = ['amp', 'spkr', 'flr', 'src'];
+            const sec = ['auto', 'auto', 'teleop', 'teleop', 'teleop'];
+            const cats = ['succeeds', 'fails', 'succeeds', 'fails', 'method'];
 
-                for (let i = 0; i < 3; i++) {
-                    for (let j = 0; j < count; j++) {
-                        matchIndex.push(match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A');
-                        console.log('generateCSV', [match.team, match.comp, match.round].join(','),
-                                    [sec, cats[i], cons[j]].join('-'),
-                                    match?.[sec]?.[cats[i]]?.[cons[j]] ?? 'N/A')
+            for (let i = 0; i < 4; i++) {
+                for (let j = 0; j < 5; j++) {
+                    if (i !== 3) {
+                        matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '');
+                    } else {
+                        if (j < 3) {
+                            matchIndex.push(match?.[sec[j + 2]]?.[cats[j + 2]]?.[cons[i]] ?? '');
+                        }
                     }
                 }
             }
 
-            matchList.push(matchIndex);
+            matchIndex.push(
+                match?.scoring?.climb ?? 'NaN',
+                'NaN',
+                'NaN',
+                'NaN',
+                match?.scoring?.harmony ?? 'NaN',
+                match?.scoring?.ensemble ?? 'NaN',
+                match?.scoring?.coop ?? 'NaN',
+                match?.collisions ?? 'NaN',
+                'NaN',
+                'NaN'
+            );
+
+            matchList.push(matchIndex ?? []);
         }
 
         return matchList;
     }
 
-    const teamList = flattenTeams();
+    const teamList = await flattenTeams();
     const csv = stringify(teamList);
     const blob = new Blob([csv], { type: 'text/csv' });
     const file = new File([blob], 'csv.csv');
@@ -558,9 +753,9 @@ const generateCSV = () => {
     return file;
 }
 
-const download = (file, fileName) => {
+const download = async (file, fileName) => {
     const a = document.createElement('a');
-    a.setAttribute('href', URL.createObjectURL(file));
+    a.setAttribute('href', URL.createObjectURL(await file));
     a.setAttribute('download', fileName);
 
     a.click();
@@ -597,20 +792,26 @@ const switchTeam = async (event) => {
 
     if (select ==='new') {
         const newTeam = prompt('new team');
-        // TODO validate team
-        let teamData = emptyTeam();
+        
+        if (validTeam(newTeam)) {
+            let teamData = emptyTeam();
 
-        setTeam(newTeam);
+            setTeam(newTeam);
 
-        teamData.team = currentTeam;
-        teamData.comp = getElem('comp').value;
-        teamData.round = getElem('round').value;
+            teamData.team = currentTeam;
+            teamData.comp = getElem('comp').value;
+            teamData.round = getElem('round').value;
 
-        await saveMatch(teamData);
+            await saveMatch(teamData);
 
-        await refreshTeams();
+            await refreshTeams();
 
-        presentTeamData(teamData, true);
+            presentTeamData(teamData, true);
+        } else if (newTeam.replace(/\D/g, '') !== newTeam) {
+            confirm(newTeam + ' - please enter a valid team number');
+        } else {
+            confirm(newTeam + ' is not a valid team number');
+        }
     } else if (select !== '') {
         let splitMatch = select.split(',');
         let [team, comp, round] = splitMatch;
@@ -626,6 +827,17 @@ const switchTeam = async (event) => {
     openSection('auto');
 }
 
+const downloadCSV = () => {
+    const date = new Date();
+    const currentDate = [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') + 
+                        ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
+
+    const fileName = 'teams ' + currentDate + '.csv';
+    const includeTopRow = getElem('csv-top-row').checked;
+
+    download(generateCSV(includeTopRow), fileName);
+}
+
 const closeSections = (saveSec = '') => {
     const sections = getElem('collapsible', 'class');
 
@@ -633,6 +845,26 @@ const closeSections = (saveSec = '') => {
         s.classList.remove('active');
         s.classList.add('inactive');
         s.nextElementSibling.style.display = 'none';
+    }
+
+    sessionStorage.setItem('sec', saveSec);
+}
+
+const toggleQRCode = (boolean) => {
+    const qrcode = document.getElementById('qrcode');
+    const qrcodeButton = document.getElementById('qrcode-button');
+
+    if (boolean === 'none' || boolean === 'inline-block') {
+        qrcode.style.display = boolean;
+        qrcodeButton.textContent = boolean === 'none' ? 'show qrcode': 'hide qrcode';
+    } else if (typeof boolean === 'boolean') {
+        qrcode.style.display = boolean ? 'inline-block': 'none';
+        qrcodeButton.textContent = boolean ? 'hide qrcode': 'show qrcode';
+    } else {
+        const none = qrcode.style.display === 'none';
+
+        qrcode.style.display = none ? 'inline-block': 'none';
+        qrcodeButton.textContent = none ? 'hide qrcode': 'show qrcode';
     }
 
     sessionStorage.setItem('sec', saveSec);
@@ -658,51 +890,45 @@ const sync = async () => {
     }
 };
 
-const exportTeam = async (input) => {
-    switch (input) {
-        case 'export-url':
-            navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
+// const exportTeam = async (input) => {
+//     switch (input) {
+//         case 'export-url':
+//             navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
 
-            break;
-        case 'export-data':
-            navigator.share({data: JSON.stringify(scrapeTeamData())});
+//             break;
+//         case 'export-data':
+//             navigator.share({data: JSON.stringify(scrapeTeamData())});
 
-            break;
-        case 'export-csv':
+//             break;
+//         case 'export-csv':
 
-            break;
-        case 'export-qrcode':
-            generateQRCode();
+//             break;
+//         case 'export-qrcode':
+//             generateQRCode();
 
-            break;
-        case 'export-qrcode':
+//             break;
+//         case 'export-qrcode':
 
-            break;
-        case 'download-csv':
-            const date = new Date();
-            const currentDate = [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') + 
-                                ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
+//             break;
+//         case 'download-csv':
+//             downloadCSV();
 
-            const fileName = 'teams ' + currentDate + '.csv';
+//             break;
+//         case 'download':
+//             const jsonString = JSON.stringify(scrapeTeamData());
 
-            download(generateCSV(), fileName);
+//             const blob = new Blob([jsonString], { type: 'application/json' });
 
-            break;
-        case 'download':
-            const jsonString = JSON.stringify(scrapeTeamData());
-
-            const blob = new Blob([jsonString], { type: 'application/json' });
-
-            const data = document.createElement('a');
-            data.setAttribute('href', URL.createObjectURL(blob));
-            data.setAttribute('download', 'data.json');
-            data.click();
+//             const data = document.createElement('a');
+//             data.setAttribute('href', URL.createObjectURL(blob));
+//             data.setAttribute('download', 'data.json');
+//             data.click();
             
-            break;
-    }
+//             break;
+//     }
 
-    getElem('export').value = 'share';
-}
+//     getElem('export').value = 'share';
+// }
 
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', loadData);
@@ -710,6 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     onLoad();
     session();
+    generateCSV()
 
     getElem('comp').addEventListener('change', switchMatch);
     getElem('round').addEventListener('change', switchMatch);
@@ -723,13 +950,24 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', sync);
     });
 
-    getElem('export').addEventListener('change', (input) => {
-        exportTeam(input.target.value)
-    });
+    // getElem('export').addEventListener('change', (input) => {
+    //     exportTeam(input.target.value)
+    // });
 
     getElem('a-stop').addEventListener('input', aStop);
 
     getElem('e-stop').addEventListener('input', eStop);
+
+    window.addEventListener('click', (event) => closeModal(event.target.id));
+
+    document.getElementById('share').addEventListener('click', startShare);
+    document.getElementById('quit-share').addEventListener('click', closeModal);
+    document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
+    document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
+    document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
+        qrcodeToggle.addEventListener('click', toggleQRCode);
+    });
+
 
     getElem('.number', 'queryAll').forEach( (input) => {
         input.addEventListener('input', (event) => formatNumber(event));
@@ -759,23 +997,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // });
 });
 
+window.beginScan = beginScan;
 window.closeScanner = closeScanner;
 window.closeSections = closeSections;
 window.decodeData = decodeData;
+window.download = download;
+window.downloadCSV = downloadCSV;
 window.emptyTeam = emptyTeam;
 window.encodeData = encodeData;
+// window.exportTeam = exportTeam;
+window.generateCSV = generateCSV;
+window.generateQRCode = generateQRCode;
 window.getElem = getElem;
 window.getMatch = getMatch;
 window.getTeam = getTeam;
 window.loadData = loadData;
+window.toggleQRCode = toggleQRCode;
 window.onLoad = onLoad;
 window.openSection = openSection;
 window.presentTeamData = presentTeamData;
 window.refreshTeams = refreshTeams;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
-window.generateCSV = generateCSV;
-
-window.exportTeam = exportTeam;
+window.session = session;
 
 window.dbClient = dbClient;

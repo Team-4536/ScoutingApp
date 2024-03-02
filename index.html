@@ -20,6 +20,7 @@
         <select id="comp">
             <option value="grand-forks">Great Northern Regional (Grand Forks)</option>
             <option value="eagan">Blue Twilight Week 0 (Eagan)</option>
+            <option selected value="grand-forks">Great Northern Regional (Grand Forks)</option>
         </select>
 
         <label>Round:</label>
@@ -41,12 +42,12 @@
         <label>Team:</label>
 
         <select id="teams">
-            <option selected value="select">Select team ...</option>
+            <option selected disabled value="select">Select team ...</option>
             <option value="new">New team ...</option>
         </select>
         <br>
 
-        <select id="export">
+        <!-- <select id="export">
             <option value="share">share ...</option>
             <option value="export-url">share current team's url</option>
             <option value="export-data">share current team's data</option>
@@ -54,7 +55,10 @@
             <option value="export-qrcode">generate qrcode</option>
             <option value="download-csv">download csv</option>
             <option value="download">download all data</option>
-        </select>
+        </select> -->
+
+        <button id="share">Share</button>    
+
         <select id="import">
             <option value="open">open ...</option>
             <option value="enter">enter team data</option>
@@ -178,15 +182,75 @@
                 <input id="tie" class="input" type="checkbox">
             </div>
         </div>
+
+        <div id="share-modal" class="modal">
+            <div class="modal-content">
+                <span id="quit-share" class="close-modal">&times;</span>
+                <h2 style="margin: 10px">Share as ...</h2>
+    
+                <select id="share-as">
+                    <option value="select" selected disabled>select share option ...</option>
+                    <option value="csv">.csv</option>
+                    <option value="json">.json</option>
+                    <option value="txt">.txt</option>
+                    <option value="url">url</option>
+                    <option value="scan">QRCode</option>
+                </select>
+    
+                <div class="option-div" id="csv-div">
+                    <br>
+                    <br>
+
+                    <label for="csv-top-row" style="color:black">include top row:</label>
+                    <input id="csv-top-row" type="checkbox">
+
+                    <br>
+
+                    <button id="csv-download-all">download csv of all teams</button>
+                </div>
+    
+                <div class="option-div" id="json-div">
+    
+                </div>
+    
+                <div class="option-div" id="txt-div">
+    
+                </div>
+    
+                <div class="option-div" id="url-div">
+    
+                </div>
+    
+                <div class="option-div" id="scan-div">
+                    <br><br>
+
+                    <div id="qrcode-div">
+                        <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+                        <button id="qrcode-button">hide qrcode</button>
+
+                        <br>
+
+                        <select id="qrcode-comp">
+                            <option disabled>no comp selected</option>
+                        </select>
+
+                        <select id="qrcode-team">
+                            <option disabled>no team selected</option>
+                        </select>
+
+                        <select id="qrcode-round">
+                            <option disabled>no round selected</option>
+                        </select>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
         
         <div id="scanner">
             <div id="cameraStream"></div>
             <button id="close-scanner">Close Scanner</button>
-        </div>
-
-        <div id="qrcode-container">
-            <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
-            <button id="close-qrcode">Close QR Code</button>
         </div>
 
         <script type="module">
