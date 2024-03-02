@@ -5,36 +5,32 @@ var rqId = 1;
 var pendingRequests = {};
 
 const rqTimeout = (rqId) => {
-    console.warn(`request ${rqId} timed out`, pendingRequests[rqId]);
+    console.warn(`request ${rqId} timed out`);
     delete pendingRequests[rqId];
 }
 
-const call = async (method, ...args) => {
+const call = (method, ...args) => {
     let rq = {
         requestId: ++rqId,
         method: method,
         args: args
     }
 
-    await navigator.serviceWorker.ready
     navigator.serviceWorker.controller.postMessage(rq);
     return new Promise((resolve, reject) => {
         pendingRequests[rqId] = {
-            request: rq,
             resolve: resolve,
             reject: reject,
-            timer: setTimeout(rqTimeout, 1000, rqId),
+            timer: setTimeout(rqTimeout, 1000, rqId)
         };
     });
 }
 
 navigator.serviceWorker.addEventListener("message", (m) => {
     let reply = m.data.reply;
-    console.log('request id', reply.requestId)
     let rq = pendingRequests[reply.requestId];
     if (!rq) {
-        console.log('message', m)
-        console.log(`received unexpected reply for ${reply.requestId}`);
+        console.log(`received unexpected reply for ${reply.requestid}`);
     } else {
         rq.resolve(reply.result);
         clearTimeout(rq.timer);
