@@ -10,13 +10,14 @@ const rqTimeout = (rqId) => {
 }
 
 const call = async (method, ...args) => {
+    await navigator.serviceWorker.ready
+
     let rq = {
         requestId: ++rqId,
         method: method,
         args: args
     }
 
-    await navigator.serviceWorker.ready
     navigator.serviceWorker.controller.postMessage(rq);
     return new Promise((resolve, reject) => {
         pendingRequests[rqId] = {

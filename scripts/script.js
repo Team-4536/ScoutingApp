@@ -120,8 +120,12 @@ const setMatch = (team, comp, round) => {
 
     if (comp) {
         getElem('comp').value = comp;
-    } else if (round) {
-        getElem('round').value = round;
+    }
+    
+    if (round) {
+        console.log('set round', round)
+        getElem('round').textContent = round;
+        console.log(getElem('round').textContent)
     }
 
     console.log('set match', team, comp, round);
@@ -238,29 +242,6 @@ const onLoad = async () => {
             }
         }
     }
-
-    const shareOptions = [['csv', 'csv file'],
-                         ['json', 'json file'],
-                         ['txt', 'text file'],
-                         ['url', 'url'],
-                         ['scan', 'qrcode']];
-
-    shareOptions.forEach((option) => {
-        const button = document.createElement('button');
-        button.innerHTML = '&times;';
-        button.classList.add('share-as-button');
-        button.addEventListener('click', startShare);
-
-        const label = document.createElement('b');
-        label.textContent = option[1];
-        label.style.margin = '10px';
-
-        const div = document.getElementById((option[0] ? option[0]:option) + '-div');
-        div.insertBefore(label, div.firstChild);
-        div.insertBefore(button, div.firstChild);
-    });
-
-    // download(generateCSV(), 'csv')
 }
 
 const populateQRCode = async () => {
@@ -295,7 +276,7 @@ const populateQRCode = async () => {
     const [team, comp, round] = getMatch().split(',');
 
     qrcodeComp.value = comp;
-    qrcodeRound.value = round;
+    qrcodeRound.textContent = round;
     qrcodeTeam.value = team;
 }
 
@@ -373,6 +354,7 @@ const popState = async () => {
 
 const loadData = async () => {
     await navigator.serviceWorker.ready;
+    console.log('worked')
 
     let url = window.location.search;
     let teamData = emptyTeam();
@@ -452,7 +434,7 @@ const eStop = () => {
 
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
-        const secs = ['auto', 'teleop', 'scoring'];
+        const secs = ['auto', 'teleop'];
 
         for (const sec of secs) {
             getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
@@ -473,7 +455,8 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value);
+    console.log('setmatch')
+    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || 1);
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -502,9 +485,8 @@ const scrapeTeamData = () => {
     teamData.team = getTeam();
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
-    teamData.scoring.amp.a = 3
 
-    const secs = ['auto', 'teleop', 'scoring'];
+    const secs = ['auto', 'teleop'];
 
     for (const sec of secs) {
         getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
@@ -524,6 +506,8 @@ const scrapeTeamData = () => {
             }
         });
     }
+
+    console.log('data scraped', teamData);
     
     return teamData;
 }
@@ -534,13 +518,15 @@ const encodeData = async (data) => {
     const blob = await new Response(compressedReadableStream).blob();
     const ab = await blob.arrayBuffer();
 
-    return encodeURIComponent(btoa(String.fromCharCode(...new Uint8Array(ab))));
+    return btoa(String.fromCharCode(...new Uint8Array(ab)));
 }
 
 const decodeData = async (encodedData) => {
     try {
+        console.log('started')
         const data = JSON.parse(decodeURI(encodedData));
-        const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
+        console.log('data', data)
+        const bytes = Uint8Array.from(atob(decodeURI(data.data)), c => c.charCodeAt(0));
         let blob = new Blob([bytes]);
         const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
         blob = await new Response(decoder).blob();
@@ -554,29 +540,21 @@ const decodeData = async (encodedData) => {
     }
 }
 
-/*
-const formatTeam = event => {
-    const value = event.target.value;
+const decodeData2 = async (encodedData) => {
+    try {
+        const bytes = Uint8Array.from(atob(encodedData), c => c.charCodeAt(0));
+        let blob = new Blob([bytes]);
+        const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
+        blob = await new Response(decoder).blob();
+        const text = await blob.text();
 
-    if (parseInt(value) ===0) {
-        event.target.value = '';
-    }
+        return JSON.parse(text);
+    } catch (error) {
+        console.error(`Error decoding data due to invalid data: "${error.message}"`);
 
-    if (parseInt(value) > 9999) {
-        if (value !== '10000') {
-            event.target.value = value.slice(0, -1);
-        } else {
-            event.target.value = '9999';
-        }
+        return undefined;
     }
-
-    if (value.length < 4 && parseInt(value) !== 0) {
-        event.target.value = '0'.repeat(4 - value.length) + value;
-    } else if (value.length > 4 && value[0] ==='0') {
-        event.target.value = value.slice(1);
-    }
-    }
-*/
+}
 
 const formatNumber = event => {
     if (event.target.value[0] ==='0') {
@@ -631,7 +609,7 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
         new QRCode(getElem('qrcode'), {
-            text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
+            text: JSON.stringify(qrcodeDataObject),
             correctLevel: QRCode.CorrectLevel.Q,
             width: length,
             height: length
@@ -639,9 +617,6 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     });
-
-    // getElem('qrcode-div').style.display = 'block';
-    // getElem('qrcode').style.display = 'block';
 }
 
 const generateCSV = async (includeTopRow) => {
@@ -887,48 +862,9 @@ const sync = async () => {
 
     if (teamData.team.length > 2) {
         await saveMatch(teamData);
+        console.log('synced', teamData)
     }
 };
-
-// const exportTeam = async (input) => {
-//     switch (input) {
-//         case 'export-url':
-//             navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
-
-//             break;
-//         case 'export-data':
-//             navigator.share({data: JSON.stringify(scrapeTeamData())});
-
-//             break;
-//         case 'export-csv':
-
-//             break;
-//         case 'export-qrcode':
-//             generateQRCode();
-
-//             break;
-//         case 'export-qrcode':
-
-//             break;
-//         case 'download-csv':
-//             downloadCSV();
-
-//             break;
-//         case 'download':
-//             const jsonString = JSON.stringify(scrapeTeamData());
-
-//             const blob = new Blob([jsonString], { type: 'application/json' });
-
-//             const data = document.createElement('a');
-//             data.setAttribute('href', URL.createObjectURL(blob));
-//             data.setAttribute('download', 'data.json');
-//             data.click();
-            
-//             break;
-//     }
-
-//     getElem('export').value = 'share';
-// }
 
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', loadData);
@@ -940,6 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     getElem('comp').addEventListener('change', switchMatch);
     getElem('round').addEventListener('change', switchMatch);
+    getElem('qrcode-gen').addEventListener('click', async () => generateQRCode(await scrapeTeamData(), Math.min(innerHeight, innerWidth) * .4))
     getElem('teams').addEventListener('change', switchTeam);
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
@@ -950,24 +887,11 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', sync);
     });
 
-    // getElem('export').addEventListener('change', (input) => {
-    //     exportTeam(input.target.value)
-    // });
-
     getElem('a-stop').addEventListener('input', aStop);
 
     getElem('e-stop').addEventListener('input', eStop);
 
     window.addEventListener('click', (event) => closeModal(event.target.id));
-
-    document.getElementById('share').addEventListener('click', startShare);
-    document.getElementById('quit-share').addEventListener('click', closeModal);
-    document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
-    document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
-    document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
-        qrcodeToggle.addEventListener('click', toggleQRCode);
-    });
-
 
     getElem('.number', 'queryAll').forEach( (input) => {
         input.addEventListener('input', (event) => formatNumber(event));
@@ -988,19 +912,13 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.removeItem('session');
         }
     });
-
-    // window.addEventListener("beforeunload", function (e) {
-    //     var confirmationMessage = "\o/";
-        
-    //     (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-    //     return confirmationMessage;                            //Webkit, Safari, Chrome
-    // });
 });
 
 window.beginScan = beginScan;
 window.closeScanner = closeScanner;
 window.closeSections = closeSections;
 window.decodeData = decodeData;
+window.decodeData2 = decodeData2;
 window.download = download;
 window.downloadCSV = downloadCSV;
 window.emptyTeam = emptyTeam;
