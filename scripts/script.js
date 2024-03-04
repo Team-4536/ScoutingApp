@@ -176,7 +176,7 @@ const refreshTeams = async (team = false) => {
 const onLoad = async () => {
     const cons = ['amp', 'close speaker', 'far speaker'];
 
-    for (let {table, count} of [{table:'auto', count: 2}, {table: 'teleop', count: 3}]) {
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
@@ -504,10 +504,13 @@ const presentTeamData = async (teamData, push=false) => {
 
                 if (secs.includes(id[0])) { // auto or teleop table element
                     input.value = teamData[id[0]][id[1]][id[2]] ?? '';
+                    console.log(input, teamData[id[0]][id[1]][id[2]] ?? '')
                 } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
 
                     input[state] = teamData[sec][inputID];
+
+                    console.log(teamData[sec][inputID], input)
                 }
             });
         }
@@ -540,6 +543,8 @@ const presentTeamData = async (teamData, push=false) => {
     }  else {
         getElem('teams').value = 'select';
     }
+
+    console.log('presented data: ', teamData)
 }
 
 const scrapeTeamData = () => {
@@ -638,6 +643,14 @@ const formatNumber = event => {
 const beginScan = async (id) => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
+    let cameras = await Html5Qrcode.getCameras()
+    const camerasscanner = getElem('cameras')
+    cameras.forEach((cam) => {
+        const camera = document.createElement('option')
+        camera.textContent = cam.label
+        camera.value = cam.id
+        camerasscanner.appendChild(camera)
+    })
 
     let scanner = new Html5Qrcode('cameraStream', {
     formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
@@ -646,13 +659,14 @@ const beginScan = async (id) => {
 
     popup.scanner = scanner;
 
-    const callback = (text, detail) => {
+    const callback = async (text, detail) => {
         const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
-        console.log(data)
-        const dataObject = decodeData(data)
-        console.log(dataObject)
-        // console.log('got /scan', text, detail);
-        // scanner.pause(true);
+        const dataObject = await decodeData(data)
+        saveMatch(dataObject)
+        pushState(dataObject)
+        presentTeamData(dataObject)
+        closeScanner()
+        console.log('scanned data', dataObject)
     };
 
     const errorCallback = (error) => {
@@ -660,11 +674,15 @@ const beginScan = async (id) => {
     };
 
     let framerate = 15;
-    let cameras = await Html5Qrcode.getCameras()
     console.log(cameras);
     
-    await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
+    if (id) {
+        await scanner.start(id , { fps: framerate, verbose: true },
                         callback, errorCallback);
+    } else {
+        await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
+                            callback, errorCallback);
+    }
 
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
@@ -1099,6 +1117,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quit-share').addEventListener('click', closeModal);
     document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
     document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
+    getElem('cameras').addEventListener('change', () => {
+        closeScanner();
+        const id = getElem('cameras').value || ''
+        beginScan(id)
+    })
     // document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
     //     qrcodeToggle.addEventListener('click', toggleQRCode);
     // });
