@@ -172,11 +172,6 @@ const refreshTeams = async (team = false) => {
     teams.value = getMatch();
 }
 
-const method = (event) => {
-    if (event.target.value === 'add') {
-        confirm('what method?');
-    }
-}
 
 const onLoad = async () => {
     const cons = ['amp', 'close speaker', 'far speaker'];
@@ -592,8 +587,7 @@ const encodeData = async (data) => {
 
 const decodeData = async (encodedData) => {
     try {
-        const data = JSON.parse(decodeURI(encodedData));
-        const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
+        const bytes = Uint8Array.from(atob(decodeURIComponent(encodedData)), c => c.charCodeAt(0));
         let blob = new Blob([bytes]);
         const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
         blob = await new Response(decoder).blob();
@@ -641,7 +635,7 @@ const formatNumber = event => {
     }
 }
 
-const beginScan = async () => {
+const beginScan = async (id) => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
 
@@ -653,19 +647,25 @@ const beginScan = async () => {
     popup.scanner = scanner;
 
     const callback = (text, detail) => {
-        console.log('got scan', text, detail);
-        scanner.pause(true);
+        const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
+        console.log(data)
+        const dataObject = decodeData(data)
+        console.log(dataObject)
+        // console.log('got /scan', text, detail);
+        // scanner.pause(true);
     };
 
     const errorCallback = (error) => {
-        console.log('scanner error', error);
+        // console.log('scanner error', error);
     };
 
     let framerate = 15;
     let cameras = await Html5Qrcode.getCameras()
     console.log(cameras);
+    
     await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
                         callback, errorCallback);
+
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
 
@@ -857,6 +857,7 @@ const switchTeam = async (event) => {
         const newTeam = prompt('new team');
         
         if (validTeam(newTeam)) {
+            clearTeam()
             let teamData = emptyTeam();
 
             setTeam(newTeam);
@@ -1113,6 +1114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         input.placeholder = '0';
         input.min = '0';
     });
+
+    document.getElementById('close-scanner').addEventListener('click', closeScanner);
 
     window.addEventListener('beforeunload', () => {
         const session = sessionStorage.getItem('session');
