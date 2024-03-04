@@ -179,9 +179,9 @@ const method = (event) => {
 }
 
 const onLoad = async () => {
-    const cons = ['amp', 'close speaker', 'far speaker', 'floor intake', 'source intake'];
+    const cons = ['amp', 'close speaker', 'far speaker'];
 
-    for (let {table, count} of [{table:'auto', count: 4}, {table: 'teleop', count: 5}]) {
+    for (let {table, count} of [{table:'auto', count: 2}, {table: 'teleop', count: 3}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
@@ -212,20 +212,54 @@ const onLoad = async () => {
                         th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
+                        const minus = document.createElement('button');
                         input = document.createElement('input');
                         input.classList.add('number', 'input');
 
-                        plus.textContent = '+';
+                        plus.textContent = '-';
                         plus.classList.add('incr');
 
-                        plus.addEventListener('click', async () => {
+                        minus.textContent = '+';
+                        minus.classList.add('incr');
+                        minus.style['marginRight'] = '30px'
+
+                        minus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
+                            if ((parseInt(input.value) || 0) - 1 > 998) {
+                                input.value = 999;
+                            }
+
+                            // if (event.value[0] ==='0') {
+                            //     event.value = event.value.slice(1);
+                            // }
+                        
+                            // if (parseInt(event.value) > 999) {
+                            //     event.value = event.value.slice(0, -1);
+                            // }
+
+                            await sync();
+                        });
+
+                        plus.addEventListener('click', async () => {
+                            input.value = (parseInt(input.value) || 0) - 1;
+                            if ((parseInt(input.value) || 0) - 1 < 0) {
+                                input.value = 0;
+                            }
+
+                            // if (event.value[0] ==='0') {
+                            //     event.value = event.value.slice(1);
+                            // }
+
+                            // if (parseInt(event.value) > 999) {
+                            //     event.value = event.value.slice(0, -1);
+                            // }
 
                             await sync();
                         });
 
                         th.appendChild(plus);
                         th.appendChild(input);
+                        th.appendChild(minus);
                     }
 
                     const cat = catItems[j].className;
@@ -313,7 +347,8 @@ const share = async (shareOption) => {
                             Math.min(innerHeight, innerWidth) * .6,
                             Math.min(innerHeight, innerWidth) * .6);
 
-                getElem('qrcode-team').textContent = 'selected match: ' + match[2] + ', team: ' + match[1] + ', competition: ' + match[0];
+                getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
+                                                   + ', team: ' + match[1] + ', competition: ' + match[0];
                 
                 // qrcodeButton.style.display = 'block';
                 // populateQRCode();
@@ -501,6 +536,15 @@ const presentTeamData = async (teamData, push=false) => {
 
     aStop();
     eStop();
+
+    await refreshTeams()
+    if (validTeam(teamData.team)) {
+        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+
+        getElem('teams').value = selected;
+    }  else {
+        getElem('teams').value = 'select';
+    }
 }
 
 const scrapeTeamData = () => {

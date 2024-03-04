@@ -50,17 +50,17 @@
 
         <button id="share">Share</button>    
 
-        <select id="import">
+        <!-- <select id="import">
             <option value="open">open ...</option>
             <option value="enter">enter team data</option>
             <option value="enter-csv">enter csv</option>
             <option value="enter-qrcode">scan qrcode</option>
             <option value="enter-encoded">decode encoded data</option>
-        </select>
+        </select> -->
         <hr>
 
         <button class="collapsible" id="auto">Auto</button>
-        <div class="content">
+        <div  class="content">
             <label for="left-zone">Left alliance zone</label>
             <input type="checkbox" id="left-zone" class="input" style="margin-bottom: 10px;"></input>
             <br>
@@ -70,12 +70,22 @@
 
             <label>Reason:</label>
             <input type="text" id="a-reason" class="input" placeholder="" disabled>
+            <br><br>
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
                 <tr class="succeeds"><th>Successful</th> </tr>
             </table>
+            <br>
+
+            <label for="auto-floor-intake">Could they do floor intake?</label>
+            <input id="auto-floor-intake" type="checkbox">
+            <br>
+            <label for="auto-source-intake">Could they do source intake?</label>
+            <input id="auto-source-intake" type="checkbox">
         </div>
+
+        <br>
 
         <button class="collapsible" id="teleop">Teleop</button>
         <div class="content">
@@ -90,6 +100,20 @@
                 <tr class="con"> <th></th> </tr>
                 <tr class="succeeds"> <th>Successful</th> </tr>
             </table>
+            <br>
+            <label for="source-intake">Could they do source intake?</label>
+            <input id="source-intake" type="checkbox">
+            <br>
+            <label for="teleop-floor-intake">Could they do floor intake?</label>
+            <input id="teleop-floor-intake" type="checkbox">
+            <br>
+            <label for="climb">Did they climb?</label>
+            <input id="climb" type="checkbox">
+            <label for="climb-others">If yes, with others?</label>
+            <input id="climb-others" type="checkbox">
+            <br>
+            <label for="trap">Could they score trap?</label>
+            <input id="trap" type="checkbox">
         </div>
 
         <div id="share-modal" class="modal">
