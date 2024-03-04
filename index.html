@@ -18,24 +18,15 @@
         <label>Competition:</label>
 
         <select id="comp">
-            <option value="grand-forks">Great Northern Regional (Grand Forks)</option>
             <option value="eagan">Blue Twilight Week 0 (Eagan)</option>
             <option selected value="grand-forks">Great Northern Regional (Grand Forks)</option>
         </select>
 
-        <label>Round:</label>
+        <label>Match:</label>
 
-        <select id="round">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-        </select>
+        <input id="round" style="width:1.7em"></input>
+        <button class="plusbutton"><b>+</b></button>
+        <button class="minusbutton"><b>-</b></button>
 
         <br>
 
@@ -83,8 +74,6 @@
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
                 <tr class="succeeds"><th>Successful</th> </tr>
-                <tr class="fails"> <th>Failed</th> </tr>
-                <tr class="method"> <th>Method</th> </tr>
             </table>
         </div>
 
@@ -100,87 +89,7 @@
             <table data-sec="teleop">
                 <tr class="con"> <th></th> </tr>
                 <tr class="succeeds"> <th>Successful</th> </tr>
-                <tr class="fails"> <th>Failed</th> </tr>
-                <tr class="method"> <th>Method</th> </tr>
             </table>
-        </div>
-
-        <button class="collapsible" id="scoring">Scoring</button>
-        <div class="content">
-            <div class="score">
-                <label for="collisions">Collisions</label>
-                <input id="collisions" class="input" type="checkbox">
-            </div>
-            
-            <div class="score">
-                <label for="climb">Climb With Others</label>
-                <input id="climb" class="input" type="checkbox">
-            </div>
-            
-            <div class="score">
-                <label for="score">Total Game Score</label>
-                <input id="score" class="input">
-            </div>
-
-            <div class="score indented">
-                <label for="amp">Total Amp Score</label>
-                <input id="amp" class="input">
-            </div>
-
-            <div class="score double-indented">
-                <label for="amp-auto">Amp Auto Score</label>
-                <input id="amp-auto" class="input">
-            </div>
-            
-            <div class="score double-indented">
-                <label for="amp-teleop">Amp Teleop Score</label>
-                <input id="amp-teleop" class="input">
-            </div>
-
-            <div class="score indented">
-                <label for="spkr">Total Speaker Score</label>
-                <input id="spkr" class="input">
-            </div>
-
-            <div class="score double-indented">
-                <label for="spkr-auto">Speaker Auto Score</label>
-                <input id="spkr-auto" class="input">
-            </div>
-            
-            <div class="score double-indented">
-                <label for="spkr-teleop">Speaker Teleop Score</label>
-                <input id="spkr-teleop" class="input">
-            </div>
-            
-            <div class="score double-indented">
-                <label for="spkr-amp">Speaker Amplified Score</label>
-                <input id="spkr-amp" class="input">
-            </div>
-
-            <div class="score">
-                <label for="coop">Cooperation</label>
-                <input id="coop" class="input" type="checkbox">
-            </div>
-            
-            <div class="score">
-                <label for="melody">Melody</label>
-                <input id="melody" class="input" type="checkbox">
-            </div>
-
-            <div class="score"> 
-                <label for="ensemble">Ensemble</label>
-                <input id="ensemble" class="input" type="checkbox">
-            </div>
-
-            <div class="score">
-                <label for="win">Win</label>
-                <input id="win" class="input" type="checkbox">
-            </div>
-
-            <div class="score">
-                <label for="tie">Tie</label>
-                <input id="tie" class="input" type="checkbox">
-            </div>
         </div>
 
         <div id="share-modal" class="modal">
@@ -204,9 +113,14 @@
                     <label for="csv-top-row" style="color:black">include top row:</label>
                     <input id="csv-top-row" type="checkbox">
 
-                    <br>
+                    <br><br>
+
+                    <label style="color:black" id="csv-comp"></label>
+
+                    <br><br>
 
                     <button id="csv-download-all">download csv of all teams</button>
+                    <button id="csv-share-all">share csv of all teams</button>
                 </div>
     
                 <div class="option-div" id="json-div">
@@ -225,25 +139,11 @@
                     <br><br>
 
                     <div id="qrcode-div">
-                        <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
-                        <button id="qrcode-button">hide qrcode</button>
-
+                        <label style="color:black" id="qrcode-team"></label>
                         <br>
-
-                        <select id="qrcode-comp">
-                            <option disabled>no comp selected</option>
-                        </select>
-
-                        <select id="qrcode-team">
-                            <option disabled>no team selected</option>
-                        </select>
-
-                        <select id="qrcode-round">
-                            <option disabled>no round selected</option>
-                        </select>
+                        <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
+                        <!-- <button id="qrcode-button">hide qrcode</button> -->
                     </div>
-
-
                 </div>
             </div>
         </div>
@@ -264,7 +164,7 @@
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>
         <script src="scripts/script.js" type="module"></script>
-        <script src="assets/console/console-import.js"></script>
-        <script>document.write(consoleImport)</script>
+        <!-- <script src="assets/console/console-import.js"></script>
+        <script>document.write(consoleImport)</script> -->
     </body>
 </html>

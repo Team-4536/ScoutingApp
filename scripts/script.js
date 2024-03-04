@@ -29,23 +29,6 @@ const dataObject = JSON.stringify({
         'fails': {},
         'method': {}
     },
-
-    'scoring': {
-        'collisions' : null,
-        'climb': null,
-
-        'coop': null,
-        'melody': null,
-        'ensemble': null,
-        'win': null,
-        'tie': null,
-
-        'score': '',
-
-        'amp': {},
-
-        'spkr': {}
-    }
 });
 
 const getElem = (value, type = 'id', head = document) => {
@@ -82,14 +65,30 @@ const pushState = (data, replace=false) => {
     console.log('push data', data)
     console.log('replace', replace)
 
-    const state = {
-        team: data.team,
-        comp: data.comp,
-        round: data.round
-    };
+    let state;
+
+    if (data.team) {
+        state = {
+            team: data.team,
+            comp: data.comp,
+            round: data.round
+        };
+    }else {
+        state = {
+            team: '',
+            comp: data.comp,
+            round: data.round
+        };
+    }
     
     const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
-    const url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+        let url;
+
+if (data.team) {
+        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+} else {
+    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
+}
 
     if (replace) {
         history.replaceState(state, title, url);
@@ -120,7 +119,9 @@ const setMatch = (team, comp, round) => {
 
     if (comp) {
         getElem('comp').value = comp;
-    } else if (round) {
+    }
+    
+    if (round) {
         getElem('round').value = round;
     }
 
@@ -178,13 +179,13 @@ const method = (event) => {
 }
 
 const onLoad = async () => {
-    const cons = ['amp', 'speaker', 'floor intake', 'source intake'];
+    const cons = ['amp', 'close speaker', 'far speaker', 'floor intake', 'source intake'];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
+    for (let {table, count} of [{table:'auto', count: 4}, {table: 'teleop', count: 5}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
-            for (let j = 0; j < 4; j++) {
+            for (let j = 0; j < 2; j++) {
                 const th = document.createElement('th');
                 let input;
 
@@ -301,23 +302,35 @@ const populateQRCode = async () => {
 
 const share = async (shareOption) => {
 	startShare();
-
+        const match = getMatch().split(',');
     switch (shareOption) {
         case 'scan':
-            const match = getMatch().split(',');
-            const qrcodeButton = getElem('qrcode-button');
+            
+            // const qrcodeButton = getElem('qrcode-button');
 
             if (match[0] && match[1] && match[2]) {
                 generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-                            Math.min(innerHeight, innerWidth) * .4,
-                            Math.min(innerHeight, innerWidth) * .4);
+                            Math.min(innerHeight, innerWidth) * .6,
+                            Math.min(innerHeight, innerWidth) * .6);
+
+                getElem('qrcode-team').textContent = 'selected match: ' + match[2] + ', team: ' + match[1] + ', competition: ' + match[0];
                 
-                qrcodeButton.style.display = 'block';
-                populateQRCode();
+                // qrcodeButton.style.display = 'block';
+                // populateQRCode();
             } else {
-                qrcodeButton.style.display = 'none';
+                getElem('qrcode-team').textContent = 'no team selected to generate qrcode from'
+                // qrcodeButton.style.display = 'none';
             }
 
+            break;
+
+            case'csv':
+            const a = getElem('csv-comp')
+            if(match[1]){
+            a.textContent='selected comp to share: '+match[1]
+            }else{
+            a.textContent='no comp selected'
+            }
             break;
     }
 
@@ -430,8 +443,8 @@ const loadData = async () => {
 
     console.log('data presented on load', teamData)
 
-    presentTeamData(teamData, push);
-    refreshTeams();
+    await presentTeamData(teamData, push);
+    // refreshTeams();
 
     const sec = sessionStorage.getItem('sec');
 
@@ -452,7 +465,7 @@ const eStop = () => {
 
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
-        const secs = ['auto', 'teleop', 'scoring'];
+        const secs = ['auto', 'teleop'];
 
         for (const sec of secs) {
             getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
@@ -461,9 +474,7 @@ const presentTeamData = async (teamData, push=false) => {
 
                 if (secs.includes(id[0])) { // auto or teleop table element
                     input.value = teamData[id[0]][id[1]][id[2]] ?? '';
-                } else if (['amp', 'spkr'].includes(id[0])) { // amp or speaker score element
-                    input.value = teamData.scoring[id[0]][inputID] ?? '';
-                } else { // non-table and non-score element
+                } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
 
                     input[state] = teamData[sec][inputID];
@@ -472,8 +483,9 @@ const presentTeamData = async (teamData, push=false) => {
         }
     }
 
+    // setMatch(teamData.team || '', teamData.comp || 'grand-forks', teamData.round || 1);
     await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value);
+    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || 1);
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -502,9 +514,8 @@ const scrapeTeamData = () => {
     teamData.team = getTeam();
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
-    teamData.scoring.amp.a = 3
 
-    const secs = ['auto', 'teleop', 'scoring'];
+    const secs = ['auto', 'teleop'];
 
     for (const sec of secs) {
         getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
@@ -514,9 +525,7 @@ const scrapeTeamData = () => {
 
                 if (secs.includes(id[0])) { // auto or teleop table element
                     teamData[id[0]][id[1]][id[2]] = input.value;
-                } else if (['amp', 'spkr'].includes(id[0])) { // amp or speaker score element
-                    teamData.scoring[id[0]][inputID] = input.value;
-                } else { // non-table and non-score element
+                } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked': 'value';
 
                     teamData[sec][inputID] = input[state];
@@ -768,7 +777,16 @@ const validTeam = (team) => {
 }
 
 const switchMatch = () => {
+    const a = getElem('round').value
+    const b = getElem('comp').value
+
+    if(a && b) {
+        pushState({team: '', round:a, comp:b})
+    } else {
+        pushState()
+    }
     getElem('teams').value = 'select';
+    clearTeam()
     closeSections();
     refreshTeams();
     console.log('current match', getMatch())
@@ -779,6 +797,7 @@ const emptyTeam = () => {
 }
 
 const clearTeam = () => {
+    currentTeam = '';
     presentTeamData(emptyTeam());
 };
 
@@ -866,8 +885,6 @@ const toggleQRCode = (boolean) => {
         qrcode.style.display = none ? 'inline-block': 'none';
         qrcodeButton.textContent = none ? 'hide qrcode': 'show qrcode';
     }
-
-    sessionStorage.setItem('sec', saveSec);
 }
 
 const openSection = (id) => {
@@ -938,9 +955,82 @@ document.addEventListener('DOMContentLoaded', () => {
     session();
     generateCSV()
 
+    getElem('.minusbutton', 'queryAll').forEach(async (button) => {
+        button.addEventListener('click', async () => {
+            document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
+            const a = parseInt(document.getElementById('round').value) - 1
+            console.log(a)
+            if(a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (Math.round(a) != a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+    })
+    getElem('.plusbutton', 'queryAll').forEach(async (button) => {
+        button.addEventListener('click', async () => {
+            document.getElementById('round').value = parseInt(document.getElementById('round').value) + 1
+            const a = parseInt(document.getElementById('round').value) + 1
+            console.log(a)
+            if(a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (Math.round(a) != a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+    })
+    getElem('round').addEventListener('input', async () => {
+            const a = parseInt(document.getElementById('round').value)
+            if (a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            } else {
+                document.getElementById('round').value ='1'
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+
     getElem('comp').addEventListener('change', switchMatch);
-    getElem('round').addEventListener('change', switchMatch);
     getElem('teams').addEventListener('change', switchTeam);
+    getElem('csv-share-all').addEventListener('click', async () => {
+        const shareData = {
+            title: "csv",
+            text: "CSV data",
+            file: await generateCSV('all-teams'),
+        };
+
+        navigator.share(shareData);
+    });
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
         input.addEventListener("click", (event) => openSection(event.target.id));
@@ -964,9 +1054,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quit-share').addEventListener('click', closeModal);
     document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
     document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
-    document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
-        qrcodeToggle.addEventListener('click', toggleQRCode);
-    });
+    // document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
+    //     qrcodeToggle.addEventListener('click', toggleQRCode);
+    // });
 
 
     getElem('.number', 'queryAll').forEach( (input) => {
@@ -1017,6 +1107,7 @@ window.onLoad = onLoad;
 window.openSection = openSection;
 window.presentTeamData = presentTeamData;
 window.refreshTeams = refreshTeams;
+window.setMatch = setMatch;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
 window.session = session;
