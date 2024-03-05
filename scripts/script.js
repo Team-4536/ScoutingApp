@@ -685,12 +685,12 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
 
             new QRCode(getElem('qrcode'), {
                 text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
-                correctLevel: QRCode.CorrectLevel.Q,
-                width: 256,
-                height: 256
+                correctLevel: QRCode.CorrectLevel.Q
             });
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
+        console.log('inner html', getElem('qrcode').innerHTML)
+        getElem('qrcode-test').textContent = getElem('qrcode').innerHTML
     });
 }
 
