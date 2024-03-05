@@ -690,18 +690,19 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-        new QRCode(getElem('qrcode'), {
-            text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
-            correctLevel: QRCode.CorrectLevel.Q,
-            width: length,
-            height: length
-        });
+        try {
+            new QRCode(getElem('qrcode'), {
+                text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
+                correctLevel: QRCode.CorrectLevel.Q,
+                width: length,
+                height: length
+            });
+        } catch(error) {
+            getElem('error').innerHTML = error.message
+        }
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     });
-
-    // getElem('qrcode-div').style.display = 'block';
-    // getElem('qrcode').style.display = 'block';
 }
 
 const generateCSV = async (includeTopRow) => {
