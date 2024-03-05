@@ -174,9 +174,9 @@ const refreshTeams = async (team = false) => {
 
 
 const onLoad = async () => {
-    const cons = ['amp', 'close speaker', 'far speaker'];
+    const cons = ['amp', 'close speaker', 'far speaker', ''];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
@@ -339,8 +339,8 @@ const share = async (shareOption) => {
 
             if (match[0] && match[1] && match[2]) {
                 generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-                            Math.min(innerHeight, innerWidth) * .6,
-                            Math.min(innerHeight, innerWidth) * .6);
+                               Math.min(innerHeight, innerWidth) * .6,
+                               Math.min(innerHeight, innerWidth) * .6);
 
                 getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
                                                    + ', team: ' + match[1] + ', competition: ' + match[0];
@@ -485,14 +485,6 @@ const loadData = async () => {
     }
 }
 
-const aStop = () => {
-    getElem('a-reason').disabled = !getElem('a-stop').checked;
-}
-
-const eStop = () => {
-    getElem('e-reason').disabled = !getElem('e-stop').checked;
-}
-
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
         const secs = ['auto', 'teleop'];
@@ -531,9 +523,6 @@ const presentTeamData = async (teamData, push=false) => {
     if (push) {
         pushState(teamData);
     }
-
-    aStop();
-    eStop();
 
     await refreshTeams()
     if (validTeam(teamData.team)) {
@@ -695,7 +684,7 @@ const closeScanner = () => {
 }
 
 const generateQRCode = (teamData, length = screen.height * .8) => {
-    console.log(teamData)
+    length = Math.max(length, 300)
     encodeData(teamData).then((data) => {
         getElem('qrcode').textContent = '';
 
@@ -873,26 +862,34 @@ const switchTeam = async (event) => {
 
     if (select ==='new') {
         const newTeam = prompt('new team');
+
+        console.log('newTeam', newTeam)
         
-        if (validTeam(newTeam)) {
-            clearTeam()
-            let teamData = emptyTeam();
-
-            setTeam(newTeam);
-
-            teamData.team = currentTeam;
-            teamData.comp = getElem('comp').value;
-            teamData.round = getElem('round').value;
-
-            await saveMatch(teamData);
-
-            await refreshTeams();
-
-            presentTeamData(teamData, true);
-        } else if (newTeam.replace(/\D/g, '') !== newTeam) {
-            confirm(newTeam + ' - please enter a valid team number');
+        if (!newTeam) {
+            getElem('teams').value = 'select'
         } else {
-            confirm(newTeam + ' is not a valid team number');
+            if (validTeam(newTeam)) {
+                clearTeam()
+                let teamData = emptyTeam();
+
+                setTeam(newTeam);
+
+                teamData.team = currentTeam;
+                teamData.comp = getElem('comp').value;
+                teamData.round = getElem('round').value;
+
+                await saveMatch(teamData);
+
+                await refreshTeams();
+
+                presentTeamData(teamData, true);
+            } else if (newTeam.replace(/\D/g, '') !== newTeam) {
+                confirm(newTeam + ' - please enter a valid team number');
+                getElem('teams').value = 'select'
+            } else {
+                confirm(newTeam + ' is not a valid team number');
+                getElem('teams').value = 'select'
+            }
         }
     } else if (select !== '') {
         let splitMatch = select.split(',');
@@ -1062,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
     })
-    getElem('round').addEventListener('input', async () => {
+    getElem('round').addEventListener('change', async () => {
             const a = parseInt(document.getElementById('round').value)
             if (a < 1) {
                 document.getElementById('round').value = '1'
@@ -1107,11 +1104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     //     exportTeam(input.target.value)
     // });
 
-    getElem('a-stop').addEventListener('input', aStop);
-
-    getElem('e-stop').addEventListener('input', eStop);
-
-    window.addEventListener('click', (event) => closeModal(event.target.id));
+    window.addEventListener('pointerdown', (event) => closeModal(event.target.id));
+    // window.addEventLxistener('touchstart', (event) => closeModal(event.target.id));
 
     document.getElementById('share').addEventListener('click', startShare);
     document.getElementById('quit-share').addEventListener('click', closeModal);
