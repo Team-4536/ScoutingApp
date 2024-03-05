@@ -61,43 +61,45 @@
         <hr>
 
         <button class="collapsible" id="auto">Auto</button>
-        <div  class="content">
+        <div  class="section">
             <label for="left-zone">Left alliance zone</label>
             <input type="checkbox" id="left-zone" class="input" style="margin-bottom: 10px;"></input>
             <br>
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
-                <tr class="succeeds"><th>Successful</th> </tr>
+                <tr class="succeeds"><th>Scored Successfully</th> </tr>
+                <tr class="fails"><th>Failed to Score</th> </tr>
             </table>
             <br>
 
             <label for="auto-floor-intake">Could they do floor intake?</label>
-            <input id="auto-floor-intake" type="checkbox">
+            <input class="input" id="auto-floor-intake" type="checkbox">
         </div>
 
         <br>
 
         <button class="collapsible" id="teleop">Teleop</button>
-        <div class="content">
+        <div class="section">
             <table data-sec="teleop">
                 <tr class="con"> <th></th> </tr>
                 <tr class="succeeds"> <th>Successful</th> </tr>
+                <tr class="fails"><th>Failed to Score</th> </tr>
             </table>
             <br>
             <label for="source-intake">Could they do source intake?</label>
-            <input id="source-intake" type="checkbox">
+            <input class="input" id="source-intake" type="checkbox">
             <br>
             <label for="teleop-floor-intake">Could they do floor intake?</label>
-            <input id="teleop-floor-intake" type="checkbox">
+            <input class="input" id="teleop-floor-intake" type="checkbox">
             <br>
             <label for="climb">Did they climb?</label>
-            <input id="climb" type="checkbox">
+            <input class="input" id="climb" type="checkbox">
             <label for="climb-others">If yes, with others?</label>
-            <input id="climb-others" type="checkbox">
+            <input class="input" id="climb-others" type="checkbox">
             <br>
             <label for="trap">Could they score trap?</label>
-            <input id="trap" type="checkbox">
+            <input class="input" id="trap" type="checkbox">
         </div>
 
         <div id="share-modal" class="modal">
@@ -148,10 +150,9 @@
 
                     <div id="qrcode-div">
                         <label style="color:black" id="qrcode-team"></label>
-                        <label id="error" style="color:#8f0b0b"></label>
                         <br>
-                        <div id="qrcode" class="qrcode" style="text-align: center; display: inline-block;"></div>
-                        <!-- <button id="qrcode-button">hide qrcode</button> -->
+                        <div id="qrcode" class="qrcode" style="text-align: center; display:inline-block;"></div>
+                        <br><button value="1" id="retry-qrcode">click this if the qrcode failed to generate</button>
                     </div>
                 </div>
             </div>

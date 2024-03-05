@@ -13,12 +13,11 @@ const dataObject = JSON.stringify({
 
     'auto': {
         'left-zone': null,
-        'a-stop': null,
-        'a-reason': '',
 
         'succeeds': {},
         'fails': {},
-        'method': {}
+
+        'auto-floor-intake': null
     },
 
     'teleop': {
@@ -27,7 +26,12 @@ const dataObject = JSON.stringify({
 
         'succeeds': {},
         'fails': {},
-        'method': {}
+
+        'source-intake': null,
+        'teleop-floor-intake': null,
+        'climb': null,
+        'climb-others': null,
+        'trap': null
     },
 });
 
@@ -174,18 +178,21 @@ const refreshTeams = async (team = false) => {
 
 
 const onLoad = async () => {
+
+    getElem('comp').value = 'grand-forks'
     const cons = ['amp', 'close speaker', 'far speaker', ''];
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
-            for (let j = 0; j < 2; j++) {
+            for (let j = 0; j < 3; j++) {
                 const th = document.createElement('th');
                 let input;
 
                 if (j === 0) {
                     th.textContent = cons[i];
+                    th.style.textAlign = 'center'
                 } else {
                     if (j === 3) {
                         const options = [['a', 'a'], ['b', 'a'], ['c', 'c'], ['d', 'd'], ['Add method', 'add']];
@@ -210,6 +217,7 @@ const onLoad = async () => {
                         const minus = document.createElement('button');
                         input = document.createElement('input');
                         input.classList.add('number', 'input');
+                        input.style.width = '50px'
 
                         plus.textContent = '-';
                         plus.classList.add('incr');
@@ -224,30 +232,14 @@ const onLoad = async () => {
                                 input.value = 999;
                             }
 
-                            // if (event.value[0] ==='0') {
-                            //     event.value = event.value.slice(1);
-                            // }
-                        
-                            // if (parseInt(event.value) > 999) {
-                            //     event.value = event.value.slice(0, -1);
-                            // }
-
                             await sync();
                         });
 
                         plus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) - 1;
-                            if ((parseInt(input.value) || 0) - 1 < 0) {
-                                input.value = 0;
+                            if ((parseInt(input.value) || 0) - 1 <= 0) {
+                                input.value = '';
                             }
-
-                            // if (event.value[0] ==='0') {
-                            //     event.value = event.value.slice(1);
-                            // }
-
-                            // if (parseInt(event.value) > 999) {
-                            //     event.value = event.value.slice(0, -1);
-                            // }
 
                             await sync();
                         });
@@ -289,8 +281,6 @@ const onLoad = async () => {
         div.insertBefore(label, div.firstChild);
         div.insertBefore(button, div.firstChild);
     });
-
-    // download(generateCSV(), 'csv')
 }
 
 const populateQRCode = async () => {
@@ -334,9 +324,6 @@ const share = async (shareOption) => {
         const match = getMatch().split(',');
     switch (shareOption) {
         case 'scan':
-            
-            // const qrcodeButton = getElem('qrcode-button');
-
             if (match[0] && match[1] && match[2]) {
                 generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
                                Math.min(innerHeight, innerWidth) * .6,
@@ -344,12 +331,8 @@ const share = async (shareOption) => {
 
                 getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
                                                    + ', team: ' + match[1] + ', competition: ' + match[0];
-                
-                // qrcodeButton.style.display = 'block';
-                // populateQRCode();
             } else {
                 getElem('qrcode-team').textContent = 'no team selected to generate qrcode from'
-                // qrcodeButton.style.display = 'none';
             }
 
             break;
@@ -474,7 +457,6 @@ const loadData = async () => {
     console.log('data presented on load', teamData)
 
     await presentTeamData(teamData, push);
-    // refreshTeams();
 
     const sec = sessionStorage.getItem('sec');
 
@@ -494,21 +476,21 @@ const presentTeamData = async (teamData, push=false) => {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
-                if (secs.includes(id[0])) { // auto or teleop table element
-                    input.value = teamData[id[0]][id[1]][id[2]] ?? '';
-                    console.log(input, teamData[id[0]][id[1]][id[2]] ?? '')
+                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
+                    console.log(input, 'table')
+                    input.value = teamData?.[id[0]]?.[id[1]]?.[id[2]] ?? '';
                 } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
 
                     input[state] = teamData[sec][inputID];
 
-                    console.log(teamData[sec][inputID], input)
+                    console.log(input.id)
+                    console.log('aaa', teamData[sec][inputID], input)
                 }
             });
         }
     }
 
-    // setMatch(teamData.team || '', teamData.comp || 'grand-forks', teamData.round || 1);
     await refreshTeams();
     setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || 1);
 
@@ -548,15 +530,21 @@ const scrapeTeamData = () => {
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
 
+    // Array.from(document.getElementsByClassName('section')).forEach((sec) => {
+    //     sec.querySelectorAll('input').forEach((input) => {
+            
+    //     });
+    // });
     const secs = ['auto', 'teleop'];
 
     for (const sec of secs) {
-        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
+        // getElem('input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {})
+        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) =>{
             if (input.value || input.checked) {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
-                if (secs.includes(id[0])) { // auto or teleop table element
+                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
                     teamData[id[0]][id[1]][id[2]] = input.value;
                 } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked': 'value';
@@ -634,10 +622,15 @@ const beginScan = async (id) => {
     popup.style.display = 'flex';
     let cameras = await Html5Qrcode.getCameras()
     const camerasscanner = getElem('cameras')
+    const options = getElem('option', 'queryAll', camerasscanner)
+    options.forEach((opt) => {
+        opt.remove()
+    })
     cameras.forEach((cam) => {
         const camera = document.createElement('option')
         camera.textContent = cam.label
         camera.value = cam.id
+        camera.selected = cam.id === id
         camerasscanner.appendChild(camera)
     })
 
@@ -690,16 +683,12 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-        try {
             new QRCode(getElem('qrcode'), {
                 text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
                 correctLevel: QRCode.CorrectLevel.Q,
                 width: length,
                 height: length
             });
-        } catch (error) {
-            getElem('error').innerHTML = error.message
-        }
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     });
@@ -1110,6 +1099,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('share').addEventListener('click', startShare);
     document.getElementById('quit-share').addEventListener('click', closeModal);
+    getElem('retry-qrcode').addEventListener('click', async () => {
+        switch(getElem('retry-qrcode').value) {
+            case '1':
+                    const match = getMatch().split(',')
+                generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
+                                    Math.min(innerHeight, innerWidth) * .6,
+                                    Math.min(innerHeight, innerWidth) * .6);
+
+                        getElem('qrcode-team').innerHTML = 'selected match: ' + (match[2] || 'NaN') + ', team: ' + (match[1] || 'NaN') + ', competition: ' +( match[0] || 'NaN');
+                    getElem('retry-qrcode').textContent = 'click this if qrcode still didn\'t generate'
+                getElem('retry-qrcode').value = '2'; case '2':
+                getElem('#qrcode, canvas', 'queryAll').forEach((i) => {
+            i.style.display=
+        'inline-block'
+                })
+                {}}
+    })
     document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
     document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
     getElem('cameras').addEventListener('change', () => {
