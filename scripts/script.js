@@ -691,7 +691,7 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
         console.log('inner html', getElem('qrcode').innerHTML)
         getElem('qrcode-test').textContent = getElem('qrcode').innerHTML
-    });
+    }).catch((error) => getElem('qrcode-test').textContent = error);
 }
 
 const generateCSV = async (includeTopRow) => {
