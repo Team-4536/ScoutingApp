@@ -697,7 +697,7 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
                 width: length,
                 height: length
             });
-        } catch(error) {
+        } catch (error) {
             getElem('error').innerHTML = error.message
         }
 
