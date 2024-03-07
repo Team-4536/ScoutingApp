@@ -435,16 +435,16 @@ const loadData = async () => {
 
             console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
 
-            teamData.team = teamParam;
-
             const match = await dbClient.getMatch(compParam, roundParam, teamParam);
 
             if (match) { // if match exists
                 console.log('match exists', match);
+                teamData.team = teamParam;
 
                 teamData = match;
             } else { // if match does not exist
                 console.log('match does not exist', teamParam, compParam, roundParam);
+                confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
             }
 
         } else { // if URL does not have team param
@@ -707,44 +707,30 @@ const generateCSV = async (includeTopRow) => {
             matchList.push([
                 'Team',
                 'Alliance',
-                'Round',
+                'Match',
                 'Scouter',
-                'Auto-A Stop',
-                'Teleop-E Stop',
-                'Auto-Left Alliance Zone',
+                'Left Alliance Zone',
 
                 'Auto-Amp Succeed',
                 'Auto-Amp Fail',
                 'Teleop-Amp Succeed',
                 'Teleop-Amp Fail',
-                'Amp Method',
 
                 'Auto-Speaker Succeed',
                 'Auto-Speaker Fail',
                 'Teleop-Speaker Succeed',
                 'Teleop-Speaker Fail',
-                'Speaker Method',
 
                 'Auto-Floor Intake Succeed',
                 'Auto-Floor Intake Fail',
                 'Teleop-Floor Intake Succeed',
                 'Teleop-Floor Intake Fail',
-                'Floor Intake Method',
 
-                'Teleop-Source Intake Succeed',
-                'Teleop-Source Intake Fail',
-                'Source Intake Method',
-
-                'Climb',
-                'Trap',
-                'Total Score',
-                'Win / Lose / Tie',
-                'Harmony',
-                'Ensemble',
-                'Cooperation',
-                'Collisions',
-                'Made Spotlight Notes',
-                'Missed Spotlight Notes'
+                'Could They Climb?',
+                'Could They Climb With Others?',
+                'Could They Score Trap?',
+                'Could They Do Source Intake?',
+                'Could They Do Floor Intake?'
             ]);
         } else {
             matchList.push([]);
@@ -759,8 +745,6 @@ const generateCSV = async (includeTopRow) => {
                 'NaN',
                 match?.round ?? 'NaN',
                 'NaN',
-                match?.auto?.['a-stop'] ?? 'NaN',
-                match?.teleop?.['e-stop'] ?? 'NaN',
                 match?.auto?.['left-zone'] ?? 'NaN'
             ].forEach(value => matchIndex.push(`${value}`));
 
@@ -771,26 +755,21 @@ const generateCSV = async (includeTopRow) => {
             for (let i = 0; i < 4; i++) {
                 for (let j = 0; j < 5; j++) {
                     if (i !== 3) {
-                        matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '');
+                        matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '0');
                     } else {
                         if (j < 3) {
-                            matchIndex.push(match?.[sec[j + 2]]?.[cats[j + 2]]?.[cons[i]] ?? '');
+                            matchIndex.push(match?.[sec[j + 2]]?.[cats[j + 2]]?.[cons[i]] ?? '0');
                         }
                     }
                 }
             }
 
             matchIndex.push(
-                match?.scoring?.climb ?? 'NaN',
-                'NaN',
-                'NaN',
-                'NaN',
-                match?.scoring?.harmony ?? 'NaN',
-                match?.scoring?.ensemble ?? 'NaN',
-                match?.scoring?.coop ?? 'NaN',
-                match?.collisions ?? 'NaN',
-                'NaN',
-                'NaN'
+                match?.teleop?.['source-intake'] ?? 'NaN',
+                match?.teleop?.['teleop-floor-intake'] ?? 'NaN',
+                match?.teleop?.climb ?? 'NaN',
+                match?.teleop?.['climb-others'] ?? 'NaN',
+                match?.teleop?.trap ?? 'NaN',
             );
 
             matchList.push(matchIndex ?? []);
