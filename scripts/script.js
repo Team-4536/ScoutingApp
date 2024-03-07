@@ -748,29 +748,24 @@ const generateCSV = async (includeTopRow) => {
                 match?.auto?.['left-zone'] ?? 'NaN'
             ].forEach(value => matchIndex.push(`${value}`));
 
-            const cons = ['amp', 'spkr', 'flr', 'src'];
+            const cons = ['amp', 'close\ speaker', 'far\ speaker'];
             const sec = ['auto', 'auto', 'teleop', 'teleop', 'teleop'];
-            const cats = ['succeeds', 'fails', 'succeeds', 'fails', 'method'];
+            const cats = ['succeeds', 'fails', 'succeeds', 'fails'];
 
-            for (let i = 0; i < 4; i++) {
-                for (let j = 0; j < 5; j++) {
-                    if (i !== 3) {
-                        matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '0');
-                    } else {
-                        if (j < 3) {
-                            matchIndex.push(match?.[sec[j + 2]]?.[cats[j + 2]]?.[cons[i]] ?? '0');
-                        }
-                    }
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 4; j++) {
+                    matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '0');
                 }
             }
 
-            matchIndex.push(
+            [
                 match?.teleop?.['source-intake'] ?? 'NaN',
                 match?.teleop?.['teleop-floor-intake'] ?? 'NaN',
                 match?.teleop?.climb ?? 'NaN',
                 match?.teleop?.['climb-others'] ?? 'NaN',
                 match?.teleop?.trap ?? 'NaN',
-            );
+            ].forEach(value => matchIndex.push(`${value}`));
+
 
             matchList.push(matchIndex ?? []);
         }
@@ -1082,23 +1077,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('share').addEventListener('click', startShare);
     document.getElementById('quit-share').addEventListener('click', closeModal);
-    getElem('retry-qrcode').addEventListener('click', async () => {
-        switch(getElem('retry-qrcode').value) {
-            case '1':
-                    const match = getMatch().split(',')
-                generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-                                    Math.min(innerHeight, innerWidth) * .6,
-                                    Math.min(innerHeight, innerWidth) * .6);
+    // getElem('retry-qrcode').addEventListener('click', async () => {
+    //     switch(getElem('retry-qrcode').value) {
+    //         case '1':
+    //                 const match = getMatch().split(',')
+    //             generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
+    //                                 Math.min(innerHeight, innerWidth) * .6,
+    //                                 Math.min(innerHeight, innerWidth) * .6);
 
-                        getElem('qrcode-team').innerHTML = 'selected match: ' + (match[2] || 'NaN') + ', team: ' + (match[1] || 'NaN') + ', competition: ' +( match[0] || 'NaN');
-                    getElem('retry-qrcode').textContent = 'click this if qrcode still didn\'t generate'
-                getElem('retry-qrcode').value = '2'; case '2':
-                getElem('#qrcode, canvas', 'queryAll').forEach((i) => {
-            i.style.display=
-        'inline-block'
-                })
-                {}}
-    })
+    //                     getElem('qrcode-team').innerHTML = 'selected match: ' + (match[2] || 'NaN') + ', team: ' + (match[1] || 'NaN') + ', competition: ' +( match[0] || 'NaN');
+    //                 getElem('retry-qrcode').textContent = 'click this if qrcode still didn\'t generate'
+    //             getElem('retry-qrcode').value = '2'; case '2':
+    //             getElem('#qrcode, canvas', 'queryAll').forEach((i) => {
+    //         i.style.display=
+    //     'inline-block'
+    //             })
+    //             {}}
+    // })
     document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
     document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
     getElem('cameras').addEventListener('change', () => {
