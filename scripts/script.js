@@ -151,7 +151,6 @@ const refreshTeams = async (team = false) => {
     {
         let selectOption = document.createElement('option');
         selectOption.value = 'select';
-        selectOption.disabled = true;
         selectOption.selected = true;
         selectOption.textContent = "Select team ...";
         newSelect.add(selectOption);
@@ -178,8 +177,6 @@ const refreshTeams = async (team = false) => {
 
 
 const onLoad = async () => {
-
-    getElem('comp').value = 'grand-forks'
     const cons = ['amp', 'close speaker', 'far speaker', ''];
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
@@ -399,6 +396,7 @@ const popState = async () => {
 
 const loadData = async () => {
     await navigator.serviceWorker.ready;
+    dbClient.getMatches().then(async () => {
 
     let url = window.location.search;
     let teamData = emptyTeam();
@@ -465,6 +463,7 @@ const loadData = async () => {
     } else {
         openSection('auto');
     }
+    }).catch(serviceWorkerMissingResponse)
 }
 
 const presentTeamData = async (teamData, push=false) => {
@@ -492,7 +491,7 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || 1);
+    setMatch(teamData.team || '', teamData.comp || 'grand-forks', teamData.round || '1');
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -516,6 +515,13 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     console.log('presented data: ', teamData)
+}
+
+const serviceWorkerMissingResponse = () => {
+    alert('\t\tWARNING!!\n\n'
+          + 'The site could not access the Service Worker (data handler)\n\n'
+          + 'DO NOT TRY TO SCOUT IF THIS WARNING APPEARS WHEN THE SITE LOADS\n\n'
+          + 'Please try to reload, or open a new tab if reloading does not work.')
 }
 
 const scrapeTeamData = () => {
@@ -689,9 +695,7 @@ const generateQRCode = (teamData, length = screen.height * .8) => {
             });
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
-        console.log('inner html', getElem('qrcode').innerHTML)
-        getElem('qrcode-test').textContent = getElem('qrcode').innerHTML
-    }).catch((error) => getElem('qrcode-test').textContent = error);
+    })
 }
 
 const generateCSV = async (includeTopRow) => {
