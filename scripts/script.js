@@ -65,7 +65,7 @@ const saveMatch = async (data) => {
     }
 };
 
-const pushState = (data, replace=false) => {
+const pushState = (data, replace = false) => {
     console.log('push data', data)
     console.log('replace', replace)
 
@@ -327,7 +327,7 @@ const share = async (shareOption) => {
                                Math.min(innerHeight, innerWidth) * .6);
 
                 getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
-                                                   + ', team: ' + match[1] + ', competition: ' + match[0];
+                                                   + ', team: ' + match[0] + ', competition: ' + match[1];
             } else {
                 getElem('qrcode-team').textContent = 'no team selected to generate qrcode from'
             }
