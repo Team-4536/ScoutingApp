@@ -650,7 +650,7 @@ const beginScan = async (id) => {
     const callback = async (text, detail) => {
         const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
         const dataObject = await decodeData(data)
-        saveMatch(dataObject)
+        saveMatch(dataObject).catch(serviceWorkerMissingResponse)
         pushState(dataObject)
         presentTeamData(dataObject)
         closeScanner()
