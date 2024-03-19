@@ -214,7 +214,7 @@ select:not(#comp, #round, #teams, #share-as, #qrcode-comp, #qrcode-round, #qrcod
     background-color: var(--darkGrey);
 }
 
-.content {
+.section {
     margin-top: -3px;
     background-color: var(--lightGrey);
     margin-bottom: 15px;

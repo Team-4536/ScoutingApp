@@ -13,12 +13,11 @@ const dataObject = JSON.stringify({
 
     'auto': {
         'left-zone': null,
-        'a-stop': null,
-        'a-reason': '',
 
         'succeeds': {},
         'fails': {},
-        'method': {}
+
+        'auto-floor-intake': null
     },
 
     'teleop': {
@@ -27,25 +26,13 @@ const dataObject = JSON.stringify({
 
         'succeeds': {},
         'fails': {},
-        'method': {}
-    },
 
-    'scoring': {
-        'collisions' : null,
+        'source-intake': null,
+        'teleop-floor-intake': null,
         'climb': null,
-
-        'coop': null,
-        'melody': null,
-        'ensemble': null,
-        'win': null,
-        'tie': null,
-
-        'score': '',
-
-        'amp': {},
-
-        'spkr': {}
-    }
+        'climb-others': null,
+        'trap': null
+    },
 });
 
 const getElem = (value, type = 'id', head = document) => {
@@ -78,18 +65,34 @@ const saveMatch = async (data) => {
     }
 };
 
-const pushState = (data, replace=false) => {
+const pushState = (data, replace = false) => {
     console.log('push data', data)
     console.log('replace', replace)
 
-    const state = {
-        team: data.team,
-        comp: data.comp,
-        round: data.round
-    };
+    let state;
+
+    if (data.team) {
+        state = {
+            team: data.team,
+            comp: data.comp,
+            round: data.round
+        };
+    }else {
+        state = {
+            team: '',
+            comp: data.comp,
+            round: data.round
+        };
+    }
     
     const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
-    const url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+        let url;
+
+if (data.team) {
+        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+} else {
+    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
+}
 
     if (replace) {
         history.replaceState(state, title, url);
@@ -120,7 +123,9 @@ const setMatch = (team, comp, round) => {
 
     if (comp) {
         getElem('comp').value = comp;
-    } else if (round) {
+    }
+    
+    if (round) {
         getElem('round').value = round;
     }
 
@@ -146,7 +151,6 @@ const refreshTeams = async (team = false) => {
     {
         let selectOption = document.createElement('option');
         selectOption.value = 'select';
-        selectOption.disabled = true;
         selectOption.selected = true;
         selectOption.textContent = "Select team ...";
         newSelect.add(selectOption);
@@ -171,25 +175,21 @@ const refreshTeams = async (team = false) => {
     teams.value = getMatch();
 }
 
-const method = (event) => {
-    if (event.target.value === 'add') {
-        confirm('what method?');
-    }
-}
 
 const onLoad = async () => {
-    const cons = ['amp', 'speaker', 'floor intake', 'source intake'];
+    const cons = ['amp', 'close speaker', 'far speaker', ''];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 4}]) {
+    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
         const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
 
         for (let i = 0; i < count; i++) {
-            for (let j = 0; j < 4; j++) {
+            for (let j = 0; j < 3; j++) {
                 const th = document.createElement('th');
                 let input;
 
                 if (j === 0) {
                     th.textContent = cons[i];
+                    th.style.textAlign = 'center'
                 } else {
                     if (j === 3) {
                         const options = [['a', 'a'], ['b', 'a'], ['c', 'c'], ['d', 'd'], ['Add method', 'add']];
@@ -211,20 +211,39 @@ const onLoad = async () => {
                         th.appendChild(input);
                     } else {
                         const plus = document.createElement('button');
+                        const minus = document.createElement('button');
                         input = document.createElement('input');
                         input.classList.add('number', 'input');
+                        input.style.width = '50px'
 
-                        plus.textContent = '+';
+                        plus.textContent = '-';
                         plus.classList.add('incr');
 
-                        plus.addEventListener('click', async () => {
+                        minus.textContent = '+';
+                        minus.classList.add('incr');
+                        minus.style['marginRight'] = '30px'
+
+                        minus.addEventListener('click', async () => {
                             input.value = (parseInt(input.value) || 0) + 1;
+                            if ((parseInt(input.value) || 0) - 1 > 998) {
+                                input.value = 999;
+                            }
+
+                            await sync();
+                        });
+
+                        plus.addEventListener('click', async () => {
+                            input.value = (parseInt(input.value) || 0) - 1;
+                            if ((parseInt(input.value) || 0) - 1 <= 0) {
+                                input.value = '';
+                            }
 
                             await sync();
                         });
 
                         th.appendChild(plus);
                         th.appendChild(input);
+                        th.appendChild(minus);
                     }
 
                     const cat = catItems[j].className;
@@ -259,8 +278,6 @@ const onLoad = async () => {
         div.insertBefore(label, div.firstChild);
         div.insertBefore(button, div.firstChild);
     });
-
-    // download(generateCSV(), 'csv')
 }
 
 const populateQRCode = async () => {
@@ -301,23 +318,29 @@ const populateQRCode = async () => {
 
 const share = async (shareOption) => {
 	startShare();
-
+        const match = getMatch().split(',');
     switch (shareOption) {
         case 'scan':
-            const match = getMatch().split(',');
-            const qrcodeButton = getElem('qrcode-button');
-
             if (match[0] && match[1] && match[2]) {
                 generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-                            Math.min(innerHeight, innerWidth) * .4,
-                            Math.min(innerHeight, innerWidth) * .4);
-                
-                qrcodeButton.style.display = 'block';
-                populateQRCode();
+                               Math.min(innerHeight, innerWidth) * .6,
+                               Math.min(innerHeight, innerWidth) * .6);
+
+                getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
+                                                   + ', team: ' + match[0] + ', competition: ' + match[1];
             } else {
-                qrcodeButton.style.display = 'none';
+                getElem('qrcode-team').textContent = 'no team selected to generate qrcode from'
             }
 
+            break;
+
+            case'csv':
+            const a = getElem('csv-comp')
+            if(match[1]){
+            a.textContent='selected comp to share: '+match[1]
+            }else{
+            a.textContent='no comp selected'
+            }
             break;
     }
 
@@ -373,6 +396,7 @@ const popState = async () => {
 
 const loadData = async () => {
     await navigator.serviceWorker.ready;
+    dbClient.getMatches().then(async () => {
 
     let url = window.location.search;
     let teamData = emptyTeam();
@@ -411,16 +435,16 @@ const loadData = async () => {
 
             console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
 
-            teamData.team = teamParam;
-
             const match = await dbClient.getMatch(compParam, roundParam, teamParam);
 
             if (match) { // if match exists
                 console.log('match exists', match);
+                teamData.team = teamParam;
 
                 teamData = match;
             } else { // if match does not exist
                 console.log('match does not exist', teamParam, compParam, roundParam);
+                confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
             }
 
         } else { // if URL does not have team param
@@ -430,8 +454,7 @@ const loadData = async () => {
 
     console.log('data presented on load', teamData)
 
-    presentTeamData(teamData, push);
-    refreshTeams();
+    await presentTeamData(teamData, push);
 
     const sec = sessionStorage.getItem('sec');
 
@@ -440,40 +463,35 @@ const loadData = async () => {
     } else {
         openSection('auto');
     }
-}
-
-const aStop = () => {
-    getElem('a-reason').disabled = !getElem('a-stop').checked;
-}
-
-const eStop = () => {
-    getElem('e-reason').disabled = !getElem('e-stop').checked;
+    }).catch(serviceWorkerMissingResponse)
 }
 
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
-        const secs = ['auto', 'teleop', 'scoring'];
+        const secs = ['auto', 'teleop'];
 
         for (const sec of secs) {
             getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
-                if (secs.includes(id[0])) { // auto or teleop table element
-                    input.value = teamData[id[0]][id[1]][id[2]] ?? '';
-                } else if (['amp', 'spkr'].includes(id[0])) { // amp or speaker score element
-                    input.value = teamData.scoring[id[0]][inputID] ?? '';
-                } else { // non-table and non-score element
+                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
+                    console.log(input, 'table')
+                    input.value = teamData?.[id[0]]?.[id[1]]?.[id[2]] ?? '';
+                } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
 
                     input[state] = teamData[sec][inputID];
+
+                    console.log(input.id)
+                    console.log('aaa', teamData[sec][inputID], input)
                 }
             });
         }
     }
 
     await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || getElem('comp')[0].value, teamData.round || getElem('round')[0].value);
+    setMatch(teamData.team || '', teamData.comp || 'grand-forks', teamData.round || '1');
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -487,8 +505,23 @@ const presentTeamData = async (teamData, push=false) => {
         pushState(teamData);
     }
 
-    aStop();
-    eStop();
+    await refreshTeams()
+    if (validTeam(teamData.team)) {
+        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+
+        getElem('teams').value = selected;
+    }  else {
+        getElem('teams').value = 'select';
+    }
+
+    console.log('presented data: ', teamData)
+}
+
+const serviceWorkerMissingResponse = () => {
+    alert('\t\tWARNING!!\n\n'
+          + 'The site could not access the Service Worker (data handler)\n\n'
+          + 'DO NOT TRY TO SCOUT IF THIS WARNING APPEARS WHEN THE SITE LOADS\n\n'
+          + 'Please try to reload, or open a new tab if reloading does not work.')
 }
 
 const scrapeTeamData = () => {
@@ -502,21 +535,24 @@ const scrapeTeamData = () => {
     teamData.team = getTeam();
     teamData.comp = getElem('comp').value;
     teamData.round = getElem('round').value;
-    teamData.scoring.amp.a = 3
 
-    const secs = ['auto', 'teleop', 'scoring'];
+    // Array.from(document.getElementsByClassName('section')).forEach((sec) => {
+    //     sec.querySelectorAll('input').forEach((input) => {
+            
+    //     });
+    // });
+    const secs = ['auto', 'teleop'];
 
     for (const sec of secs) {
-        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
+        // getElem('input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {})
+        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) =>{
             if (input.value || input.checked) {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
-                if (secs.includes(id[0])) { // auto or teleop table element
+                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
                     teamData[id[0]][id[1]][id[2]] = input.value;
-                } else if (['amp', 'spkr'].includes(id[0])) { // amp or speaker score element
-                    teamData.scoring[id[0]][inputID] = input.value;
-                } else { // non-table and non-score element
+                } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked': 'value';
 
                     teamData[sec][inputID] = input[state];
@@ -539,8 +575,7 @@ const encodeData = async (data) => {
 
 const decodeData = async (encodedData) => {
     try {
-        const data = JSON.parse(decodeURI(encodedData));
-        const bytes = Uint8Array.from(atob(data.data), c => c.charCodeAt(0));
+        const bytes = Uint8Array.from(atob(decodeURIComponent(encodedData)), c => c.charCodeAt(0));
         let blob = new Blob([bytes]);
         const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
         blob = await new Response(decoder).blob();
@@ -588,9 +623,22 @@ const formatNumber = event => {
     }
 }
 
-const beginScan = async () => {
+const beginScan = async (id) => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
+    let cameras = await Html5Qrcode.getCameras()
+    const camerasscanner = getElem('cameras')
+    const options = getElem('option', 'queryAll', camerasscanner)
+    options.forEach((opt) => {
+        opt.remove()
+    })
+    cameras.forEach((cam) => {
+        const camera = document.createElement('option')
+        camera.textContent = cam.label
+        camera.value = cam.id
+        camera.selected = cam.id === id
+        camerasscanner.appendChild(camera)
+    })
 
     let scanner = new Html5Qrcode('cameraStream', {
     formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
@@ -599,20 +647,31 @@ const beginScan = async () => {
 
     popup.scanner = scanner;
 
-    const callback = (text, detail) => {
-        console.log('got scan', text, detail);
-        scanner.pause(true);
+    const callback = async (text, detail) => {
+        const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
+        const dataObject = await decodeData(data)
+        saveMatch(dataObject).catch(serviceWorkerMissingResponse)
+        pushState(dataObject)
+        presentTeamData(dataObject)
+        closeScanner()
+        console.log('scanned data', dataObject)
     };
 
     const errorCallback = (error) => {
-        console.log('scanner error', error);
+        // console.log('scanner error', error);
     };
 
     let framerate = 15;
-    let cameras = await Html5Qrcode.getCameras()
     console.log(cameras);
-    await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
+    
+    if (id) {
+        await scanner.start(id , { fps: framerate, verbose: true },
                         callback, errorCallback);
+    } else {
+        await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
+                            callback, errorCallback);
+    }
+
     scanner.applyVideoConstraints({ frameRate: framerate });
 }
 
@@ -624,24 +683,19 @@ const closeScanner = () => {
 }
 
 const generateQRCode = (teamData, length = screen.height * .8) => {
-    console.log(teamData)
+    length = Math.max(length, 300)
     encodeData(teamData).then((data) => {
         getElem('qrcode').textContent = '';
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-        new QRCode(getElem('qrcode'), {
-            text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
-            correctLevel: QRCode.CorrectLevel.Q,
-            width: length,
-            height: length
-        });
+            new QRCode(getElem('qrcode'), {
+                text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
+                correctLevel: QRCode.CorrectLevel.Q
+            });
 
         console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
-    });
-
-    // getElem('qrcode-div').style.display = 'block';
-    // getElem('qrcode').style.display = 'block';
+    })
 }
 
 const generateCSV = async (includeTopRow) => {
@@ -653,44 +707,30 @@ const generateCSV = async (includeTopRow) => {
             matchList.push([
                 'Team',
                 'Alliance',
-                'Round',
+                'Match',
                 'Scouter',
-                'Auto-A Stop',
-                'Teleop-E Stop',
-                'Auto-Left Alliance Zone',
+                'Left Alliance Zone',
 
                 'Auto-Amp Succeed',
                 'Auto-Amp Fail',
                 'Teleop-Amp Succeed',
                 'Teleop-Amp Fail',
-                'Amp Method',
 
                 'Auto-Speaker Succeed',
                 'Auto-Speaker Fail',
                 'Teleop-Speaker Succeed',
                 'Teleop-Speaker Fail',
-                'Speaker Method',
 
                 'Auto-Floor Intake Succeed',
                 'Auto-Floor Intake Fail',
                 'Teleop-Floor Intake Succeed',
                 'Teleop-Floor Intake Fail',
-                'Floor Intake Method',
 
-                'Teleop-Source Intake Succeed',
-                'Teleop-Source Intake Fail',
-                'Source Intake Method',
-
-                'Climb',
-                'Trap',
-                'Total Score',
-                'Win / Lose / Tie',
-                'Harmony',
-                'Ensemble',
-                'Cooperation',
-                'Collisions',
-                'Made Spotlight Notes',
-                'Missed Spotlight Notes'
+                'Could They Climb?',
+                'Could They Climb With Others?',
+                'Could They Score Trap?',
+                'Could They Do Source Intake?',
+                'Could They Do Floor Intake?'
             ]);
         } else {
             matchList.push([]);
@@ -705,39 +745,27 @@ const generateCSV = async (includeTopRow) => {
                 'NaN',
                 match?.round ?? 'NaN',
                 'NaN',
-                match?.auto?.['a-stop'] ?? 'NaN',
-                match?.teleop?.['e-stop'] ?? 'NaN',
                 match?.auto?.['left-zone'] ?? 'NaN'
             ].forEach(value => matchIndex.push(`${value}`));
 
-            const cons = ['amp', 'spkr', 'flr', 'src'];
+            const cons = ['amp', 'close\ speaker', 'far\ speaker'];
             const sec = ['auto', 'auto', 'teleop', 'teleop', 'teleop'];
-            const cats = ['succeeds', 'fails', 'succeeds', 'fails', 'method'];
+            const cats = ['succeeds', 'fails', 'succeeds', 'fails'];
 
-            for (let i = 0; i < 4; i++) {
-                for (let j = 0; j < 5; j++) {
-                    if (i !== 3) {
-                        matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '');
-                    } else {
-                        if (j < 3) {
-                            matchIndex.push(match?.[sec[j + 2]]?.[cats[j + 2]]?.[cons[i]] ?? '');
-                        }
-                    }
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 4; j++) {
+                    matchIndex.push(match?.[sec[j]]?.[cats[j]]?.[cons[i]] ?? '0');
                 }
             }
 
-            matchIndex.push(
-                match?.scoring?.climb ?? 'NaN',
-                'NaN',
-                'NaN',
-                'NaN',
-                match?.scoring?.harmony ?? 'NaN',
-                match?.scoring?.ensemble ?? 'NaN',
-                match?.scoring?.coop ?? 'NaN',
-                match?.collisions ?? 'NaN',
-                'NaN',
-                'NaN'
-            );
+            [
+                match?.teleop?.['source-intake'] ?? 'NaN',
+                match?.teleop?.['teleop-floor-intake'] ?? 'NaN',
+                match?.teleop?.climb ?? 'NaN',
+                match?.teleop?.['climb-others'] ?? 'NaN',
+                match?.teleop?.trap ?? 'NaN',
+            ].forEach(value => matchIndex.push(`${value}`));
+
 
             matchList.push(matchIndex ?? []);
         }
@@ -768,7 +796,16 @@ const validTeam = (team) => {
 }
 
 const switchMatch = () => {
+    const a = getElem('round').value
+    const b = getElem('comp').value
+
+    if(a && b) {
+        pushState({team: '', round:a, comp:b})
+    } else {
+        pushState()
+    }
     getElem('teams').value = 'select';
+    clearTeam()
     closeSections();
     refreshTeams();
     console.log('current match', getMatch())
@@ -779,6 +816,7 @@ const emptyTeam = () => {
 }
 
 const clearTeam = () => {
+    currentTeam = '';
     presentTeamData(emptyTeam());
 };
 
@@ -792,25 +830,34 @@ const switchTeam = async (event) => {
 
     if (select ==='new') {
         const newTeam = prompt('new team');
+
+        console.log('newTeam', newTeam)
         
-        if (validTeam(newTeam)) {
-            let teamData = emptyTeam();
-
-            setTeam(newTeam);
-
-            teamData.team = currentTeam;
-            teamData.comp = getElem('comp').value;
-            teamData.round = getElem('round').value;
-
-            await saveMatch(teamData);
-
-            await refreshTeams();
-
-            presentTeamData(teamData, true);
-        } else if (newTeam.replace(/\D/g, '') !== newTeam) {
-            confirm(newTeam + ' - please enter a valid team number');
+        if (!newTeam) {
+            getElem('teams').value = 'select'
         } else {
-            confirm(newTeam + ' is not a valid team number');
+            if (validTeam(newTeam)) {
+                clearTeam()
+                let teamData = emptyTeam();
+
+                setTeam(newTeam);
+
+                teamData.team = currentTeam;
+                teamData.comp = getElem('comp').value;
+                teamData.round = getElem('round').value;
+
+                await saveMatch(teamData);
+
+                await refreshTeams();
+
+                presentTeamData(teamData, true);
+            } else if (newTeam.replace(/\D/g, '') !== newTeam) {
+                confirm(newTeam + ' - please enter a valid team number');
+                getElem('teams').value = 'select'
+            } else {
+                confirm(newTeam + ' is not a valid team number');
+                getElem('teams').value = 'select'
+            }
         }
     } else if (select !== '') {
         let splitMatch = select.split(',');
@@ -866,8 +913,6 @@ const toggleQRCode = (boolean) => {
         qrcode.style.display = none ? 'inline-block': 'none';
         qrcodeButton.textContent = none ? 'hide qrcode': 'show qrcode';
     }
-
-    sessionStorage.setItem('sec', saveSec);
 }
 
 const openSection = (id) => {
@@ -938,9 +983,82 @@ document.addEventListener('DOMContentLoaded', () => {
     session();
     generateCSV()
 
+    getElem('.minusbutton', 'queryAll').forEach(async (button) => {
+        button.addEventListener('click', async () => {
+            document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
+            const a = parseInt(document.getElementById('round').value) - 1
+            console.log(a)
+            if(a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (Math.round(a) != a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+    })
+    getElem('.plusbutton', 'queryAll').forEach(async (button) => {
+        button.addEventListener('click', async () => {
+            document.getElementById('round').value = parseInt(document.getElementById('round').value) + 1
+            const a = parseInt(document.getElementById('round').value) + 1
+            console.log(a)
+            if(a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (Math.round(a) != a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+    })
+    getElem('round').addEventListener('change', async () => {
+            const a = parseInt(document.getElementById('round').value)
+            if (a < 1) {
+                document.getElementById('round').value = '1'
+            }
+
+            if (a > 90) {
+                document.getElementById('round').value = '90'
+            }
+
+            if (a) {
+                document.getElementById('round').value = `${Math.round(a)}`
+            } else {
+                document.getElementById('round').value ='1'
+            }
+
+            switchMatch();
+            await sync();
+
+        });
+
     getElem('comp').addEventListener('change', switchMatch);
-    getElem('round').addEventListener('change', switchMatch);
     getElem('teams').addEventListener('change', switchTeam);
+    getElem('csv-share-all').addEventListener('click', async () => {
+        const shareData = {
+            title: "csv",
+            text: "CSV data",
+            file: await generateCSV('all-teams'),
+        };
+
+        navigator.share(shareData);
+    });
 
     getElem('.collapsible', 'queryAll').forEach((input) => {
         input.addEventListener("click", (event) => openSection(event.target.id));
@@ -954,19 +1072,38 @@ document.addEventListener('DOMContentLoaded', () => {
     //     exportTeam(input.target.value)
     // });
 
-    getElem('a-stop').addEventListener('input', aStop);
-
-    getElem('e-stop').addEventListener('input', eStop);
-
-    window.addEventListener('click', (event) => closeModal(event.target.id));
+    window.addEventListener('pointerdown', (event) => closeModal(event.target.id));
+    // window.addEventLxistener('touchstart', (event) => closeModal(event.target.id));
 
     document.getElementById('share').addEventListener('click', startShare);
     document.getElementById('quit-share').addEventListener('click', closeModal);
+    // getElem('retry-qrcode').addEventListener('click', async () => {
+    //     switch(getElem('retry-qrcode').value) {
+    //         case '1':
+    //                 const match = getMatch().split(',')
+    //             generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
+    //                                 Math.min(innerHeight, innerWidth) * .6,
+    //                                 Math.min(innerHeight, innerWidth) * .6);
+
+    //                     getElem('qrcode-team').innerHTML = 'selected match: ' + (match[2] || 'NaN') + ', team: ' + (match[1] || 'NaN') + ', competition: ' +( match[0] || 'NaN');
+    //                 getElem('retry-qrcode').textContent = 'click this if qrcode still didn\'t generate'
+    //             getElem('retry-qrcode').value = '2'; case '2':
+    //             getElem('#qrcode, canvas', 'queryAll').forEach((i) => {
+    //         i.style.display=
+    //     'inline-block'
+    //             })
+    //             {}}
+    // })
     document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
     document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
-    document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
-        qrcodeToggle.addEventListener('click', toggleQRCode);
-    });
+    getElem('cameras').addEventListener('change', () => {
+        closeScanner();
+        const id = getElem('cameras').value || ''
+        beginScan(id)
+    })
+    // document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
+    //     qrcodeToggle.addEventListener('click', toggleQRCode);
+    // });
 
 
     getElem('.number', 'queryAll').forEach( (input) => {
@@ -979,6 +1116,8 @@ document.addEventListener('DOMContentLoaded', () => {
         input.placeholder = '0';
         input.min = '0';
     });
+
+    document.getElementById('close-scanner').addEventListener('click', closeScanner);
 
     window.addEventListener('beforeunload', () => {
         const session = sessionStorage.getItem('session');
@@ -1017,6 +1156,7 @@ window.onLoad = onLoad;
 window.openSection = openSection;
 window.presentTeamData = presentTeamData;
 window.refreshTeams = refreshTeams;
+window.setMatch = setMatch;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
 window.session = session;
