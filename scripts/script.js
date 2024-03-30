@@ -110,8 +110,6 @@ const refreshTeams = async (team = false) => {
     const match = getMatch().split(',');
     const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
     let newSelect = document.createElement('select');
-    
-    newSelect.addEventListener('change', switchTeam);
 
     newSelect.setAttribute('id', 'teams')
     {
@@ -256,6 +254,7 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
     {
         let new_select = document.createElement('select');
         new_select.setAttribute('id', 'teams');
+        new_select.addEventListener('change', switchTeam);
 
         let select_team_option = document.createElement('option');
         select_team_option.value = 'select';
@@ -271,12 +270,16 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
             option.setAttribute('id', [team_number, comp, match].join(','))
 
             option.selected = team_number === defaultTeam
+            team_number === defaultTeam && setMatch(team_number, comp, match)
+            openSection('auto')
 
             new_select.appendChild(option);
         }
 
         document.getElementById('teams').replaceWith(new_select);
     }
+
+    pushState(scrapeTeamData())
 }
 
 const popState = async () => {
@@ -348,6 +351,9 @@ const loadData = async () => {
     await presentTeamData(teamData, push);
 
     const sec = sessionStorage.getItem('sec');
+    document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level');
+    document.getElementById('team-default').value = sessionStorage.getItem('station');
+    prepopulateTeams(teamData.round, teamData.comp, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level'))
 
     if (sec) {
         openSection(sec);
@@ -663,13 +669,16 @@ const validTeam = (team) => {
 const switchMatch = () => {
     const a = document.getElementById('round').value
     const b = document.getElementById('comp').value
+    prepopulateTeams(a, b, document.getElementById('team-default').value, document.getElementById('tourn-level').value)
 
     if(a && b) {
         pushState({team: '', round:a, comp:b})
     } else {
         pushState()
     }
+
     document.getElementById('teams').value = 'select';
+
     clearTeam()
     closeSections();
     refreshTeams();
@@ -685,14 +694,18 @@ const clearTeam = () => {
 };
 
 const switchTeam = async (event) => {
+    console.log('switched')
     let select = event.target.value;
+    document.getElementById('team-default').value = 'none'
+    sessionStorage.setItem('station', 'none')
+    // document.getElementById('tourn-level').value = 'none'
 
     if (select === 'select') {
         clearTeam();
         closeSections();
     }
 
-    if (select ==='new') {
+    if (select === 'new') {
         const newTeam = prompt('new team');
         
         if (!newTeam) {
@@ -724,9 +737,9 @@ const switchTeam = async (event) => {
     } else if (select !== '') {
         let splitMatch = select.split(',');
         let [team, comp, round] = splitMatch;
-        const teamData = await dbClient.getMatch(comp, round, team);
         setTeam(team);
 
+        const teamData = await dbClient.getMatch(comp, round, team);
         if (teamData) {
             presentTeamData(teamData, true);
         }
@@ -788,9 +801,11 @@ const openSection = (id) => {
 }
 
 const sync = async () => {
-    const teamData = scrapeTeamData();
+    let teamData = scrapeTeamData();
+    teamData.team = `${teamData.team}`
 
     if (teamData.team.length > 2) {
+        console.log('sunc', teamData)
         await saveMatch(teamData);
     }
 };
@@ -821,7 +836,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let new_value = parseInt(document.getElementById('round').value);
         new_value = isNaN(new_value) ? 0: new_value;
         new_value = Math.min(Math.max(Math.floor(new_value), 1), 90)
-
         document.getElementById('round').value = new_value;
 
         switchMatch();
@@ -830,15 +844,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('#tourn-level, #team-default').forEach((input) => {
         input.addEventListener('change', () => {
+            clearTeam()
             let match = document.getElementById('round').value;
             let comp = document.getElementById('comp').value;
             let station = document.getElementById('team-default').value;
             let tournamentLevel = document.getElementById('tourn-level').value;
 
-            console.log(match, comp, station, tournamentLevel)
+            sessionStorage.setItem('station', station)
+            sessionStorage.setItem('tournament-level', tournamentLevel)
 
-            if (match && comp && station && tournamentLevel) {
-                prepopulateTeams(match, comp, station, tournamentLevel);
+            if (match && comp && tournamentLevel) {
+                prepopulateTeams(match, comp, station ?? undefined, tournamentLevel);
+            } else {
+                clearTeam();
             }
         });
     });
