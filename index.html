@@ -40,11 +40,11 @@
 
         <select id="teams">
             <option selected value="select">Select team ...</option>
-            <!-- <option value="new">New team ...</option> -->
+            <option value="new">New team ...</option>
         </select>
 
         <select id="team-default" style="margin-left: 15px;">
-            <option value="none">No Default</option>
+            <option value="">No Default</option>
             <option value="Red1">Red 1</option>
             <option value="Red2">Red 2</option>
             <option value="Red3">Red 3</option>
@@ -52,9 +52,17 @@
             <option value="Blue2">Blue 2</option>
             <option value="Blue3">Blue 3</option>
         </select>
+
+        <select id="tourn-level" style="margin-left: 15px;">
+            <option value="">Select Tournament Level</option>
+            <option value="Practice">Practice</option>
+            <option value="Qualification">Qualifications</option>
+            <option value="Playoff">Finals</option>
+        </select>
         <br>
     
-        <button onclick="beginScan()">Scan for qrcode</button>
+        <button id="scan-button" style="margin-top: 10px;">Scan for qrcode</button>
+        <button id="download-csv" style="margin-left: 10px;">Download CSV</button>
 
         <hr>
 
@@ -100,25 +108,28 @@
             <input class="input" id="trap" type="checkbox">
         </div>
 
-        <label for="disable">Did they do any defense?</label>
-        <input id="defense" type="checkbox">
+        <button class="collapsible" id="post-game">Post Game</button>
+        <div class="section">
+            <label for="disable">Did they do any defense?</label>
+            <input id="defense" type="checkbox">
 
-        <label for="disable">If yes, were they forced to?</label>
-        <input id="forced-defense" type="checkbox">
+            <label for="disable">If yes, were they forced to?</label>
+            <input id="forced-defense" type="checkbox">
 
 
-        <br>
-        <label for="break">Did they break or loose a part?</label>
-        <input id="break" type="checkbox">
+            <br>
+            <label for="break">Did they break or loose a part?</label>
+            <input id="break" type="checkbox">
 
-        <br>
-        <label for="disable">Did they disable or stop moving?</label>
-        <input id="disable" type="checkbox">
+            <br>
+            <label for="disable">Did they disable or stop moving?</label>
+            <input id="disable" type="checkbox">
 
-        <br><br>
-        <label>Any extra comments? Keep any comments short and objective.</label>
-        <br>
-        <textarea id="comments"></textarea>
+            <br><br>
+            <label>Any extra comments? Keep any comments short and objective.</label>
+            <br>
+            <textarea id="comments"></textarea>
+        </div>
 
         <div class="center"><button id="generate-qrcode">Generate Qrcode</button></div>
 

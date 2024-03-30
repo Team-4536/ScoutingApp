@@ -76,14 +76,6 @@ if (data.team) {
 
 const setTeam = (team) => {
     currentTeam = team;
-
-    const session = sessionStorage.getItem('session');
-
-    if (localStorage.getItem(session)) {
-        localStorage.setItem(session, getMatch());
-    } else {
-        session();
-    }
 }
 
 const getTeam = () => {
@@ -113,7 +105,6 @@ const getMatch = () => {
 false ? prepopulateTeams: null;
 
 const refreshTeams = async (team = false) => {
-    // return '';
     const teams = document.getElementById('teams');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
     const match = getMatch().split(',');
@@ -244,8 +235,8 @@ const closeModal = (id) => {
 
 false ? refreshTeams: null;
 
-const prepopulateTeams = async (match=1, comp="grandforks", station = undefined, tournament='qualification') => {
-    let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament}.json`
+const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification') => {
+    let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
 
     let arrayOfMatches = await fetch(jsonFilePath) 
         .then((res) => { 
@@ -255,7 +246,7 @@ const prepopulateTeams = async (match=1, comp="grandforks", station = undefined,
     arrayOfMatches = arrayOfMatches.Schedule;
 
     let filteredMatches = arrayOfMatches.filter(obj => {
-        return obj.tournamentLevel === tournament && obj.matchNumber === match;
+        return obj.tournamentLevel === tournament && obj.matchNumber == match;
     })[0].teams;
 
     let defaultTeam = filteredMatches.filter(team => {
@@ -286,18 +277,6 @@ const prepopulateTeams = async (match=1, comp="grandforks", station = undefined,
 
         document.getElementById('teams').replaceWith(new_select);
     }
-}
-
-const session = () => {
-    let session = sessionStorage.getItem('session');
-    
-    if (!session) {
-        session = Math.random();
-
-        sessionStorage.setItem('session', session);
-    }
-
-    window.localStorage.setItem(session, getMatch());
 }
 
 const popState = async () => {
@@ -762,7 +741,6 @@ const downloadCSV = (includeTopRow = false) => {
                         ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
 
     const fileName = 'teams ' + currentDate + '.csv';
-    // const includeTopRow = document.getElementById('csv-top-row').checked;
 
     download(generateCSV(includeTopRow), fileName);
 }
@@ -822,7 +800,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', popState);
 
     onLoad();
-    session();
 
     document.getElementById('minus-button').addEventListener('click', async () => {
         const new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);
@@ -851,17 +828,26 @@ document.addEventListener('DOMContentLoaded', () => {
         await sync();
     });
 
+    document.querySelectorAll('#tourn-level, #team-default').forEach((input) => {
+        input.addEventListener('change', () => {
+            let match = document.getElementById('round').value;
+            let comp = document.getElementById('comp').value;
+            let station = document.getElementById('team-default').value;
+            let tournamentLevel = document.getElementById('tourn-level').value;
+
+            console.log(match, comp, station, tournamentLevel)
+
+            if (match && comp && station && tournamentLevel) {
+                prepopulateTeams(match, comp, station, tournamentLevel);
+            }
+        });
+    });
+
+    document.getElementById('scan-button').addEventListener('click', () => beginScan());
+    document.getElementById('download-csv').addEventListener('click', () => downloadCSV(false))
+
     document.getElementById('comp').addEventListener('change', switchMatch);
     document.getElementById('teams').addEventListener('change', switchTeam);
-    // document.getElementById('csv-share-all').addEventListener('click', async () => {
-    //     const shareData = {
-    //         title: "csv",
-    //         text: "CSV data",
-    //         file: await generateCSV('all-teams'),
-    //     };
-
-    //     navigator.share(shareData);
-    // });
 
     Array.from(document.getElementsByClassName('collapsible')).forEach((input) => {
         input.addEventListener("click", (event) => openSection(event.target.id));
@@ -876,8 +862,8 @@ document.addEventListener('DOMContentLoaded', () => {
     Array.from(document.getElementsByClassName('close-modal')).forEach((item) => {
         item.addEventListener('click', closeModal);
     });
+
     document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
-    // document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
     document.getElementById('cameras').addEventListener('change', () => {
         closeScanner();
         const id = document.getElementById('cameras').value || ''
@@ -901,15 +887,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('close-scanner').addEventListener('click', closeScanner);
-
-    window.addEventListener('beforeunload', () => {
-        const session = sessionStorage.getItem('session');
-
-        if (localStorage.getItem(session)) {
-            localStorage.removeItem(session);
-            sessionStorage.removeItem('session');
-        }
-    });
 });
 
 window.beginScan = beginScan;
@@ -934,7 +911,6 @@ window.refreshTeams = refreshTeams;
 window.setMatch = setMatch;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
-window.session = session;
 window.openModal = openModal;
 
 window.dbClient = dbClient;
