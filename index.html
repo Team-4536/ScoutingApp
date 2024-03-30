@@ -10,6 +10,12 @@
     </head>
 
     <body>
+        <div id="service-error" class="modal">
+            <div class="modal-content">
+                <p id="warning-label"></p>
+            </div>
+        </div>
+
         <img align="right" src="assets/minutebots-logo.png" width=325px>
 
         <h1>MinuteBots Scouting</h1>
@@ -25,50 +31,42 @@
         <label>Match:</label>
 
         <input id="round" style="width:1.7em"></input>
-        <button class="plusbutton"><b>+</b></button>
-        <button class="minusbutton"><b>-</b></button>
+        <button id="plus-button"><b>+</b></button>
+        <button id="minus-button"><b>-</b></button>
 
         <br>
 
         <label>Team:</label>
 
         <select id="teams">
-            <option selected disabled value="select">Select team ...</option>
-            <option value="new">New team ...</option>
+            <option selected value="select">Select team ...</option>
+            <!-- <option value="new">New team ...</option> -->
+        </select>
+
+        <select id="team-default" style="margin-left: 15px;">
+            <option value="none">No Default</option>
+            <option value="Red1">Red 1</option>
+            <option value="Red2">Red 2</option>
+            <option value="Red3">Red 3</option>
+            <option value="Blue1">Blue 1</option>
+            <option value="Blue2">Blue 2</option>
+            <option value="Blue3">Blue 3</option>
         </select>
         <br>
-
-        <!-- <select id="export">
-            <option value="share">share ...</option>
-            <option value="export-url">share current team's url</option>
-            <option value="export-data">share current team's data</option>
-            <option value="export-csv">share csv</option>
-            <option value="export-qrcode">generate qrcode</option>
-            <option value="download-csv">download csv</option>
-            <option value="download">download all data</option>
-        </select> -->
-
-        <button id="share">Share</button>    
+    
         <button onclick="beginScan()">Scan for qrcode</button>
 
-        <!-- <select id="import">
-            <option value="open">open ...</option>
-            <option value="enter">enter team data</option>
-            <option value="enter-csv">enter csv</option>
-            <option value="enter-qrcode">scan qrcode</option>
-            <option value="enter-encoded">decode encoded data</option>
-        </select> -->
         <hr>
 
         <button class="collapsible" id="auto">Auto</button>
         <div  class="section">
-            <label for="left-zone">Left alliance zone</label>
+            <label for="left-zone">Exited alliance starting zone</label>
             <input type="checkbox" id="left-zone" class="input" style="margin-bottom: 10px;"></input>
             <br>
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
-                <tr class="succeeds"><th>Scored Successfully</th> </tr>
+                <tr class="succeeds"><th>Successfully Scored</th> </tr>
                 <tr class="fails"><th>Failed to Score</th> </tr>
             </table>
             <br>
@@ -83,7 +81,7 @@
         <div class="section">
             <table data-sec="teleop">
                 <tr class="con"> <th></th> </tr>
-                <tr class="succeeds"> <th>Successful</th> </tr>
+                <tr class="succeeds"> <th>Successfully Scored</th> </tr>
                 <tr class="fails"><th>Failed to Score</th> </tr>
             </table>
             <br>
@@ -102,58 +100,35 @@
             <input class="input" id="trap" type="checkbox">
         </div>
 
-        <div id="share-modal" class="modal">
+        <label for="disable">Did they do any defense?</label>
+        <input id="defense" type="checkbox">
+
+        <label for="disable">If yes, were they forced to?</label>
+        <input id="forced-defense" type="checkbox">
+
+
+        <br>
+        <label for="break">Did they break or loose a part?</label>
+        <input id="break" type="checkbox">
+
+        <br>
+        <label for="disable">Did they disable or stop moving?</label>
+        <input id="disable" type="checkbox">
+
+        <br><br>
+        <label>Any extra comments? Keep any comments short and objective.</label>
+        <br>
+        <textarea id="comments"></textarea>
+
+        <div class="center"><button id="generate-qrcode">Generate Qrcode</button></div>
+
+        <div id="qrcode-div" class="modal">
             <div class="modal-content">
-                <span id="quit-share" class="close-modal">&times;</span>
-                <h2 style="margin: 10px">Share as ...</h2>
-    
-                <select id="share-as">
-                    <option value="select" selected disabled>select share option ...</option>
-                    <option value="csv">.csv</option>
-                    <option value="json">.json</option>
-                    <option value="txt">.txt</option>
-                    <option value="url">url</option>
-                    <option value="scan">QRCode</option>
-                </select>
-    
-                <div class="option-div" id="csv-div">
-                    <br>
-                    <br>
+                <span class="close-modal">&times;</span>
 
-                    <label for="csv-top-row" style="color:black">include top row:</label>
-                    <input id="csv-top-row" type="checkbox">
-
-                    <br><br>
-
-                    <label style="color:black" id="csv-comp"></label>
-
-                    <br><br>
-
-                    <button id="csv-download-all">download csv of all teams</button>
-                    <button id="csv-share-all">share csv of all teams</button>
-                </div>
-    
-                <div class="option-div" id="json-div">
-    
-                </div>
-    
-                <div class="option-div" id="txt-div">
-    
-                </div>
-    
-                <div class="option-div" id="url-div">
-    
-                </div>
-    
-                <div class="option-div" id="scan-div">
-                    <br><br>
-
-                    <div id="qrcode-div">
-                        <label style="color:black" id="qrcode-team"></label>
-                        <br>
-                        <div id="qrcode" class="qrcode" style="text-align: center; display:inline-block;"></div>
-                    </div>
-                </div>
+                <label style="color:black" id="qrcode-team"></label>
+                <br>
+                <div id="qrcode" class="qrcode" style="text-align: center; display:inline-block;"></div>
             </div>
         </div>
         
@@ -174,7 +149,5 @@
         <script src="scripts/qrcode.js"></script>
         <script src="scripts/qrcode-scanner.js"></script>
         <script src="scripts/script.js" type="module"></script>
-        <!-- <script src="assets/console/console-import.js"></script>
-        <script>document.write(consoleImport)</script> -->
     </body>
 </html>
