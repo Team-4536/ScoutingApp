@@ -11,18 +11,21 @@
     --darkGrey: #00000020;
 }
 
-body:not(.modal) {
-    margin: 2px;
+body:not(.modal, #generate-qrcode, .center) {
+    margin: 3px;
     cursor: default;
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
 }
 
-h1, h2, label, th {
+h1, h2, label, th, p {
     font-family: Arial, sans-serif;
-    color: var(--MinutebotsColor);
     margin: 2px;
+}
+
+h1, h2, label, th {
+    color: var(--MinutebotsColor);
 }
 
 hr {
@@ -48,12 +51,21 @@ input, button:not(.collapsible), textarea, select {
     cursor: pointer;
 }
 
-.number, textarea, b {
+.number, b {
     width: 4em;
     height: 32px;
     margin: 2px;
     font-family: Arial, sans-serif;
     font-size: 13pt;
+    color: black;
+}
+
+textarea {
+    width: 24em;
+    height: 32px;
+    margin: 2px;
+    font-family: Arial, sans-serif;
+    font-size: 9pt;
     color: black;
 }
 
@@ -78,6 +90,17 @@ input[type="text"]:disabled {
 select:not(#comp, #round, #teams, #share-as, #qrcode-comp, #qrcode-round, #qrcode-team) {
     width: 7em;
     font-size: 16px;
+}
+
+#generate-qrcode {
+    margin: auto;
+    font-size: 3em;
+    display: block;
+}
+
+.center {
+    margin: auto;
+    display: block;
 }
 
 #comp, #round, #teams, #share-as, #qrcode-comp, #qrcode-round, #qrcode-team {
@@ -261,7 +284,7 @@ select:not(#comp, #round, #teams, #share-as, #qrcode-comp, #qrcode-round, #qrcod
 .close-modal {
 	color: #aaa;
 	float: right;
-	font-size: 28px;
+	font-size: 60px;
 	font-weight: bold;
 }
 

@@ -35,30 +35,6 @@ const dataObject = JSON.stringify({
     },
 });
 
-const getElem = (value, type = 'id', head = document) => {
-    const typeMap = {
-        id: head.getElementById,
-        name: head.getElementsByName,
-        class: head.getElementsByClassName,
-        queryAll: head.querySelectorAll,
-        query: head.querySelector,
-        tag: head.getElementsByTagName,
-    };
-
-    if (!(type in typeMap)) {
-        console.warn('Unrecognized element type: ' + type);
-        return undefined;
-    }
-
-    const result = typeMap[type].call(head, value);
-
-    if (!result) {
-        console.error('Element with type \'' + type + '\' of \'' + value +  '\' was not found');
-    }
-
-    return result;
-}
-
 const saveMatch = async (data) => {    
     if (validTeam(data ? data.team: undefined) && data.comp && data.round) {
         await dbClient.putMatch(data);
@@ -66,9 +42,6 @@ const saveMatch = async (data) => {
 };
 
 const pushState = (data, replace = false) => {
-    console.log('push data', data)
-    console.log('replace', replace)
-
     let state;
 
     if (data.team) {
@@ -107,7 +80,6 @@ const setTeam = (team) => {
     const session = sessionStorage.getItem('session');
 
     if (localStorage.getItem(session)) {
-        console.log('match', getMatch())
         localStorage.setItem(session, getMatch());
     } else {
         session();
@@ -122,24 +94,27 @@ const setMatch = (team, comp, round) => {
     team && setTeam(team);
 
     if (comp) {
-        getElem('comp').value = comp;
+        document.getElementById('comp').value = comp;
     }
     
     if (round) {
-        getElem('round').value = round;
+        document.getElementById('round').value = round;
     }
 
     console.log('set match', team, comp, round);
 
-    getElem('teams').value = getMatch();
+    document.getElementById('teams').value = getMatch();
 }
 
 const getMatch = () => {
-    return [getTeam(), getElem('comp').value, getElem('round').value].join(',');
+    return [getTeam(), document.getElementById('comp').value, document.getElementById('round').value].join(',');
 }
 
+false ? prepopulateTeams: null;
+
 const refreshTeams = async (team = false) => {
-    const teams = getElem('teams');
+    // return '';
+    const teams = document.getElementById('teams');
     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
     const match = getMatch().split(',');
     const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
@@ -177,77 +152,62 @@ const refreshTeams = async (team = false) => {
 
 
 const onLoad = async () => {
-    const cons = ['amp', 'close speaker', 'far speaker', ''];
+    const cons = ['Amp', 'Close Speaker Shot', 'Far Speaker Shot'];
 
     for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
-        const catItems = getElem('tr', 'queryAll', getElem('[data-sec=' + table + ']', 'query'));
+        const catItems = document.querySelector(`[data-sec=${table}]`).querySelectorAll('tr');
 
         for (let i = 0; i < count; i++) {
             for (let j = 0; j < 3; j++) {
                 const th = document.createElement('th');
-                let input;
 
                 if (j === 0) {
                     th.textContent = cons[i];
                     th.style.textAlign = 'center'
                 } else {
-                    if (j === 3) {
-                        const options = [['a', 'a'], ['b', 'a'], ['c', 'c'], ['d', 'd'], ['Add method', 'add']];
+                    const minus = document.createElement('button');
+                    const plus = document.createElement('button');
+                    const input = document.createElement('input');
+                    input.classList.add('number', 'input');
+                    input.type = 'text';
+                    input.style.width = '50px';
 
-                        input = document.createElement('select');
-                        input.classList.add('input');
-                        
-                        options.forEach((option) => {
-                            const method = document.createElement('option');
-                            
-                            method.textContent = option[0];
-                            method.value = option[1];
+                    minus.textContent = '-';
+                    minus.classList.add('incr');
 
-                            input.appendChild(method);
-                        });
+                    plus.textContent = '+';
+                    plus.classList.add('incr');
+                    plus.style.marginRight = '30px';
 
-                        input.addEventListener('change', (event) => method(event));
-                                                
-                        th.appendChild(input);
-                    } else {
-                        const plus = document.createElement('button');
-                        const minus = document.createElement('button');
-                        input = document.createElement('input');
-                        input.classList.add('number', 'input');
-                        input.style.width = '50px'
-
-                        plus.textContent = '-';
-                        plus.classList.add('incr');
-
-                        minus.textContent = '+';
-                        minus.classList.add('incr');
-                        minus.style['marginRight'] = '30px'
-
-                        minus.addEventListener('click', async () => {
+                    plus.addEventListener('click', async () => {
+                        if ((parseInt(input.value) || 0) + 1 >= 999) {
+                            input.value = 999;
+                        } else {
                             input.value = (parseInt(input.value) || 0) + 1;
-                            if ((parseInt(input.value) || 0) - 1 > 998) {
-                                input.value = 999;
-                            }
+                        }
 
-                            await sync();
-                        });
+                        await sync();
+                    });
 
-                        plus.addEventListener('click', async () => {
+                    minus.addEventListener('click', async () => {
+                        if ((parseInt(input.value) || 0) - 1 <= 0) {
+                            input.value = '';
+                        } else {
                             input.value = (parseInt(input.value) || 0) - 1;
-                            if ((parseInt(input.value) || 0) - 1 <= 0) {
-                                input.value = '';
-                            }
+                        }
 
-                            await sync();
-                        });
+                        await sync();
+                    });
 
-                        th.appendChild(plus);
-                        th.appendChild(input);
-                        th.appendChild(minus);
-                    }
+                    th.appendChild(minus);
+                    th.appendChild(input);
+                    th.appendChild(plus);
 
                     const cat = catItems[j].className;
-                    const con = cons[i];
+
+                    let con;
+                    
+                    con = j === 0 ? cons[i]: cons[i].toLowerCase().split(' ').slice(0).join('');
 
                     input.setAttribute('id', [table, cat, con].join('-'));
                     input.classList.add('table-input');
@@ -257,108 +217,13 @@ const onLoad = async () => {
             }
         }
     }
-
-    const shareOptions = [['csv', 'csv file'],
-                         ['json', 'json file'],
-                         ['txt', 'text file'],
-                         ['url', 'url'],
-                         ['scan', 'qrcode']];
-
-    shareOptions.forEach((option) => {
-        const button = document.createElement('button');
-        button.innerHTML = '&times;';
-        button.classList.add('share-as-button');
-        button.addEventListener('click', startShare);
-
-        const label = document.createElement('b');
-        label.textContent = option[1];
-        label.style.margin = '10px';
-
-        const div = document.getElementById((option[0] ? option[0]:option) + '-div');
-        div.insertBefore(label, div.firstChild);
-        div.insertBefore(button, div.firstChild);
-    });
 }
 
-const populateQRCode = async () => {
-    const qrcodeComp = getElem('qrcode-comp');
-    const qrcodeRound = getElem('qrcode-round');
-    const qrcodeTeam = getElem('qrcode-team');
+const openModal = (id) => {
+    id = id.id ? id.id: id;
+    const modal = document.getElementById(id);
 
-    const compList = [];
-    const roundList = [];
-    const teamList = [];
-
-    await dbClient.getMatches().forEach((match) => {
-        const [team, comp, round] = [match?.team, match?.comp, match?.round];
-
-        if (team && validTeam(team) && comp && round) {
-            teamList.push(team);
-
-            if (!compList.includes(comp)) {
-                compList.push(comp);
-            }
-            
-            if (!roundList.includes(round)) {
-                roundList.push(round);
-            }
-        }
-    });
-
-    teamList.sort();
-    compList.sort();
-    roundList.sort();
-
-    const [team, comp, round] = getMatch().split(',');
-
-    qrcodeComp.value = comp;
-    qrcodeRound.value = round;
-    qrcodeTeam.value = team;
-}
-
-const share = async (shareOption) => {
-	startShare();
-        const match = getMatch().split(',');
-    switch (shareOption) {
-        case 'scan':
-            if (match[0] && match[1] && match[2]) {
-                generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-                               Math.min(innerHeight, innerWidth) * .6,
-                               Math.min(innerHeight, innerWidth) * .6);
-
-                getElem('qrcode-team').innerHTML = 'selected match: ' + match[2]
-                                                   + ', team: ' + match[0] + ', competition: ' + match[1];
-            } else {
-                getElem('qrcode-team').textContent = 'no team selected to generate qrcode from'
-            }
-
-            break;
-
-            case'csv':
-            const a = getElem('csv-comp')
-            if(match[1]){
-            a.textContent='selected comp to share: '+match[1]
-            }else{
-            a.textContent='no comp selected'
-            }
-            break;
-    }
-
-	document.getElementById(shareOption + '-div').style.display = 'block';
-
-	const select = document.getElementById('share-as');
-	select.hidden = true;
-	select.value = 'select';
-}
-
-const startShare = () => {
-	document.getElementById('share-as').hidden = false;
-
-	Array.from(document.getElementById('share-modal')
-                       .getElementsByClassName('option-div')).forEach(
-                          (div) => div.style.display = 'none');
-
-	document.getElementById('share-modal').style.display = 'block';
+    modal.style.display = 'block';
 }
 
 const closeModal = (id) => {
@@ -366,14 +231,61 @@ const closeModal = (id) => {
 		id = id.id ? id.id: id;
 		const modal = document.getElementById(id);
 
-		if (id === 'share-modal') {
-			modal.style.display = 'none';
-		}
+        console.log(id)
+        if (modal?.classList?.contains('modal') && id !== 'service-error') {
+            modal.style.display = 'none';
+        }
 	} else {
 		Array.from(document.getElementsByClassName('modal')).forEach((modal) => {
 			modal.style.display = 'none';
 		});
 	}
+}
+
+false ? refreshTeams: null;
+
+const prepopulateTeams = async (match=1, comp="grandforks", station = undefined, tournament='qualification') => {
+    let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament}.json`
+
+    let arrayOfMatches = await fetch(jsonFilePath) 
+        .then((res) => { 
+            return res.json();
+        });
+
+    arrayOfMatches = arrayOfMatches.Schedule;
+
+    let filteredMatches = arrayOfMatches.filter(obj => {
+        return obj.tournamentLevel === tournament && obj.matchNumber === match;
+    })[0].teams;
+
+    let defaultTeam = filteredMatches.filter(team => {
+        return station && team.station === station;
+    })[0]?.teamNumber;
+
+    {
+        let new_select = document.createElement('select');
+        new_select.setAttribute('id', 'teams');
+
+        let select_team_option = document.createElement('option');
+        select_team_option.value = 'select';
+        select_team_option.textContent = 'select team...'
+        select_team_option.selected = true;
+        new_select.appendChild(select_team_option);
+
+        for (let matchObject of filteredMatches) {
+            let team_number = matchObject.teamNumber
+
+            let option = document.createElement('option');
+            option.textContent = team_number
+            option.setAttribute('id', [team_number, comp, match].join(','))
+
+            option.selected = team_number === defaultTeam
+
+            new_select.appendChild(option);
+        }
+
+        document.getElementById('teams').replaceWith(new_select);
+    }
 }
 
 const session = () => {
@@ -471,20 +383,16 @@ const presentTeamData = async (teamData, push=false) => {
         const secs = ['auto', 'teleop'];
 
         for (const sec of secs) {
-            getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {
+            Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach((input) => {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
                 if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
-                    console.log(input, 'table')
                     input.value = teamData?.[id[0]]?.[id[1]]?.[id[2]] ?? '';
                 } else { // non-table element
                     const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
 
                     input[state] = teamData[sec][inputID];
-
-                    console.log(input.id)
-                    console.log('aaa', teamData[sec][inputID], input)
                 }
             });
         }
@@ -496,9 +404,9 @@ const presentTeamData = async (teamData, push=false) => {
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
-        getElem('teams').value = selected;
+        document.getElementById('teams').value = selected;
     } else {
-        getElem('teams').value = 'select';
+        document.getElementById('teams').value = 'select';
     }
 
     if (push) {
@@ -509,43 +417,35 @@ const presentTeamData = async (teamData, push=false) => {
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
-        getElem('teams').value = selected;
+        document.getElementById('teams').value = selected;
     }  else {
-        getElem('teams').value = 'select';
+        document.getElementById('teams').value = 'select';
     }
 
     console.log('presented data: ', teamData)
 }
 
 const serviceWorkerMissingResponse = () => {
-    alert('\t\tWARNING!!\n\n'
-          + 'The site could not access the Service Worker (data handler)\n\n'
-          + 'DO NOT TRY TO SCOUT IF THIS WARNING APPEARS WHEN THE SITE LOADS\n\n'
-          + 'Please try to reload, or open a new tab if reloading does not work.')
+    location.reload(true)
+    document.getElementById('service-error').style.display = 'block';
 }
 
 const scrapeTeamData = () => {
     let teamData = emptyTeam();
-    const teams = getElem('teams');
+    const teams = document.getElementById('teams');
 
     if (teams.selectedIndex < 2) {
         return teamData;
     }
 
     teamData.team = getTeam();
-    teamData.comp = getElem('comp').value;
-    teamData.round = getElem('round').value;
+    teamData.comp = document.getElementById('comp').value;
+    teamData.round = document.getElementById('round').value;
 
-    // Array.from(document.getElementsByClassName('section')).forEach((sec) => {
-    //     sec.querySelectorAll('input').forEach((input) => {
-            
-    //     });
-    // });
     const secs = ['auto', 'teleop'];
 
     for (const sec of secs) {
-        // getElem('input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) => {})
-        getElem('.input', 'queryAll', getElem(sec).nextElementSibling).forEach((input) =>{
+        Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach((input) => {
             if (input.value || input.checked) {
                 const inputID = input.id;
                 const id = inputID.split('-');
@@ -589,30 +489,6 @@ const decodeData = async (encodedData) => {
     }
 }
 
-/*
-const formatTeam = event => {
-    const value = event.target.value;
-
-    if (parseInt(value) ===0) {
-        event.target.value = '';
-    }
-
-    if (parseInt(value) > 9999) {
-        if (value !== '10000') {
-            event.target.value = value.slice(0, -1);
-        } else {
-            event.target.value = '9999';
-        }
-    }
-
-    if (value.length < 4 && parseInt(value) !== 0) {
-        event.target.value = '0'.repeat(4 - value.length) + value;
-    } else if (value.length > 4 && value[0] ==='0') {
-        event.target.value = value.slice(1);
-    }
-    }
-*/
-
 const formatNumber = event => {
     if (event.target.value[0] ==='0') {
         event.target.value = event.target.value.slice(1);
@@ -627,8 +503,8 @@ const beginScan = async (id) => {
     let popup = document.getElementById('scanner')
     popup.style.display = 'flex';
     let cameras = await Html5Qrcode.getCameras()
-    const camerasscanner = getElem('cameras')
-    const options = getElem('option', 'queryAll', camerasscanner)
+    const camerasscanner = document.getElementById('cameras')
+    const options = camerasscanner.querySelectorAll('option')
     options.forEach((opt) => {
         opt.remove()
     })
@@ -662,7 +538,6 @@ const beginScan = async (id) => {
     };
 
     let framerate = 15;
-    console.log(cameras);
     
     if (id) {
         await scanner.start(id , { fps: framerate, verbose: true },
@@ -682,20 +557,31 @@ const closeScanner = () => {
     popup.scanner = null;
 }
 
-const generateQRCode = (teamData, length = screen.height * .8) => {
-    length = Math.max(length, 300)
+const generateQrcode = (teamData, length) => {
     encodeData(teamData).then((data) => {
-        getElem('qrcode').textContent = '';
+        document.getElementById('qrcode').textContent = '';
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-            new QRCode(getElem('qrcode'), {
+            new QRCode(document.getElementById('qrcode'), {
                 text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
-                correctLevel: QRCode.CorrectLevel.Q
+                correctLevel: QRCode.CorrectLevel.Q,
+                width: length,
+                height: length
             });
 
-        console.log(`https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
+        console.log('encoded in a qrcode', `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     })
+}
+
+const generateTeamQrcode = async () => {
+    const match = getMatch().split(',');
+
+    generateQrcode(await dbClient.getMatch(match[1], match[2], match[0]),
+                   Math.min(innerHeight, innerWidth) * .8,
+                   Math.min(innerHeight, innerWidth) * .8);
+
+    openModal('qrcode-div');
 }
 
 const generateCSV = async (includeTopRow) => {
@@ -709,23 +595,23 @@ const generateCSV = async (includeTopRow) => {
                 'Alliance',
                 'Match',
                 'Scouter',
-                'Left Alliance Zone',
+                'Did They Exit the Starting Zone?',
 
                 'Auto-Amp Succeed',
                 'Auto-Amp Fail',
                 'Teleop-Amp Succeed',
                 'Teleop-Amp Fail',
 
-                'Auto-Speaker Succeed',
-                'Auto-Speaker Fail',
-                'Teleop-Speaker Succeed',
-                'Teleop-Speaker Fail',
+                'Auto-Close Speaker Succeed',
+                'Auto-Close Speaker Fail',
+                'Teleop-Close Speaker Succeed',
+                'Teleop-Close Speaker Fail',
 
-                'Auto-Floor Intake Succeed',
-                'Auto-Floor Intake Fail',
-                'Teleop-Floor Intake Succeed',
-                'Teleop-Floor Intake Fail',
-
+                'Auto-Far Speaker Succeed',
+                'Auto-Far Speaker Fail',
+                'Teleop-Far Speaker Succeed',
+                'Teleop-Far Speaker Fail',
+                
                 'Could They Climb?',
                 'Could They Climb With Others?',
                 'Could They Score Trap?',
@@ -745,7 +631,7 @@ const generateCSV = async (includeTopRow) => {
                 'NaN',
                 match?.round ?? 'NaN',
                 'NaN',
-                match?.auto?.['left-zone'] ?? 'NaN'
+                match?.auto?.['left-zone'] === true ? '1': '0'
             ].forEach(value => matchIndex.push(`${value}`));
 
             const cons = ['amp', 'close\ speaker', 'far\ speaker'];
@@ -759,11 +645,11 @@ const generateCSV = async (includeTopRow) => {
             }
 
             [
-                match?.teleop?.['source-intake'] ?? 'NaN',
-                match?.teleop?.['teleop-floor-intake'] ?? 'NaN',
-                match?.teleop?.climb ?? 'NaN',
-                match?.teleop?.['climb-others'] ?? 'NaN',
-                match?.teleop?.trap ?? 'NaN',
+                match?.teleop?.['source-intake'] === true ? '1': '0',,
+                match?.teleop?.['teleop-floor-intake'] === true ? '1': '0',
+                match?.teleop?.climb === true ? '1': '0',
+                match?.teleop?.['climb-others'] === true ? '1': '0',
+                match?.teleop?.trap === true ? '1': '0',
             ].forEach(value => matchIndex.push(`${value}`));
 
 
@@ -796,19 +682,18 @@ const validTeam = (team) => {
 }
 
 const switchMatch = () => {
-    const a = getElem('round').value
-    const b = getElem('comp').value
+    const a = document.getElementById('round').value
+    const b = document.getElementById('comp').value
 
     if(a && b) {
         pushState({team: '', round:a, comp:b})
     } else {
         pushState()
     }
-    getElem('teams').value = 'select';
+    document.getElementById('teams').value = 'select';
     clearTeam()
     closeSections();
     refreshTeams();
-    console.log('current match', getMatch())
 };
 
 const emptyTeam = () => {
@@ -830,11 +715,9 @@ const switchTeam = async (event) => {
 
     if (select ==='new') {
         const newTeam = prompt('new team');
-
-        console.log('newTeam', newTeam)
         
         if (!newTeam) {
-            getElem('teams').value = 'select'
+            document.getElementById('teams').value = 'select'
         } else {
             if (validTeam(newTeam)) {
                 clearTeam()
@@ -843,8 +726,8 @@ const switchTeam = async (event) => {
                 setTeam(newTeam);
 
                 teamData.team = currentTeam;
-                teamData.comp = getElem('comp').value;
-                teamData.round = getElem('round').value;
+                teamData.comp = document.getElementById('comp').value;
+                teamData.round = document.getElementById('round').value;
 
                 await saveMatch(teamData);
 
@@ -853,10 +736,10 @@ const switchTeam = async (event) => {
                 presentTeamData(teamData, true);
             } else if (newTeam.replace(/\D/g, '') !== newTeam) {
                 confirm(newTeam + ' - please enter a valid team number');
-                getElem('teams').value = 'select'
+                document.getElementById('teams').value = 'select'
             } else {
                 confirm(newTeam + ' is not a valid team number');
-                getElem('teams').value = 'select'
+                document.getElementById('teams').value = 'select'
             }
         }
     } else if (select !== '') {
@@ -866,7 +749,6 @@ const switchTeam = async (event) => {
         setTeam(team);
 
         if (teamData) {
-            console.log(teamData)
             presentTeamData(teamData, true);
         }
     }
@@ -874,19 +756,19 @@ const switchTeam = async (event) => {
     openSection('auto');
 }
 
-const downloadCSV = () => {
+const downloadCSV = (includeTopRow = false) => {
     const date = new Date();
     const currentDate = [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') + 
                         ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
 
     const fileName = 'teams ' + currentDate + '.csv';
-    const includeTopRow = getElem('csv-top-row').checked;
+    // const includeTopRow = document.getElementById('csv-top-row').checked;
 
     download(generateCSV(includeTopRow), fileName);
 }
 
 const closeSections = (saveSec = '') => {
-    const sections = getElem('collapsible', 'class');
+    const sections = document.getElementsByClassName('collapsible');
 
     for (let s of sections) {
         s.classList.remove('active');
@@ -916,7 +798,7 @@ const toggleQRCode = (boolean) => {
 }
 
 const openSection = (id) => {
-    const section = getElem(id);
+    const section = document.getElementById(id);
 
     closeSections(id);
 
@@ -935,178 +817,79 @@ const sync = async () => {
     }
 };
 
-// const exportTeam = async (input) => {
-//     switch (input) {
-//         case 'export-url':
-//             navigator.share({url: 'https://scouting.minutebots.org/?data=' + (await encodeData(scrapeTeamData()))});
-
-//             break;
-//         case 'export-data':
-//             navigator.share({data: JSON.stringify(scrapeTeamData())});
-
-//             break;
-//         case 'export-csv':
-
-//             break;
-//         case 'export-qrcode':
-//             generateQRCode();
-
-//             break;
-//         case 'export-qrcode':
-
-//             break;
-//         case 'download-csv':
-//             downloadCSV();
-
-//             break;
-//         case 'download':
-//             const jsonString = JSON.stringify(scrapeTeamData());
-
-//             const blob = new Blob([jsonString], { type: 'application/json' });
-
-//             const data = document.createElement('a');
-//             data.setAttribute('href', URL.createObjectURL(blob));
-//             data.setAttribute('download', 'data.json');
-//             data.click();
-            
-//             break;
-//     }
-
-//     getElem('export').value = 'share';
-// }
-
 document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('load', loadData);
     window.addEventListener('popstate', popState);
 
     onLoad();
     session();
-    generateCSV()
 
-    getElem('.minusbutton', 'queryAll').forEach(async (button) => {
-        button.addEventListener('click', async () => {
-            document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
-            const a = parseInt(document.getElementById('round').value) - 1
-            console.log(a)
-            if(a < 1) {
-                document.getElementById('round').value = '1'
-            }
+    document.getElementById('minus-button').addEventListener('click', async () => {
+        const new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);
+        document.getElementById('round').value = new_value;
 
-            if (a > 90) {
-                document.getElementById('round').value = '90'
-            }
-
-            if (Math.round(a) != a) {
-                document.getElementById('round').value = `${Math.round(a)}`
-            }
-
-            switchMatch();
-            await sync();
-
-        });
-    })
-    getElem('.plusbutton', 'queryAll').forEach(async (button) => {
-        button.addEventListener('click', async () => {
-            document.getElementById('round').value = parseInt(document.getElementById('round').value) + 1
-            const a = parseInt(document.getElementById('round').value) + 1
-            console.log(a)
-            if(a < 1) {
-                document.getElementById('round').value = '1'
-            }
-
-            if (a > 90) {
-                document.getElementById('round').value = '90'
-            }
-
-            if (Math.round(a) != a) {
-                document.getElementById('round').value = `${Math.round(a)}`
-            }
-
-            switchMatch();
-            await sync();
-
-        });
-    })
-    getElem('round').addEventListener('change', async () => {
-            const a = parseInt(document.getElementById('round').value)
-            if (a < 1) {
-                document.getElementById('round').value = '1'
-            }
-
-            if (a > 90) {
-                document.getElementById('round').value = '90'
-            }
-
-            if (a) {
-                document.getElementById('round').value = `${Math.round(a)}`
-            } else {
-                document.getElementById('round').value ='1'
-            }
-
-            switchMatch();
-            await sync();
-
-        });
-
-    getElem('comp').addEventListener('change', switchMatch);
-    getElem('teams').addEventListener('change', switchTeam);
-    getElem('csv-share-all').addEventListener('click', async () => {
-        const shareData = {
-            title: "csv",
-            text: "CSV data",
-            file: await generateCSV('all-teams'),
-        };
-
-        navigator.share(shareData);
+        switchMatch();
+        await sync();
     });
 
-    getElem('.collapsible', 'queryAll').forEach((input) => {
+    document.getElementById('plus-button').addEventListener('click', async () => {
+        const new_value = Math.min(parseInt(document.getElementById('round').value) + 1, 90);
+        document.getElementById('round').value = new_value;
+
+        switchMatch();
+        await sync();
+    });
+
+    document.getElementById('round').addEventListener('change', async () => {
+        let new_value = parseInt(document.getElementById('round').value);
+        new_value = isNaN(new_value) ? 0: new_value;
+        new_value = Math.min(Math.max(Math.floor(new_value), 1), 90)
+
+        document.getElementById('round').value = new_value;
+
+        switchMatch();
+        await sync();
+    });
+
+    document.getElementById('comp').addEventListener('change', switchMatch);
+    document.getElementById('teams').addEventListener('change', switchTeam);
+    // document.getElementById('csv-share-all').addEventListener('click', async () => {
+    //     const shareData = {
+    //         title: "csv",
+    //         text: "CSV data",
+    //         file: await generateCSV('all-teams'),
+    //     };
+
+    //     navigator.share(shareData);
+    // });
+
+    Array.from(document.getElementsByClassName('collapsible')).forEach((input) => {
         input.addEventListener("click", (event) => openSection(event.target.id));
     });
 
-    getElem('.input', 'queryAll').forEach((input) => {
+    Array.from(document.getElementsByClassName('input')).forEach((input) => {
         input.addEventListener('input', sync);
     });
 
-    // getElem('export').addEventListener('change', (input) => {
-    //     exportTeam(input.target.value)
-    // });
-
     window.addEventListener('pointerdown', (event) => closeModal(event.target.id));
-    // window.addEventLxistener('touchstart', (event) => closeModal(event.target.id));
 
-    document.getElementById('share').addEventListener('click', startShare);
-    document.getElementById('quit-share').addEventListener('click', closeModal);
-    // getElem('retry-qrcode').addEventListener('click', async () => {
-    //     switch(getElem('retry-qrcode').value) {
-    //         case '1':
-    //                 const match = getMatch().split(',')
-    //             generateQRCode(await dbClient.getMatch(match[1], match[2], match[0]),
-    //                                 Math.min(innerHeight, innerWidth) * .6,
-    //                                 Math.min(innerHeight, innerWidth) * .6);
-
-    //                     getElem('qrcode-team').innerHTML = 'selected match: ' + (match[2] || 'NaN') + ', team: ' + (match[1] || 'NaN') + ', competition: ' +( match[0] || 'NaN');
-    //                 getElem('retry-qrcode').textContent = 'click this if qrcode still didn\'t generate'
-    //             getElem('retry-qrcode').value = '2'; case '2':
-    //             getElem('#qrcode, canvas', 'queryAll').forEach((i) => {
-    //         i.style.display=
-    //     'inline-block'
-    //             })
-    //             {}}
-    // })
-    document.getElementById('share-as').addEventListener('change', (event) => share(event.target.value));
-    document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
-    getElem('cameras').addEventListener('change', () => {
+    Array.from(document.getElementsByClassName('close-modal')).forEach((item) => {
+        item.addEventListener('click', closeModal);
+    });
+    document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
+    // document.getElementById('csv-download-all').addEventListener('click', downloadCSV);
+    document.getElementById('cameras').addEventListener('change', () => {
         closeScanner();
-        const id = getElem('cameras').value || ''
+        const id = document.getElementById('cameras').value || ''
         beginScan(id)
     })
-    // document.querySelectorAll('#qrcode, #qrcode-button').forEach((qrcodeToggle) => {
-    //     qrcodeToggle.addEventListener('click', toggleQRCode);
-    // });
 
+    document.getElementById('warning-label').innerHTML = `<b><u>WARNING!!</u></b><br><br>
+    <u>The site could not access the Service Worker (data handler)</u><br><br>
+    DO NOT TRY TO SCOUT IF THIS WARNING APPEARS WHEN THE SITE LOADS<br><br>
+    <b><u>Please try to reload</u></b>, or open a new tab if reloading does not work.`
 
-    getElem('.number', 'queryAll').forEach( (input) => {
+    document.querySelectorAll('input[type="text"]:not(#round)').forEach( (input) => {
         input.addEventListener('input', (event) => formatNumber(event));
 
         input.addEventListener('input', (event) => {
@@ -1127,13 +910,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sessionStorage.removeItem('session');
         }
     });
-
-    // window.addEventListener("beforeunload", function (e) {
-    //     var confirmationMessage = "\o/";
-        
-    //     (e || window.event).returnValue = confirmationMessage; //Gecko + IE
-    //     return confirmationMessage;                            //Webkit, Safari, Chrome
-    // });
 });
 
 window.beginScan = beginScan;
@@ -1144,21 +920,21 @@ window.download = download;
 window.downloadCSV = downloadCSV;
 window.emptyTeam = emptyTeam;
 window.encodeData = encodeData;
-// window.exportTeam = exportTeam;
 window.generateCSV = generateCSV;
-window.generateQRCode = generateQRCode;
-window.getElem = getElem;
+window.generateQrcode = generateQrcode;
 window.getMatch = getMatch;
 window.getTeam = getTeam;
 window.loadData = loadData;
 window.toggleQRCode = toggleQRCode;
 window.onLoad = onLoad;
 window.openSection = openSection;
+window.prepopulateTeams = prepopulateTeams;
 window.presentTeamData = presentTeamData;
 window.refreshTeams = refreshTeams;
 window.setMatch = setMatch;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
 window.session = session;
+window.openModal = openModal;
 
 window.dbClient = dbClient;

@@ -138,9 +138,8 @@ class DBController extends EventTarget {
         };
 
         let p = new Promise((r) => {
-            console.log('rq = ', rq);
             rq.onerror = (e) => {
-                console.log('error', e);
+                console.log(`error - ${e}, rq - ${rq}`);
             }
             rq.onsuccess = (e) => {
                 r(e.target.result);
@@ -166,9 +165,8 @@ class DBController extends EventTarget {
         };
 
         let p = new Promise((r) => {
-            console.log('rq = ', rq);
             rq.onerror = (e) => {
-                console.log('error', e);
+                console.log(`error - ${e}, rq - ${rq}`);
             }
             rq.onsuccess = (e) => {
                 r(e.target.result);
