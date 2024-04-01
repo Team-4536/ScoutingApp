@@ -49,6 +49,12 @@ const saveMatch = async (data) => {
     }
 };
 
+const throwError = () => {
+    try {
+        console.log(document.getElementById('a').style)
+    } catch(e) {console.error(e)}
+}
+
 const pushState = async (data, replace = false) => {
     let state;
 
@@ -104,7 +110,7 @@ const setMatch = (team, comp, round) => {
         document.getElementById('round').value = round;
     }
 
-    console.log('set match', team, comp, round);
+    // console.log('set match', team, comp, round);
 
     document.getElementById('teams').value = getMatch();
     // console.log(document.getElementById('a').style)
@@ -233,7 +239,7 @@ const closeModal = (id) => {
 		id = id.id ? id.id: id;
 		const modal = document.getElementById(id);
 
-        console.log('close modal id', id)
+        // console.log('close modal id', id)
         if (modal?.classList?.contains('modal') && id !== 'service-error') {
             modal.style.display = 'none';
         }
@@ -277,6 +283,12 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                 select_team_option.textContent = 'select team...'
                 select_team_option.selected = true;
                 new_select.appendChild(select_team_option);
+
+                let new_team_option = document.createElement('option');
+                new_team_option.value = 'new';
+                new_team_option.textContent = 'add new team...'
+                new_team_option.selected = false;
+                new_select.appendChild(new_team_option);
 
                 for (let matchObject of filteredMatches) {
                     let team_number = matchObject.teamNumber
@@ -555,7 +567,7 @@ const beginScan = async (id) => {
         await pushState(dataObject)
         presentTeamData(dataObject)
         closeScanner()
-        console.log('scanned data', dataObject)
+        // console.log('scanned data', dataObject)
     };
 
     const errorCallback = (error) => {
@@ -595,7 +607,7 @@ const generateQrcode = (teamData, length) => {
                 height: length
             });
 
-        console.log('encoded in a qrcode', `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
+        // console.log('encoded in a qrcode', `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     })
 }
 
@@ -748,7 +760,7 @@ const clearTeam = () => {
 };
 
 const switchTeam = async (event) => {
-    console.log('switched')
+    // console.log('switched')
     let select = event.target.value;
     document.getElementById('team-default').value = 'none'
     sessionStorage.setItem('station', 'none')
@@ -862,7 +874,7 @@ const sync = async () => {
     teamData.team = `${teamData.team}`
 
     if (teamData.team.length > 2) {
-        console.log('sunc', teamData)
+        // console.log('sunc', teamData)
         await saveMatch(teamData);
     }
 };
