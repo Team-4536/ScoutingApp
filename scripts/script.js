@@ -1020,8 +1020,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('edit-scouter').addEventListener('click', () => {
         let a = prompt('Scouter Name:')
 
-        if (a) { document.getElementById('scouter').textContent = a;
-        localStorage.setItem('scout', a)}
+        if (a && a.replace('.', ',', '-', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ' ').length !== 0) { document.getElementById('scouter').textContent = a;
+        localStorage.setItem('scout', a)} else {
+            document.getElementById('scouter').textContent = 'none';
+        localStorage.setItem('scout', 'none')
+        }
 
         sync()
     })
