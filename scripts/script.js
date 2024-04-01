@@ -33,6 +33,14 @@ const dataObject = JSON.stringify({
         'climb-others': null,
         'trap': null
     },
+
+    'post-game': {
+        'defense': null,
+        'forced-defence': null,
+        'break': null,
+        'disable': null,
+        'comments': ''
+    }
 });
 
 const saveMatch = async (data) => {    
@@ -41,7 +49,7 @@ const saveMatch = async (data) => {
     }
 };
 
-const pushState = (data, replace = false) => {
+const pushState = async (data, replace = false) => {
     let state;
 
     if (data.team) {
@@ -50,7 +58,7 @@ const pushState = (data, replace = false) => {
             comp: data.comp,
             round: data.round
         };
-    }else {
+    } else {
         state = {
             team: '',
             comp: data.comp,
@@ -61,10 +69,12 @@ const pushState = (data, replace = false) => {
     const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
         let url;
 
+let date = (await encodeData(Date.now())).substring(0, 8)
+
 if (data.team) {
-        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}&c=${date}`;
 } else {
-    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
+    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}&c=${date}`;
 }
 
     if (replace) {
@@ -102,42 +112,43 @@ const getMatch = () => {
     return [getTeam(), document.getElementById('comp').value, document.getElementById('round').value].join(',');
 }
 
-false ? prepopulateTeams: null;
+// false ? prepopulateTeams: null;
 
-const refreshTeams = async (team = false) => {
-    const teams = document.getElementById('teams');
-    const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
-    const match = getMatch().split(',');
-    const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
-    let newSelect = document.createElement('select');
+// const refreshTeams = async (team = false) => {
+//     return ''
+//     const teams = document.getElementById('teams');
+//     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
+//     const match = getMatch().split(',');
+//     const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
+//     let newSelect = document.createElement('select');
 
-    newSelect.setAttribute('id', 'teams')
-    {
-        let selectOption = document.createElement('option');
-        selectOption.value = 'select';
-        selectOption.selected = true;
-        selectOption.textContent = "Select team ...";
-        newSelect.add(selectOption);
+//     newSelect.setAttribute('id', 'teams')
+//     {
+//         let selectOption = document.createElement('option');
+//         selectOption.value = 'select';
+//         selectOption.selected = true;
+//         selectOption.textContent = "Select team ...";
+//         newSelect.add(selectOption);
 
-        let newOption = document.createElement('option');
-        newOption.value = 'new';
-        newOption.textContent = "New team ...";
-        newSelect.add(newOption);
-    }
+//         let newOption = document.createElement('option');
+//         newOption.value = 'new';
+//         newOption.textContent = "New team ...";
+//         newSelect.add(newOption);
+//     }
 
-    for (const team of teamNumbers) {
-        let teamOption = document.createElement('option');
-        teamOption.value = team;
-        teamOption.textContent = team[0];
-        if (team === selectedTeam) {
-            teamOption.selected = true;
-        }
-        newSelect.appendChild(teamOption);
-    }
+//     for (const team of teamNumbers) {
+//         let teamOption = document.createElement('option');
+//         teamOption.value = team;
+//         teamOption.textContent = team[0];
+//         if (team === selectedTeam) {
+//             teamOption.selected = true;
+//         }
+//         newSelect.appendChild(teamOption);
+//     }
 
-    teams.replaceWith(newSelect);
-    teams.value = getMatch();
-}
+//     teams.replaceWith(newSelect);
+//     teams.value = getMatch();
+// }
 
 
 const onLoad = async () => {
@@ -231,55 +242,69 @@ const closeModal = (id) => {
 	}
 }
 
-false ? refreshTeams: null;
+// false ? refreshTeams: null;
 
 const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification') => {
-    let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
+    try {
+        if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
+            let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
+            let arrayOfMatches = await fetch(jsonFilePath) 
+                .then((res) => { 
+                    return res.json();
+                }).catch((e) => console.warn(e));
 
-    let arrayOfMatches = await fetch(jsonFilePath) 
-        .then((res) => { 
-            return res.json();
-        });
+            arrayOfMatches = arrayOfMatches.Schedule;
 
-    arrayOfMatches = arrayOfMatches.Schedule;
+            let filteredMatches = arrayOfMatches.filter(obj => {
+                return obj.tournamentLevel === tournament && obj.matchNumber == match;
+            })[0].teams;
 
-    let filteredMatches = arrayOfMatches.filter(obj => {
-        return obj.tournamentLevel === tournament && obj.matchNumber == match;
-    })[0].teams;
+            let defaultTeam = filteredMatches.filter(team => {
+                return station && team.station === station;
+            })[0]?.teamNumber;
 
-    let defaultTeam = filteredMatches.filter(team => {
-        return station && team.station === station;
-    })[0]?.teamNumber;
+            defaultTeam ? setTeam(defaultTeam): clearTeam()
+            // if (defaultTeam) {
+            //     try {
+            //     const a = await dbClient.getMatch(defaultTeam);
 
-    {
-        let new_select = document.createElement('select');
-        new_select.setAttribute('id', 'teams');
-        new_select.addEventListener('change', switchTeam);
+            //     if (a) {
+            //         console.log('a', a)
+            //         presentTeamData(a);
+            //     }} catch(e) {console.warn(e)}
+            // }
+            console.log('went past a')
+            {
+                let new_select = document.createElement('select');
+                new_select.setAttribute('id', 'teams');
+                new_select.addEventListener('change', switchTeam);
 
-        let select_team_option = document.createElement('option');
-        select_team_option.value = 'select';
-        select_team_option.textContent = 'select team...'
-        select_team_option.selected = true;
-        new_select.appendChild(select_team_option);
+                let select_team_option = document.createElement('option');
+                select_team_option.value = 'select';
+                select_team_option.textContent = 'select team...'
+                select_team_option.selected = true;
+                new_select.appendChild(select_team_option);
 
-        for (let matchObject of filteredMatches) {
-            let team_number = matchObject.teamNumber
+                for (let matchObject of filteredMatches) {
+                    let team_number = matchObject.teamNumber
 
-            let option = document.createElement('option');
-            option.textContent = team_number
-            option.setAttribute('id', [team_number, comp, match].join(','))
+                    let option = document.createElement('option');
+                    option.textContent = team_number
+                    option.setAttribute('value', [team_number, comp, match].join(','))
 
-            option.selected = team_number === defaultTeam
-            team_number === defaultTeam && setMatch(team_number, comp, match)
-            openSection('auto')
+                    option.selected = team_number === defaultTeam
+                    team_number === defaultTeam && setMatch(team_number, comp, match)
+                    openSection('auto')
 
-            new_select.appendChild(option);
+                    new_select.appendChild(option);
+                }
+
+                document.getElementById('teams').replaceWith(new_select);
+            }
+
+            await pushState(scrapeTeamData())
         }
-
-        document.getElementById('teams').replaceWith(new_select);
-    }
-
-    pushState(scrapeTeamData())
+    } catch(e) {console.warn(e)}
 }
 
 const popState = async () => {
@@ -292,80 +317,85 @@ const loadData = async () => {
     await navigator.serviceWorker.ready;
     dbClient.getMatches().then(async () => {
 
-    let url = window.location.search;
-    let teamData = emptyTeam();
-    let push = false;
-    
-    console.log('url', location.origin + location.pathname + url)
+        let url = window.location.search;
+        let teamData = emptyTeam();
+        let push = false;
+        
+        console.log('url', location.origin + location.pathname + url)
 
-    const search = new URLSearchParams(url);
+        const search = new URLSearchParams(url);
 
-    if (search.has('data')) { // if URL has data param
-        const dataParam = search.get('data');
+        if (search.has('data')) { // if URL has data param
+            const dataParam = search.get('data');
 
-        console.log('has data param', dataParam);
+            console.log('has data param', dataParam);
 
-        const data = await decodeData(JSON.stringify({data: dataParam}));
+            const data = await decodeData(JSON.stringify({data: dataParam}));
 
-        if (data) { // if data param could be decoded
-            console.log('decoded data', data);
+            if (data) { // if data param could be decoded
+                console.log('decoded data', data);
 
-            teamData = data;
+                teamData = data;
 
-            push = true;
-        } else { // if data param could not be decoded
-            console.error('unable to decode data from URL');
-        }
-
-    } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
-        const compParam = search.get('comp');
-        const roundParam = search.get('round');
-
-        teamData.comp = compParam;
-        teamData.round = roundParam;
-
-        if (search.has('team')) { // if URL has team param
-            const teamParam = search.get('team');
-
-            console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
-
-            const match = await dbClient.getMatch(compParam, roundParam, teamParam);
-
-            if (match) { // if match exists
-                console.log('match exists', match);
-                teamData.team = teamParam;
-
-                teamData = match;
-            } else { // if match does not exist
-                console.log('match does not exist', teamParam, compParam, roundParam);
-                confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
+                push = true;
+            } else { // if data param could not be decoded
+                console.error('unable to decode data from URL');
             }
 
-        } else { // if URL does not have team param
-            console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
+        } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
+            const compParam = search.get('comp');
+            const roundParam = search.get('round');
+
+            teamData.comp = compParam;
+            teamData.round = roundParam;
+
+            if (search.has('team')) { // if URL has team param
+                const teamParam = search.get('team');
+
+                console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
+
+                const match = await dbClient.getMatch(compParam, roundParam, teamParam);
+
+                if (match) { // if match exists
+                    console.log('match exists', match);
+                    teamData.team = teamParam;
+
+                    teamData = match;
+                } else { // if match does not exist
+                    console.log('match does not exist', teamParam, compParam, roundParam);
+                    teamData = emptyTeam()
+                    teamData.team=teamParam
+                    teamData.comp=compParam
+                    teamData.round=roundParam
+                    saveMatch(teamData)
+                    // confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
+                }
+
+            } else { // if URL does not have team param
+                console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
+            }
         }
-    }
 
-    console.log('data presented on load', teamData)
+        console.log('data presented on load', teamData)
 
-    await presentTeamData(teamData, push);
+        await presentTeamData(teamData, push);
 
-    const sec = sessionStorage.getItem('sec');
-    document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level');
-    document.getElementById('team-default').value = sessionStorage.getItem('station');
-    prepopulateTeams(teamData.round, teamData.comp, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level'))
+        const sec = sessionStorage.getItem('sec');
+        document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
+        document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
+        prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice')
 
-    if (sec) {
-        openSection(sec);
-    } else {
-        openSection('auto');
-    }
+        if (sec) {
+            openSection(sec);
+        } else {
+            openSection('auto');
+        }
     }).catch(serviceWorkerMissingResponse)
 }
 
 const presentTeamData = async (teamData, push=false) => {
     if (teamData) {
-        const secs = ['auto', 'teleop'];
+        const secs = ['auto', 'teleop', 'post-game'];
 
         for (const sec of secs) {
             Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach((input) => {
@@ -383,8 +413,8 @@ const presentTeamData = async (teamData, push=false) => {
         }
     }
 
-    await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || 'grand-forks', teamData.round || '1');
+    // await refreshTeams();
+    setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || '1');
 
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -395,10 +425,10 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     if (push) {
-        pushState(teamData);
+        await pushState(teamData);
     }
 
-    await refreshTeams()
+    // await refreshTeams()
     if (validTeam(teamData.team)) {
         const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
@@ -427,7 +457,7 @@ const scrapeTeamData = () => {
     teamData.comp = document.getElementById('comp').value;
     teamData.round = document.getElementById('round').value;
 
-    const secs = ['auto', 'teleop'];
+    const secs = ['auto', 'teleop', 'post-game'];
 
     for (const sec of secs) {
         Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach((input) => {
@@ -512,7 +542,7 @@ const beginScan = async (id) => {
         const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
         const dataObject = await decodeData(data)
         saveMatch(dataObject).catch(serviceWorkerMissingResponse)
-        pushState(dataObject)
+        await pushState(dataObject)
         presentTeamData(dataObject)
         closeScanner()
         console.log('scanned data', dataObject)
@@ -562,11 +592,15 @@ const generateQrcode = (teamData, length) => {
 const generateTeamQrcode = async () => {
     const match = getMatch().split(',');
 
-    generateQrcode(await dbClient.getMatch(match[1], match[2], match[0]),
-                   Math.min(innerHeight, innerWidth) * .8,
-                   Math.min(innerHeight, innerWidth) * .8);
+    let thing = await dbClient.getMatch(match[1], match[2], match[0])
 
-    openModal('qrcode-div');
+    if (typeof thing === 'object') {
+        generateQrcode(thing,
+                    Math.min(innerHeight, innerWidth) - 45,
+                    Math.min(innerHeight, innerWidth) - 45);
+
+        openModal('qrcode-div');
+    }
 }
 
 const generateCSV = async (includeTopRow) => {
@@ -666,22 +700,22 @@ const validTeam = (team) => {
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
 }
 
-const switchMatch = () => {
+const switchMatch = async () => {
     const a = document.getElementById('round').value
     const b = document.getElementById('comp').value
     prepopulateTeams(a, b, document.getElementById('team-default').value, document.getElementById('tourn-level').value)
 
     if(a && b) {
-        pushState({team: '', round:a, comp:b})
+        await pushState({team: '', round:a, comp:b})
     } else {
-        pushState()
+        await pushState()
     }
 
     document.getElementById('teams').value = 'select';
 
     clearTeam()
     closeSections();
-    refreshTeams();
+    // refreshTeams();
 };
 
 const emptyTeam = () => {
@@ -704,8 +738,8 @@ const switchTeam = async (event) => {
         clearTeam();
         closeSections();
     }
-
-    if (select === 'new') {
+    
+    else if (select === 'new') {
         const newTeam = prompt('new team');
         
         if (!newTeam) {
@@ -723,7 +757,7 @@ const switchTeam = async (event) => {
 
                 await saveMatch(teamData);
 
-                await refreshTeams();
+                // await refreshTeams();
 
                 presentTeamData(teamData, true);
             } else if (newTeam.replace(/\D/g, '') !== newTeam) {
@@ -742,6 +776,9 @@ const switchTeam = async (event) => {
         const teamData = await dbClient.getMatch(comp, round, team);
         if (teamData) {
             presentTeamData(teamData, true);
+        } else {
+            saveMatch(scrapeTeamData())
+            sync()
         }
     }
 
@@ -811,16 +848,16 @@ const sync = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('load', loadData);
-    window.addEventListener('popstate', popState);
+    window.addEventListener('load', () => loadData().then(document.getElementById('load-block').style.display = 'none'));
+    window.addEventListener('popstate', () => popState().then(document.getElementById('load-block').style.display = 'none'));
 
-    onLoad();
+    onLoad()
 
     document.getElementById('minus-button').addEventListener('click', async () => {
         const new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);
         document.getElementById('round').value = new_value;
 
-        switchMatch();
+        await switchMatch();
         await sync();
     });
 
@@ -828,7 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const new_value = Math.min(parseInt(document.getElementById('round').value) + 1, 90);
         document.getElementById('round').value = new_value;
 
-        switchMatch();
+        await switchMatch();
         await sync();
     });
 
@@ -838,17 +875,17 @@ document.addEventListener('DOMContentLoaded', () => {
         new_value = Math.min(Math.max(Math.floor(new_value), 1), 90)
         document.getElementById('round').value = new_value;
 
-        switchMatch();
+        await switchMatch();
         await sync();
     });
 
     document.querySelectorAll('#tourn-level, #team-default').forEach((input) => {
         input.addEventListener('change', () => {
-            clearTeam()
             let match = document.getElementById('round').value;
             let comp = document.getElementById('comp').value;
             let station = document.getElementById('team-default').value;
             let tournamentLevel = document.getElementById('tourn-level').value;
+            clearTeam()
 
             sessionStorage.setItem('station', station)
             sessionStorage.setItem('tournament-level', tournamentLevel)
@@ -920,15 +957,15 @@ window.generateQrcode = generateQrcode;
 window.getMatch = getMatch;
 window.getTeam = getTeam;
 window.loadData = loadData;
-window.toggleQRCode = toggleQRCode;
 window.onLoad = onLoad;
+window.openModal = openModal;
 window.openSection = openSection;
 window.prepopulateTeams = prepopulateTeams;
 window.presentTeamData = presentTeamData;
-window.refreshTeams = refreshTeams;
-window.setMatch = setMatch;
+// window.refreshTeams = refreshTeams;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
-window.openModal = openModal;
+window.setMatch = setMatch;
+window.toggleQRCode = toggleQRCode;
 
 window.dbClient = dbClient;

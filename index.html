@@ -9,7 +9,7 @@
         <link rel="stylesheet" type="text/css" href="style.css">
     </head>
 
-    <body>
+    <body>        
         <div id="service-error" class="modal">
             <div class="modal-content">
                 <p id="warning-label"></p>
@@ -24,8 +24,9 @@
         <label>Competition:</label>
 
         <select id="comp">
-            <option value="eagan">Blue Twilight Week 0 (Eagan)</option>
-            <option selected value="grand-forks">Great Northern Regional (Grand Forks)</option>
+            <!-- <option value="eagan">Blue Twilight Week 0 (Eagan)</option> -->
+            <option value="grand-forks">Great Northern Regional (Grand Forks)</option>
+            <option value="granite-city">Granite City Regional (Saint Cloud)</option>
         </select>
 
         <label>Match:</label>
@@ -44,7 +45,7 @@
         </select>
 
         <select id="team-default" style="margin-left: 15px;">
-            <option value="none">No Default</option>
+            <option selected value="none">No Default</option>
             <option value="Red1">Red 1</option>
             <option value="Red2">Red 2</option>
             <option value="Red3">Red 3</option>
@@ -54,9 +55,9 @@
         </select>
 
         <select id="tourn-level" style="margin-left: 15px;">
-            <option value="none">Select Tournament Level</option>
+            <!-- <option value="none">Select Tournament Level</option> -->
             <option value="Practice">Practice</option>
-            <option value="Qualification">Qualifications</option>
+            <option selected value="Qualification">Qualifications</option>
             <option value="Playoff">Finals</option>
         </select>
         <br>
@@ -110,10 +111,10 @@
 
         <button class="collapsible" id="post-game">Post Game</button>
         <div class="section">
-            <label for="disable">Did they do any defense?</label>
+            <label for="defense">Did they do any defense?</label>
             <input id="defense" type="checkbox">
 
-            <label for="disable">If yes, were they forced to?</label>
+            <label for="forced-defense">If yes, were they forced to?</label>
             <input id="forced-defense" type="checkbox">
 
 
@@ -148,6 +149,8 @@
             <button id="close-scanner">Close Scanner</button>
         <select id="cameras"></select>
         </div>
+
+        <div class="loading" id="load-block">Loading ...</div>
 
         <script type="module">
           try {
