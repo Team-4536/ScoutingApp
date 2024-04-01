@@ -2,8 +2,7 @@
 
 import { DBClient } from '../app-client.js';
 import { stringify } from "./csv-stringify.js";
-//import { beginScan, closeScanner } from "../bundles/qr-scan.bundle.js";
-import { beginScan, closeScanner } from "./qr-scan-noop.js";
+import { beginScan, closeScanner } from "../bundles/qr-scan.bundle.js";
 
 const dbClient = new DBClient();
 let currentTeam;
@@ -884,8 +883,7 @@ const sync = async () => {
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('load', loadData);
+const pageInit = async () => {
     window.addEventListener('popstate', popState);
 
     onLoad();
@@ -990,7 +988,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('close-scanner').addEventListener('click', closeScanner);
-});
+
+    if (document.readyState == "complete") {
+        console.log("calling loadData");
+        loadData();
+    } else {
+        console.log("adding loadData event listener");
+        window.addEventListener('load', loadData);
+    }
+}
 
 window.beginScan = beginScan;
 window.closeScanner = closeScanner;
@@ -1018,3 +1024,11 @@ window.sync = sync;
 window.toggleQRCode = toggleQRCode;
 
 window.dbClient = dbClient;
+
+if (document.readyState != "loading") {
+    console.log("content is already loaded");
+    pageInit();
+} else {
+    console.log("adding page event listener");
+    document.addEventListener('DOMContentLoaded', pageInit);
+}

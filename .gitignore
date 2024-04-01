@@ -2,3 +2,5 @@
 \#*
 .\#*
 .DS_Store
+/bundles/
+/node_modules/
