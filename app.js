@@ -101,7 +101,7 @@ class DBController extends EventTarget {
         const rq = store.put(team);
         let p = new Promise((r) => {
             rq.onsuccess = (e) => {
-                r(e.target.result)
+                r(e.target.result);
             };
         });
     }
