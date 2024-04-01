@@ -10,6 +10,9 @@ const dataObject = JSON.stringify({
     'comp': '',
     'round': '',
     'team': '',
+    'scouter': '',
+    'alliance-role': '',
+    'tournament-level': '',
 
     'auto': {
         'left-zone': null,
@@ -49,9 +52,10 @@ const saveMatch = async (data) => {
     }
 };
 
-const throwError = () => {
+const throwError = (...logs) => {
     try {
-        console.log(document.getElementById('a').style)
+        console.log(...logs)
+        document.getElementById('a').style
     } catch(e) {console.error(e)}
 }
 
@@ -75,12 +79,11 @@ const pushState = async (data, replace = false) => {
     const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
         let url;
 
-let date = (await encodeData(Date.now())).substring(0, 8)
 
 if (data.team) {
-        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}&c=${date}`;
+        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
 } else {
-    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}&c=${date}`;
+    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
 }
 
     if (replace) {
@@ -252,7 +255,7 @@ const closeModal = (id) => {
 
 // false ? refreshTeams: null;
 
-const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification') => {
+const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined) => {
     const cMatch = getMatch()
     try {
         if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
@@ -296,7 +299,11 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                     let option = document.createElement('option');
                     option.textContent = team_number
                     option.setAttribute('value', [team_number, comp, match].join(','))
-                    if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
+                    if (sect) {
+                        openSection(sect)
+                    } else {
+                        if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
+                    }
 
                     option.selected = team_number === defaultTeam
                     team_number === defaultTeam && setMatch(team_number, comp, match)
@@ -398,12 +405,11 @@ const loadData = async () => {
         const sec = sessionStorage.getItem('sec');
         document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
         document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
-        prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice')
 
         if (sec) {
-            openSection(sec);
+            prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
         } else {
-            openSection('auto');
+            prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice')
         }
     }).catch(serviceWorkerMissingResponse))
 } catch {
@@ -478,6 +484,9 @@ const scrapeTeamData = () => {
     teamData.team = getTeam();
     teamData.comp = document.getElementById('comp').value;
     teamData.round = document.getElementById('round').value;
+    teamData.scouter = document.getElementById('scouter').textContent;
+    teamData['tournament-level'] = document.getElementById('tourn-level').value;
+    teamData['alliance-role'] = document.getElementById('team-default').value;
 
     const secs = ['auto', 'teleop', 'post-game'];
 
@@ -633,7 +642,8 @@ const generateCSV = async (includeTopRow) => {
         if (includeTopRow) {
             matchList.push([
                 'Team',
-                'Alliance',
+                'Alliance Role',
+                'Tournament Level',
                 'Match',
                 'Scouter',
                 'Did They Exit the Starting Zone?',
@@ -656,8 +666,15 @@ const generateCSV = async (includeTopRow) => {
                 'Could They Climb?',
                 'Could They Climb With Others?',
                 'Could They Score Trap?',
+                'Could They Do Floor Intake In Auto?',
+                'Could They Do Floor Intake In Teleop?',
                 'Could They Do Source Intake?',
-                'Could They Do Floor Intake?'
+
+                'Did They Use Defense?',
+                'Were They Forced To Use Defense?',
+                'Did They Break Or Loose A Part?',
+                'Did They Disable Or Stop Moving?',
+                'Comments'
             ]);
         } else {
             matchList.push([]);
@@ -668,14 +685,15 @@ const generateCSV = async (includeTopRow) => {
             const matchIndex = [];
             
             [
-                match?.team ?? 'NaN',
-                'NaN',
-                match?.round ?? 'NaN',
-                'NaN',
+                match?.team ?? 'N/A',
+                match?.['alliance-role'] ?? 'N/A',
+                match?.['tournament-level'] ?? 'N/A',
+                match?.round ?? 'N/A',
+                match?.scouter ?? 'N/A',
                 match?.auto?.['left-zone'] === true ? '1': '0'
             ].forEach(value => matchIndex.push(`${value}`));
 
-            const cons = ['amp', 'close\ speaker', 'far\ speaker'];
+            const cons = ['amp', 'closespeakershot', 'farspeakershot'];
             const sec = ['auto', 'auto', 'teleop', 'teleop', 'teleop'];
             const cats = ['succeeds', 'fails', 'succeeds', 'fails'];
 
@@ -686,11 +704,18 @@ const generateCSV = async (includeTopRow) => {
             }
 
             [
-                match?.teleop?.['source-intake'] === true ? '1': '0',,
-                match?.teleop?.['teleop-floor-intake'] === true ? '1': '0',
                 match?.teleop?.climb === true ? '1': '0',
                 match?.teleop?.['climb-others'] === true ? '1': '0',
                 match?.teleop?.trap === true ? '1': '0',
+                match?.teleop?.['auto-floor-intake'] === true ? '1': '0',
+                match?.teleop?.['teleop-floor-intake'] === true ? '1': '0',
+                match?.teleop?.['source-intake'] === true ? '1': '0',
+
+                match?.['post-game']?.defense === true ? '1': '0',
+                match?.['post-game']?.['forced-defense'] === true ? '1': '0',
+                match?.['post-game']?.break === true ? '1': '0',
+                match?.['post-game']?.disable === true ? '1': '0',
+                (match?.['post-game']?.comments ?? 'N/A') || 'None'
             ].forEach(value => matchIndex.push(`${value}`));
 
 
@@ -931,7 +956,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('scan-button').addEventListener('click', () => beginScan());
-    document.getElementById('download-csv').addEventListener('click', () => downloadCSV(false))
+    document.getElementById('download-csv').addEventListener('click', () => {downloadCSV(true)})
 
     document.getElementById('comp').addEventListener('change', switchMatch);
     document.getElementById('teams').addEventListener('change', switchTeam);
@@ -998,6 +1023,7 @@ window.presentTeamData = presentTeamData;
 window.saveMatch = saveMatch;
 window.scrapeTeamData = scrapeTeamData;
 window.setMatch = setMatch;
+window.sync = sync;
 window.toggleQRCode = toggleQRCode;
 
 window.dbClient = dbClient;
