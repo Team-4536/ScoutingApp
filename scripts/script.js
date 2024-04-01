@@ -107,6 +107,7 @@ const setMatch = (team, comp, round) => {
     console.log('set match', team, comp, round);
 
     document.getElementById('teams').value = getMatch();
+    // console.log(document.getElementById('a').style)
 }
 
 const getMatch = () => {
@@ -232,7 +233,7 @@ const closeModal = (id) => {
 		id = id.id ? id.id: id;
 		const modal = document.getElementById(id);
 
-        console.log(id)
+        console.log('close modal id', id)
         if (modal?.classList?.contains('modal') && id !== 'service-error') {
             modal.style.display = 'none';
         }
@@ -266,15 +267,6 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
             })[0]?.teamNumber;
 
             defaultTeam ? setTeam(defaultTeam): clearTeam()
-            // if (defaultTeam) {
-            //     try {
-            //     const a = await dbClient.getMatch(defaultTeam);
-
-            //     if (a) {
-            //         console.log('a', a)
-            //         presentTeamData(a);
-            //     }} catch(e) {console.warn(e)}
-            // }
             {
                 let new_select = document.createElement('select');
                 new_select.setAttribute('id', 'teams');
@@ -292,7 +284,7 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                     let option = document.createElement('option');
                     option.textContent = team_number
                     option.setAttribute('value', [team_number, comp, match].join(','))
-if(cMatch === [team_number, comp, match].join(',') ){ openSection('auto')}
+                    if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
 
                     option.selected = team_number === defaultTeam
                     team_number === defaultTeam && setMatch(team_number, comp, match)
@@ -303,8 +295,17 @@ if(cMatch === [team_number, comp, match].join(',') ){ openSection('auto')}
                 document.getElementById('teams').replaceWith(new_select);
             }
 
+            if (defaultTeam) {
+                let a
+                a = await dbClient.getMatch(document.getElementById('comp').value, `${document.getElementById('round').value}`, `${defaultTeam}`);
+    
+                if (a) {
+                    presentTeamData(a, false, false);
+            }}
+    
             await pushState(scrapeTeamData())
         }
+
     } catch(e) {console.warn(e)}
 }
 
@@ -399,7 +400,7 @@ const loadData = async () => {
 document.getElementById('load-block').style.display='none'
 }
 
-const presentTeamData = async (teamData, push=false) => {
+const presentTeamData = async (teamData, push=false, excludePreGame=false) => {
     if (teamData) {
         const secs = ['auto', 'teleop', 'post-game'];
 
@@ -420,28 +421,30 @@ const presentTeamData = async (teamData, push=false) => {
     }
 
     // await refreshTeams();
-    setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || '1');
+    if (!excludePreGame) {
+        setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || '1');
 
-    if (validTeam(teamData.team)) {
-        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+        if (validTeam(teamData.team)) {
+            const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
-        document.getElementById('teams').value = selected;
-    } else {
-        document.getElementById('teams').value = 'select';
-    }
+            document.getElementById('teams').value = selected;
+        } else {
+            document.getElementById('teams').value = 'select';
+        }
 
-    if (push) {
-        await pushState(teamData);
-    }
+        if (push) {
+            await pushState(teamData);
+        }
 
-    // await refreshTeams()
-    if (validTeam(teamData.team)) {
-        const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
+        // await refreshTeams()
+        if (validTeam(teamData.team)) {
+            const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
-        document.getElementById('teams').value = selected;
-    }  else {
-        document.getElementById('teams').value = 'select';
-    }
+            document.getElementById('teams').value = selected;
+        }  else {
+            document.getElementById('teams').value = 'select';
+        }
+    } 
 
     console.log('presented data: ', teamData)
 }
@@ -722,7 +725,17 @@ const switchMatch = async () => {
 
     clearTeam()
     closeSections();
-    // refreshTeams();
+
+    let team
+
+    try {
+        team = await dbClient.getMatch(currentTeam, b, a);
+    } catch {console.warn('Match ' + getMatch() + 'does not exist ):')}
+
+        if (team) {
+            presentTeamData(team)
+            openSection('auto')
+        }
 };
 
 const emptyTeam = () => {
