@@ -49,6 +49,13 @@ const dataObject = JSON.stringify({
 const saveMatch = async (data) => {    
     if (validTeam(data ? data.team: undefined) && data.comp && data.round) {
         await dbClient.putMatch(data);
+
+        // let key = [data.team, data.comp, data.round, data['tourn-round']].join(',')
+        // let a = [localStorage.getItem('team')];
+        // a = localStorage.getItem('team') ? []: a
+        // if ( !a ) { a = [] };
+        // a.push(key)
+        // if ([1, 2].includes(a.length) || a.split(' - ').includes(key)) {localStorage.setItem('team', a.join(' - ')) }
     }
 };
 
@@ -228,6 +235,14 @@ const onLoad = async () => {
             }
         }
     }
+
+    let scout = localStorage.getItem('scout') || 'scout'
+    if (scout) {
+    } else {
+        localStorage.setItem('none')
+    }
+
+    document.getElementById('scouter').textContent = scout
 }
 
 const openModal = (id) => {
@@ -356,6 +371,9 @@ const loadData = async () => {
 
             if (data) { // if data param could be decoded
                 console.log('decoded data', data);
+                saveMatch(data)
+                presentTeamData(data)
+                setMatch(data.team, data.comp, data.match)
 
                 teamData = data;
 
@@ -641,12 +659,17 @@ const generateCSV = async (includeTopRow) => {
         let statey = document.getElementById('download-opts').value
 
         if (statey === '1') {
-            let comp = document.getElementById('comp').value
             let round = document.getElementById('round').value
             let tournL = document.getElementById('tourn-level').value
 
             matches = matches.filter(obj => {
                 return obj.round === round && obj['tournament-level'] === tournL
+            })
+        } else if (statey === '2') {
+            matches = matches.filter(obj => {
+                return true;
+
+                return // code (:
             })
         }
 
@@ -991,8 +1014,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
     document.getElementById('cameras').addEventListener('change', () => {
         closeScanner();
-        const id = document.getElementById('cameras').value || ''
-        beginScan(id)
+        const id = document.getElementById('cameras').value || '';
+        beginScan(id);
+    });
+    document.getElementById('edit-scouter').addEventListener('click', () => {
+        let a = prompt('Scouter Name:')
+
+        if (a) { document.getElementById('scouter').textContent = a;
+        localStorage.setItem('scout', a)}
+
+        sync()
     })
 
     document.getElementById('warning-label').innerHTML = `<b><u>WARNING!!</u></b><br><br>

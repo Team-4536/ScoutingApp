@@ -11,7 +11,7 @@
     --darkGrey: #00000020;
 }
 
-img {
+.bad-image {
     width: 30vw;
     max-width: 300px;
 }
