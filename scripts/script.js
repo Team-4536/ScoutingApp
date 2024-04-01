@@ -2,6 +2,8 @@
 
 import { DBClient } from '../app-client.js';
 import { stringify } from "./csv-stringify.js";
+//import { beginScan, closeScanner } from "../bundles/qr-scan.bundle.js";
+import { beginScan, closeScanner } from "./qr-scan-noop.js";
 
 const dbClient = new DBClient();
 let currentTeam;
@@ -561,64 +563,6 @@ const formatNumber = event => {
     if (parseInt(event.target.value) > 999) {
         event.target.value = event.target.value.slice(0, -1);
     }
-}
-
-const beginScan = async (id) => {
-    let popup = document.getElementById('scanner')
-    popup.style.display = 'flex';
-    let cameras = await Html5Qrcode.getCameras()
-    const camerasscanner = document.getElementById('cameras')
-    const options = camerasscanner.querySelectorAll('option')
-    options.forEach((opt) => {
-        opt.remove()
-    })
-    cameras.forEach((cam) => {
-        const camera = document.createElement('option')
-        camera.textContent = cam.label
-        camera.value = cam.id
-        camera.selected = cam.id === id
-        camerasscanner.appendChild(camera)
-    })
-
-    let scanner = new Html5Qrcode('cameraStream', {
-    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
-    verbose: false
-    });
-
-    popup.scanner = scanner;
-
-    const callback = async (text, detail) => {
-        const data = JSON.parse(text.replace('https://scouting.minutebots.org/?data=', '')).data
-        const dataObject = await decodeData(data)
-        saveMatch(dataObject).catch(serviceWorkerMissingResponse)
-        await pushState(dataObject)
-        presentTeamData(dataObject)
-        closeScanner()
-        // console.log('scanned data', dataObject)
-    };
-
-    const errorCallback = (error) => {
-        // console.log('scanner error', error);
-    };
-
-    let framerate = 15;
-    
-    if (id) {
-        await scanner.start(id , { fps: framerate, verbose: true },
-                        callback, errorCallback);
-    } else {
-        await scanner.start({ facingMode: 'environment' }, { fps: framerate, verbose: true },
-                            callback, errorCallback);
-    }
-
-    scanner.applyVideoConstraints({ frameRate: framerate });
-}
-
-const closeScanner = () => {
-    let popup = document.getElementById('scanner');
-    popup.style.display = 'none';
-    popup.scanner && popup.scanner.stop();
-    popup.scanner = null;
 }
 
 const generateQrcode = (teamData, length) => {
