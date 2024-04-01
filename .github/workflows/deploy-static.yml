@@ -39,7 +39,9 @@ jobs:
           node-version: 21
           cache: 'npm'
       - run: npm ci
+      - run: mkdir assets/scan/
       - run: webpack
+      - run: find node_modules/dynamsoft-*/dist/*.wasm assets/scan/
       - run: rm -rf node_modules
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

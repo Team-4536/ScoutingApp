@@ -6,14 +6,14 @@ import * as CVR from "dynamsoft-capture-vision-router";
 import * as Utility from "dynamsoft-utility";
 
 Object.assign(Core.CoreModule.engineResourcePaths, {
-    std: "/wasm/",
-    dip: "/wasm/",
-    core: "/wasm/",
-    license: "/wasm/",
-    cvr: "/wasm/",
-    dbr: "/wasm/",
-    dce: "/wasm/",
-    utility: "/wasm/"
+    std: "/assets/scan/",
+    dip: "/assets/scan/",
+    core: "/assets/scan/",
+    license: "/assets/scan/",
+    cvr: "/assets/scan/",
+    dbr: "/assets/scan/",
+    dce: "/assets/scan/",
+    utility: "/assets/scan/"
 })
 
 //License.LicenseManager.initLicense();
