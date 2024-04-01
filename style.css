@@ -78,7 +78,7 @@ th {
     margin-left: 10px;
 }
 
-input, button:not(.collapsible, .exclude), textarea, select {
+input, button:not(.collapsible, .exclude), textarea, select:not(.exclude) {
     border-radius: 7px;
     border-width: 2px;
     border-top-color: black;
@@ -131,7 +131,7 @@ input[type="text"]:disabled {
     background-color: var(--disabledBackground);
 }
 
-select:not(#comp, #round, #teams, #tourn-level, #team-default, #share-as, #qrcode-comp, #qrcode-round, #qrcode-team) {
+select:not(#comp, #round, #teams, #tourn-level, #team-default, #share-as, #qrcode-comp, .exclude, #qrcode-round, #qrcode-team) {
     width: 7em;
     font-size: 16px;
 }
@@ -147,7 +147,7 @@ select:not(#comp, #round, #teams, #tourn-level, #team-default, #share-as, #qrcod
     display: block;
 }
 
-#comp, #tourn-level, #team-default, #round, #teams, select, #share-as, #qrcode-comp, #qrcode-round, #qrcode-team {
+#comp, #tourn-level, #team-default, #round, #teams, select:not(.exclude), #share-as, #qrcode-comp, #qrcode-round, #qrcode-team {
     width: auto;
     font-size: 16px;
 }

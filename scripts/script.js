@@ -486,7 +486,7 @@ const scrapeTeamData = () => {
     teamData.round = document.getElementById('round').value;
     teamData.scouter = document.getElementById('scouter').textContent;
     teamData['tournament-level'] = document.getElementById('tourn-level').value;
-    teamData['alliance-role'] = document.getElementById('team-default').value;
+    teamData['alliance-role'] = document.getElementById('team-default').value.replace('1', ' 1').replace('2', ' 2').replace('3', ' 3');
 
     const secs = ['auto', 'teleop', 'post-game'];
 
@@ -637,7 +637,18 @@ const generateTeamQrcode = async () => {
 const generateCSV = async (includeTopRow) => {
     const flattenTeams = async () => {
         let matchList = [];
-        const matches = await dbClient.getMatches();
+        let matches = await dbClient.getMatches();
+        let statey = document.getElementById('download-opts').value
+
+        if (statey === '1') {
+            let comp = document.getElementById('comp').value
+            let round = document.getElementById('round').value
+            let tournL = document.getElementById('tourn-level').value
+
+            matches = matches.filter(obj => {
+                return obj.round === round && obj['tournament-level'] === tournL
+            })
+        }
 
         if (includeTopRow) {
             matchList.push([
@@ -853,15 +864,15 @@ const downloadCSV = (includeTopRow = false) => {
 }
 
 const closeSections = (saveSec = '') => {
-    const sections = document.getElementsByClassName('collapsible');
+    const sections = Array.from(document.getElementsByClassName('collapsible'));
 
-    for (let s of sections) {
+    for (let s of sections.filter(secti => secti.id !== saveSec)) {
         s.classList.remove('active');
         s.classList.add('inactive');
         s.nextElementSibling.style.display = 'none';
     }
 
-    sessionStorage.setItem('sec', saveSec);
+    sessionStorage.setItem('sec', '');
 }
 
 const toggleQRCode = (boolean) => {
@@ -882,15 +893,17 @@ const toggleQRCode = (boolean) => {
     }
 }
 
-const openSection = (id) => {
-        const section = document.getElementById(id);
+const openSection = (id, target) => {
+    const section = document.getElementById(id);
 
     closeSections(id);
 
-    if (getTeam()) {
+    if ((!(target?.classList?.contains('active')) || target?.classList?.contains('inactive')) && getTeam()) {
         section.classList.remove("inactive");
         section.classList.add("active");
         section.nextElementSibling.style.display = "block";
+    } else {
+        closeSections()
     }
 }
 
@@ -962,7 +975,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('teams').addEventListener('change', switchTeam);
 
     Array.from(document.getElementsByClassName('collapsible')).forEach((input) => {
-        input.addEventListener("click", (event) => openSection(event.target.id));
+        input.addEventListener("click", (event) => openSection(event.target.id, event.target));
     });
 
     Array.from(document.getElementsByClassName('input')).forEach((input) => {
