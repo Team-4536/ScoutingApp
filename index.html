@@ -20,7 +20,7 @@
 
         <h1>MinuteBots Scouting</h1>
         <br>
-
+        <div style="display:inline-block">
         <label>Competition:</label>
 
         <select id="comp">
@@ -28,15 +28,17 @@
             <option value="grand-forks">Great Northern Regional (Grand Forks)</option>
             <option value="granite-city">Granite City Regional (Saint Cloud)</option>
         </select>
-
-        <label>Match:</label>
-
-        <input id="round" style="width:1.7em"></input>
-        <button id="plus-button"><b>+</b></button>
-        <button id="minus-button"><b>-</b></button>
+        </div>
+        <div style="display:inline-block">
+            <label>Match:</label>
+            <input id="round" style="width:1.7em"></input>
+            <button id="plus-button"><b>+</b></button>
+            <button id="minus-button"><b>-</b></button>
+        </div>
 
         <br>
 
+        <div style="display:inline-block">
         <label>Team:</label>
 
         <select id="teams">
@@ -60,6 +62,7 @@
             <option selected value="Qualification">Qualifications</option>
             <option value="Playoff">Finals</option>
         </select>
+        </div>
         <br>
     
         <button id="scan-button" style="margin-top: 10px;">Scan for qrcode</button>
@@ -75,8 +78,8 @@
 
             <table data-sec="auto">
                 <tr class="con"> <th></th> </tr>
-                <tr class="succeeds"><th>Successfully Scored</th> </tr>
-                <tr class="fails"><th>Failed to Score</th> </tr>
+                <tr class="succeeds"><th>Scored</th> </tr>
+                <tr class="fails"><th>Missed</th> </tr>
             </table>
             <br>
 
@@ -90,8 +93,8 @@
         <div class="section">
             <table data-sec="teleop">
                 <tr class="con"> <th></th> </tr>
-                <tr class="succeeds"> <th>Successfully Scored</th> </tr>
-                <tr class="fails"><th>Failed to Score</th> </tr>
+                <tr class="succeeds"> <th>Scored</th> </tr>
+                <tr class="fails"><th>Missed</th> </tr>
             </table>
             <br>
             <label for="source-intake">Could they do source intake?</label>
@@ -112,24 +115,24 @@
         <button class="collapsible" id="post-game">Post Game</button>
         <div class="section">
             <label for="defense">Did they do any defense?</label>
-            <input id="defense" type="checkbox">
+            <input class="input" id="defense" type="checkbox">
 
             <label for="forced-defense">If yes, were they forced to?</label>
-            <input id="forced-defense" type="checkbox">
+            <input class="input" id="forced-defense" type="checkbox">
 
 
             <br>
             <label for="break">Did they break or loose a part?</label>
-            <input id="break" type="checkbox">
+            <input class="input" id="break" type="checkbox">
 
             <br>
             <label for="disable">Did they disable or stop moving?</label>
-            <input id="disable" type="checkbox">
+            <input class="input" id="disable" type="checkbox">
 
             <br><br>
             <label>Any extra comments? Keep any comments short and objective.</label>
             <br>
-            <textarea id="comments"></textarea>
+            <textarea class="input" id="comments"></textarea>
         </div>
 
         <div class="center"><button id="generate-qrcode">Generate Qrcode</button></div>

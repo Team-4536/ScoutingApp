@@ -93,6 +93,7 @@ const getTeam = () => {
 }
 
 const setMatch = (team, comp, round) => {
+    team=`${team}`
     team && setTeam(team);
 
     if (comp) {
@@ -245,6 +246,7 @@ const closeModal = (id) => {
 // false ? refreshTeams: null;
 
 const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification') => {
+    const cMatch = getMatch()
     try {
         if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
             let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
@@ -273,7 +275,6 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
             //         presentTeamData(a);
             //     }} catch(e) {console.warn(e)}
             // }
-            console.log('went past a')
             {
                 let new_select = document.createElement('select');
                 new_select.setAttribute('id', 'teams');
@@ -291,10 +292,10 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                     let option = document.createElement('option');
                     option.textContent = team_number
                     option.setAttribute('value', [team_number, comp, match].join(','))
+if(cMatch === [team_number, comp, match].join(',') ){ openSection('auto')}
 
                     option.selected = team_number === defaultTeam
                     team_number === defaultTeam && setMatch(team_number, comp, match)
-                    openSection('auto')
 
                     new_select.appendChild(option);
                 }
@@ -314,8 +315,9 @@ const popState = async () => {
 }
 
 const loadData = async () => {
+    try {
     await navigator.serviceWorker.ready;
-    dbClient.getMatches().then(async () => {
+    (dbClient.getMatches().then(async () => {
 
         let url = window.location.search;
         let teamData = emptyTeam();
@@ -390,7 +392,11 @@ const loadData = async () => {
         } else {
             openSection('auto');
         }
-    }).catch(serviceWorkerMissingResponse)
+    }).catch(serviceWorkerMissingResponse))
+} catch {
+    document.getElementById('load-block').style.display='block'
+}
+document.getElementById('load-block').style.display='none'
 }
 
 const presentTeamData = async (teamData, push=false) => {
@@ -442,7 +448,8 @@ const presentTeamData = async (teamData, push=false) => {
 
 const serviceWorkerMissingResponse = () => {
     location.reload(true)
-    document.getElementById('service-error').style.display = 'block';
+    // document.getElementById('service-error').style.display = 'block';
+    document.getElementById('load-block').style.display = 'block';
 }
 
 const scrapeTeamData = () => {
@@ -826,7 +833,7 @@ const toggleQRCode = (boolean) => {
 }
 
 const openSection = (id) => {
-    const section = document.getElementById(id);
+        const section = document.getElementById(id);
 
     closeSections(id);
 
@@ -848,10 +855,10 @@ const sync = async () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.addEventListener('load', () => loadData().then(document.getElementById('load-block').style.display = 'none'));
-    window.addEventListener('popstate', () => popState().then(document.getElementById('load-block').style.display = 'none'));
+    window.addEventListener('load', loadData);
+    window.addEventListener('popstate', popState);
 
-    onLoad()
+    onLoad();
 
     document.getElementById('minus-button').addEventListener('click', async () => {
         const new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);

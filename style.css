@@ -11,12 +11,21 @@
     --darkGrey: #00000020;
 }
 
+img {
+    width: 30vw;
+    max-width: 300px;
+}
+
 body:not(.modal, #generate-qrcode, .center) {
     margin: 3px;
     cursor: default;
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+}
+
+body {
+    min-width: 500px;
 }
 
 h1, h2, label, th, p {
