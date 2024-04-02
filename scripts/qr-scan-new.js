@@ -63,7 +63,7 @@ const beginScan = async (id) => {
     popup.style.display = 'block';
     const router = await CVR.CaptureVisionRouter.createInstance();
     router.setInput(cameraEnhancer);
-            console.log("router is", router);
+    console.log("router is", router);
 
     const resultReceiver = new CVR.CapturedResultReceiver();
     resultReceiver.onDecodedBarcodesReceived = (result) => {
@@ -99,6 +99,10 @@ const beginScan = async (id) => {
 }
 
 const closeScanner = () => {
+    try {
+        cameraEnhancer.close();
+    } catch (e) {
+    }
     let popup = document.getElementById('scanner');
     popup.style.display = 'none';
 }
