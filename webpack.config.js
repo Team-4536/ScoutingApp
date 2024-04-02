@@ -24,14 +24,8 @@ module.exports = {
 };
 
 /*
-core.wasm
 core.worker.js
-cvr.wasm
 cvr.worker.js
-dbr.wasm
-dip.wasm
-license.wasm
 std.js
-std.wasm
 */
 

@@ -16,18 +16,45 @@ Object.assign(Core.CoreModule.engineResourcePaths, {
     utility: "/assets/scan/"
 })
 
-//License.LicenseManager.initLicense();
+const license = async () => {
+    const ls = window.localStorage;
 
-const cameraView = await DCE.CameraView.createInstance('/barcode-ui.html');
-const cameraEnhancer = await DCE.CameraEnhancer.createInstance(cameraView);
+    let key = ls.getItem("scan-license");
 
-console.log(cameraView);
+    do {
+        if (!key) {
+            key = prompt("Enter scanner license");
+            if (!key) {
+                return false;
+            }
+        }
+        try {
+            await License.LicenseManager.initLicense(key);
+        } catch (e) {
+            alert("invalid key");
+            key = null;
+        }
+    } while (!key);
+    ls.setItem("scan-license", key);
+    return true;
+}
 
-let popup = document.getElementById('scanner')
-
-popup.append(cameraView.getUIElement()); // Get default UI and append it to DOM.
+var cameraView;
+var cameraEnhancer;
 
 const beginScan = async (id) => {
+    if (!await license()) {
+        return
+    }
+
+    if (!cameraView) {
+        cameraView = await DCE.CameraView.createInstance('/barcode-ui.html');
+        cameraEnhancer = await DCE.CameraEnhancer.createInstance(cameraView);
+        let popup = document.getElementById('scanner')
+
+        popup.append(cameraView.getUIElement()); // Get default UI and append it to DOM.
+    }
+
     popup.style.display = 'block';
     const router = await CVR.CaptureVisionRouter.createInstance();
     router.setInput(cameraEnhancer);
