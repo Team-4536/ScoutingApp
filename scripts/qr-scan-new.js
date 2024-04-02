@@ -42,9 +42,14 @@ const license = async () => {
 var cameraView;
 var cameraEnhancer;
 
+var licensed = false;
+
 const beginScan = async (id) => {
-    if (!await license()) {
-        return
+    if (!licensed) {
+        licensed = await license();
+    }
+    if (!licensed) {
+        return;
     }
 
     let popup = document.getElementById('scanner')
