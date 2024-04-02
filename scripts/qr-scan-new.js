@@ -47,10 +47,10 @@ const beginScan = async (id) => {
         return
     }
 
+    let popup = document.getElementById('scanner')
     if (!cameraView) {
         cameraView = await DCE.CameraView.createInstance('/barcode-ui.html');
         cameraEnhancer = await DCE.CameraEnhancer.createInstance(cameraView);
-        let popup = document.getElementById('scanner')
 
         popup.append(cameraView.getUIElement()); // Get default UI and append it to DOM.
     }
