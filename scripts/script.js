@@ -238,10 +238,12 @@ const onLoad = async () => {
     }
 
     let scout = localStorage.getItem('scout') || 'scout'
-    if (scout) {
-    } else {
-        localStorage.setItem('none')
+    /* this will never happen
+    if (!scout) {
+        localStorage.setItem('scout', 'none')
     }
+    */
+        
 
     document.getElementById('scouter').textContent = scout
 }
