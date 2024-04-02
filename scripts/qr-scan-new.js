@@ -61,7 +61,7 @@ const beginScan = async (id) => {
         stream.append(cameraView.getUIElement()); // Get default UI and append it to DOM.
     }
 
-    popup.style.display = 'block';
+    popup.style.display = 'flex';
     const router = await CVR.CaptureVisionRouter.createInstance();
     router.setInput(cameraEnhancer);
     console.log("router is", router);
