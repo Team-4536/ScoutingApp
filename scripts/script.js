@@ -70,34 +70,36 @@ const throwError = (...logs) => {
 const pushState = async (data, replace = false) => {
     let state;
 
-    if (data.team) {
-        state = {
-            team: data.team,
-            comp: data.comp,
-            round: data.round
-        };
-    } else {
-        state = {
-            team: '',
-            comp: data.comp,
-            round: data.round
-        };
-    }
-    
-    const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
-        let url;
+    if (data.comp && data.round) {
+        if (data.team) {
+            state = {
+                team: data.team,
+                comp: data.comp,
+                round: data.round
+            };
+        } else {
+            state = {
+                team: '',
+                comp: data.comp,
+                round: data.round
+            };
+        }
+        
+        const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
+            let url;
 
 
-if (data.team) {
-        url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
-} else {
-    url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
-}
+        if (data.team) {
+            url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
+        } else {
+            url = `${location.origin}${location.pathname}?comp=${data.comp}&round=${data.round}`;
+        }
 
-    if (replace) {
-        history.replaceState(state, title, url);
-    } else {
-        history.pushState(state, title, url);
+        if (replace) {
+            history.replaceState(state, title, url);
+        } else {
+            history.pushState(state, title, url);
+        }
     }
 };
 
@@ -237,13 +239,11 @@ const onLoad = async () => {
         }
     }
 
-    let scout = localStorage.getItem('scout') || 'scout'
-    /* this will never happen
-    if (!scout) {
+    let scout = localStorage.getItem('scout') || 'none'
+
+    if (scout === 'none') {
         localStorage.setItem('scout', 'none')
-    }
-    */
-        
+    }        
 
     document.getElementById('scouter').textContent = scout
 }
@@ -275,6 +275,11 @@ const closeModal = (id) => {
 
 const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined) => {
     const cMatch = getMatch()
+
+    if (!station || station === 'none') {
+        clearTeam()
+    }
+
     try {
         if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
             let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
@@ -293,7 +298,10 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                 return station && team.station === station;
             })[0]?.teamNumber;
 
-            defaultTeam ? setTeam(defaultTeam): clearTeam()
+            if (defaultTeam) {
+                setTeam(defaultTeam)
+            }
+
             {
                 let new_select = document.createElement('select');
                 new_select.setAttribute('id', 'teams');
@@ -301,13 +309,13 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
 
                 let select_team_option = document.createElement('option');
                 select_team_option.value = 'select';
-                select_team_option.textContent = 'select team...'
+                select_team_option.textContent = 'Select Team...'
                 select_team_option.selected = true;
                 new_select.appendChild(select_team_option);
 
                 let new_team_option = document.createElement('option');
                 new_team_option.value = 'new';
-                new_team_option.textContent = 'add new team...'
+                new_team_option.textContent = 'Add New Team...'
                 new_team_option.selected = false;
                 new_select.appendChild(new_team_option);
 
@@ -338,11 +346,18 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
     
                 if (a) {
                     presentTeamData(a, false, false);
-            }}
+                } else {
+                    let data = emptyTeam()
+                    data.team = `${defaultTeam}`
+                    data.comp = document.getElementById('comp').value
+                    data.round = document.getElementById('round').value
+
+                    presentTeamData(data)
+                }
+            }
     
             await pushState(scrapeTeamData())
         }
-
     } catch(e) {console.warn(e)}
 }
 
@@ -439,7 +454,7 @@ const loadData = async () => {
 document.getElementById('load-block').style.display='none'
 }
 
-const presentTeamData = async (teamData, push=false, excludePreGame=false) => {
+const presentTeamData = async (teamData, push=false, excludePreGame=false, preserveMatch = false) => {
     if (teamData) {
         const secs = ['auto', 'teleop', 'post-game'];
 
@@ -461,7 +476,7 @@ const presentTeamData = async (teamData, push=false, excludePreGame=false) => {
 
     // await refreshTeams();
     if (!excludePreGame) {
-        setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || '1');
+        setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || (preserveMatch ? document.getElementById('round').value: '1'));
 
         if (validTeam(teamData.team)) {
             const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -739,19 +754,21 @@ const switchMatch = async () => {
 
     document.getElementById('teams').value = 'select';
 
-    clearTeam()
-    closeSections();
-
     let team
 
     try {
         team = await dbClient.getMatch(currentTeam, b, a);
-    } catch {console.warn('Match ' + getMatch() + 'does not exist ):')}
+    } catch {
+        console.warn('Match ' + getMatch() + 'does not exist ):')
+    }
 
-        if (team) {
-            presentTeamData(team)
-            openSection('auto')
-        }
+    if (team) {
+        clearTeam()
+        closeSections();    
+
+        presentTeamData(team)
+        openSection('auto')
+    }
 };
 
 const emptyTeam = () => {
@@ -760,7 +777,7 @@ const emptyTeam = () => {
 
 const clearTeam = () => {
     currentTeam = '';
-    presentTeamData(emptyTeam());
+    presentTeamData(emptyTeam(), false, false, true);
 };
 
 const switchTeam = async (event) => {
@@ -885,6 +902,20 @@ const sync = async () => {
     }
 };
 
+const callScout = () => {
+    let a = prompt('Scouter Name:');
+
+    if (a && /[1-9a-zA-Z]/g.test(a)) {
+        document.getElementById('scouter').textContent = a;
+        localStorage.setItem('scout', a)
+    } else if (a !== null && a !== '') {
+        alert('scouter name must include at least one letter or number in it.')
+        callScout()
+    }
+
+    sync()
+}
+
 const pageInit = async () => {
     window.addEventListener('popstate', popState);
 
@@ -922,7 +953,6 @@ const pageInit = async () => {
             let comp = document.getElementById('comp').value;
             let station = document.getElementById('team-default').value;
             let tournamentLevel = document.getElementById('tourn-level').value;
-            clearTeam()
 
             sessionStorage.setItem('station', station)
             sessionStorage.setItem('tournament-level', tournamentLevel)
@@ -957,15 +987,7 @@ const pageInit = async () => {
 
     document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
     document.getElementById('edit-scouter').addEventListener('click', () => {
-        let a = prompt('Scouter Name:')
-
-        if (a && a.replace('.', ',', '-', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', ' ').length !== 0) { document.getElementById('scouter').textContent = a;
-        localStorage.setItem('scout', a)} else {
-            document.getElementById('scouter').textContent = 'none';
-        localStorage.setItem('scout', 'none')
-        }
-
-        sync()
+        callScout()
     })
 
     document.getElementById('warning-label').innerHTML = `<b><u>WARNING!!</u></b><br><br>
