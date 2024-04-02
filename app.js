@@ -7,7 +7,7 @@ class CacheController extends EventTarget {
     constructor() {
         super();
         this.cache = null;
-        globalThis.caches.open("v1").then((c) => this.cache = c);
+        globalThis.caches.open("v2").then((c) => this.cache = c);
     }
     refresh() {
         console.log("cache refresh");
@@ -19,13 +19,20 @@ class CacheController extends EventTarget {
         console.log(`fetch ${request.url}`)
         let cached = await this.cache.match(request, { ignoreSearch: true });
         console.log("in cache", cached);
+        let all = await this.cache.matchAll(request, { ignoreSearch: true });
+        if (all.length > 1) {
+            console.error("CACHE MATCHED MULTIPLE ENTRIES");
+            console.log(all);
+        }
         if (!cached || navigator.onLine) {
             console.log("caching");
             let f = globalThis.fetch(request, { cache: "no-store" });
             return f.then((r) => {
                 console.log("resp", r);
                 let z = r.clone();
-                this.cache.put(request, r);
+                let u = new URL(request.url);
+                let creq = new Request(u);
+                this.cache.put(creq, r);
                 return z;
             }).catch(e => {
                 console.log("fail", e);
