@@ -954,11 +954,6 @@ const pageInit = async () => {
     });
 
     document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
-    document.getElementById('cameras').addEventListener('change', () => {
-        closeScanner();
-        const id = document.getElementById('cameras').value || '';
-        beginScan(id);
-    });
     document.getElementById('edit-scouter').addEventListener('click', () => {
         let a = prompt('Scouter Name:')
 
