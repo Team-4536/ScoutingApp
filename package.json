@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "build": "webpack"
+  },
   "dependencies": {
     "dynamsoft-barcode-reader": "^10.0.21",
     "dynamsoft-camera-enhancer": "^4.0.1",

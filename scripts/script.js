@@ -242,7 +242,7 @@ const onLoad = async () => {
     let scout = localStorage.getItem('scout') || 'none'
 
     if (scout === 'none') {
-        localStorage.setItem('none')
+        localStorage.setItem('scout', 'none')
     }        
 
     document.getElementById('scouter').textContent = scout
@@ -357,8 +357,6 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
             await pushState(scrapeTeamData())
         }
     } catch(e) {console.warn(e)}
-
-    throwError()
 }
 
 const popState = async () => {
