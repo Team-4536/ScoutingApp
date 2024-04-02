@@ -275,9 +275,11 @@ const closeModal = (id) => {
 
 const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined) => {
     const cMatch = getMatch()
-    if (station === 'none') {
+
+    if (!station || station === 'none') {
         clearTeam()
     }
+
     try {
         if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
             let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
