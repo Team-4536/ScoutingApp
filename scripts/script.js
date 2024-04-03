@@ -309,13 +309,13 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
 
                 let select_team_option = document.createElement('option');
                 select_team_option.value = 'select';
-                select_team_option.textContent = 'Select Team...'
+                select_team_option.textContent = 'Select team...'
                 select_team_option.selected = true;
                 new_select.appendChild(select_team_option);
 
                 let new_team_option = document.createElement('option');
                 new_team_option.value = 'new';
-                new_team_option.textContent = 'Add New Team...'
+                new_team_option.textContent = 'Add new team...'
                 new_team_option.selected = false;
                 new_select.appendChild(new_team_option);
 
@@ -461,15 +461,13 @@ const loadData = async () => {
 
         await presentTeamData(teamData, push);
 
-        const sec = sessionStorage.getItem('sec');
+        let sec = sessionStorage.getItem('sec');
+        let session = sessionStorage.getItem('station');
         document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
         document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
 
-        if (sec) {
-            prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
-        } else {
-            prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, sessionStorage.getItem('station'), sessionStorage.getItem('tournament-level') ?? 'Practice')
-        }
+        prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, session, sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
+
     }).catch(serviceWorkerMissingResponse))
 } catch {
     document.getElementById('load-block').style.display='block'
@@ -616,7 +614,7 @@ const generateQrcode = (teamData, length) => {
     encodeData(teamData).then((data) => {
         document.getElementById('qrcode').textContent = '';
 
-        let qrcodeDataObject = { 'ver': 1, 'data': data }
+        let qrcodeDataObject = { 'ver': 2, 'data': data }
 
         let url = new URL("https://scouting.minutebots.org");
         url.searchParams.set("data", JSON.stringify(qrcodeDataObject));
@@ -891,7 +889,7 @@ const closeSections = (saveSec = '') => {
         s.nextElementSibling.style.display = 'none';
     }
 
-    sessionStorage.setItem('sec', '');
+    sessionStorage.setItem('sec', saveSec);
 }
 
 const toggleQRCode = (boolean) => {
@@ -914,6 +912,9 @@ const toggleQRCode = (boolean) => {
 
 const openSection = (id, target) => {
     const section = document.getElementById(id);
+
+    sessionStorage.setItem('sec', id)
+    console.log(id)
 
     closeSections(id);
 
