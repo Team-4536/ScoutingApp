@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "webpack"
+    "build": "build-scripts/build.sh"
   },
   "dependencies": {
     "dynamsoft-barcode-reader": "^10.0.21",
