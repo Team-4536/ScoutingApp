@@ -44,7 +44,7 @@ var cameraEnhancer;
 
 var licensed = false;
 
-const beginScan = async (id) => {
+const beginScan = async (callback) => {
     if (!licensed) {
         licensed = await license();
     }
@@ -70,7 +70,8 @@ const beginScan = async (id) => {
     resultReceiver.onDecodedBarcodesReceived = (result) => {
         if (!result.barcodeResultItems.length) return;
 
-        console.log(result);
+        console.log("got qr", result);
+        callback(new URL(result.barcodeResultItems[0].text));
     };
     router.addResultReceiver(resultReceiver);
 

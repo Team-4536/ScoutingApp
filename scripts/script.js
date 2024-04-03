@@ -367,39 +367,62 @@ const popState = async () => {
     console.log('popState called');
 }
 
+const loadFromURL = async (url) => {
+    let search = url.searchParams;
+    const dataParam = search.get('data');
+
+    console.log('has data param', dataParam);
+
+    var data;
+    try {
+        let dataObj = JSON.parse(dataParam);
+        console.log("parsed data", dataObj);
+        //const data = await decodeData(JSON.stringify({data: dataParam}));
+        data = await decodeData(dataObj["data"]);
+    } catch (e) {
+        console.error(e);
+    }
+
+    if (data) { // if data param could be decoded
+        console.log('decoded data', data);
+        saveMatch(data)
+        presentTeamData(data)
+        setMatch(data.team, data.comp, data.match)
+    } else { // if data param could not be decoded
+        console.error('unable to decode data from URL');
+    }
+
+    return data;
+}
+
+const loadFromQRCode = (url) => {
+    console.log("LOAD FROM QR", url);
+    let newUrl = new URL(window.location.href);
+    newUrl.search = url.search;
+    window.location = newUrl;
+}
+
 const loadData = async () => {
     try {
     await navigator.serviceWorker.ready;
     (dbClient.getMatches().then(async () => {
 
-        let url = window.location.search;
+        let url = new URL(window.location.href);
         let teamData = emptyTeam();
         let push = false;
+        let replace = false;
         
-        console.log('url', location.origin + location.pathname + url)
+        console.log('url', url)
 
-        const search = new URLSearchParams(url);
+        const search = url.searchParams;
 
         if (search.has('data')) { // if URL has data param
-            const dataParam = search.get('data');
-
-            console.log('has data param', dataParam);
-
-            const data = await decodeData(JSON.stringify({data: dataParam}));
-
-            if (data) { // if data param could be decoded
-                console.log('decoded data', data);
-                saveMatch(data)
-                presentTeamData(data)
-                setMatch(data.team, data.comp, data.match)
-
+            let data = await loadFromURL(url);
+            if (data) {
                 teamData = data;
-
                 push = true;
-            } else { // if data param could not be decoded
-                console.error('unable to decode data from URL');
+                replace = true;
             }
-
         } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
             const compParam = search.get('comp');
             const roundParam = search.get('round');
@@ -556,6 +579,7 @@ const encodeData = async (data) => {
 }
 
 const decodeData = async (encodedData) => {
+    console.log("encoded = ", encodedData);
     try {
         const bytes = Uint8Array.from(atob(decodeURIComponent(encodedData)), c => c.charCodeAt(0));
         let blob = new Blob([bytes]);
@@ -563,6 +587,13 @@ const decodeData = async (encodedData) => {
         blob = await new Response(decoder).blob();
         const text = await blob.text();
 
+        console.log("decoded text", text);
+        var parsed;
+        try {
+            parsed = JSON.parse(text);
+        } catch (e) {
+            console.error(e);
+        }
         return JSON.parse(text);
     } catch (error) {
         console.error(`Error decoding data due to invalid data: "${error.message}"`);
@@ -587,12 +618,15 @@ const generateQrcode = (teamData, length) => {
 
         let qrcodeDataObject = { 'ver': 1, 'data': data }
 
-            new QRCode(document.getElementById('qrcode'), {
-                text: `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`,
-                correctLevel: QRCode.CorrectLevel.Q,
-                width: length,
-                height: length
-            });
+        let url = new URL("https://scouting.minutebots.org");
+        url.searchParams.set("data", JSON.stringify(qrcodeDataObject));
+
+        new QRCode(document.getElementById('qrcode'), {
+            text: url.href,
+            correctLevel: QRCode.CorrectLevel.Q,
+            width: length,
+            height: length
+        });
 
         // console.log('encoded in a qrcode', `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
     })
@@ -965,7 +999,8 @@ const pageInit = async () => {
         });
     });
 
-    document.getElementById('scan-button').addEventListener('click', () => beginScan());
+    document.getElementById('scan-button').addEventListener('click',
+                                                            () => beginScan(loadFromQRCode));
     document.getElementById('download-csv').addEventListener('click', () => {downloadCSV(true)})
 
     document.getElementById('comp').addEventListener('change', switchMatch);
