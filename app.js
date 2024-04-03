@@ -7,7 +7,7 @@ class CacheController extends EventTarget {
     constructor() {
         super();
         this.cache = null;
-        globalThis.caches.open("v2").then((c) => this.cache = c);
+        globalThis.caches.open("v3").then((c) => this.cache = c);
     }
     refresh() {
         console.log("cache refresh");
@@ -31,6 +31,10 @@ class CacheController extends EventTarget {
                 console.log("resp", r);
                 let z = r.clone();
                 let u = new URL(request.url);
+                if (u.toString().startsWith(registration.scope)) {
+                    u.search = '';
+                    u.fragment = '';
+                }
                 let creq = new Request(u);
                 this.cache.put(creq, r);
                 return z;
