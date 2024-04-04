@@ -273,8 +273,11 @@ const closeModal = (id) => {
 
 // false ? refreshTeams: null;
 
-const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined) => {
+const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined, present=true) => {
+    console.log('pre', match, comp, station, tournament, sect)
     const cMatch = getMatch()
+
+    station = station.replace(' ', '')
 
     if (!station || station === 'none') {
         clearTeam()
@@ -292,7 +295,10 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
 
             let filteredMatches = arrayOfMatches.filter(obj => {
                 return obj.tournamentLevel === tournament && obj.matchNumber == match;
-            })[0].teams;
+            });
+
+            if (filteredMatches && filteredMatches[0] && filteredMatches[0].teams) {
+                filteredMatches = filteredMatches[0].teams
 
             let defaultTeam = filteredMatches.filter(team => {
                 return station && team.station === station;
@@ -344,9 +350,9 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                 let a
                 a = await dbClient.getMatch(document.getElementById('comp').value, `${document.getElementById('round').value}`, `${defaultTeam}`);
     
-                if (a) {
+                if (a && present) {
                     presentTeamData(a, false, false);
-                } else {
+                } else if (present) {
                     let data = emptyTeam()
                     data.team = `${defaultTeam}`
                     data.comp = document.getElementById('comp').value
@@ -357,6 +363,10 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
             }
     
             await pushState(scrapeTeamData())
+            } else {
+                document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
+                match - 1 > 0 ? prepopulateTeams(match - 1, comp, station, tournament, sect): console.log('uhoh')
+            }
         }
     } catch(e) {console.warn(e)}
 }
@@ -377,7 +387,6 @@ const loadFromURL = async (url) => {
     try {
         let dataObj = JSON.parse(dataParam);
         console.log("parsed data", dataObj);
-        //const data = await decodeData(JSON.stringify({data: dataParam}));
         data = await decodeData(dataObj["data"]);
     } catch (e) {
         console.error(e);
@@ -386,7 +395,7 @@ const loadFromURL = async (url) => {
     if (data) { // if data param could be decoded
         console.log('decoded data', data);
         saveMatch(data)
-        presentTeamData(data)
+        // presentTeamData(data)
         setMatch(data.team, data.comp, data.match)
     } else { // if data param could not be decoded
         console.error('unable to decode data from URL');
@@ -404,13 +413,15 @@ const loadFromQRCode = (url) => {
 
 const loadData = async () => {
     try {
-    await navigator.serviceWorker.ready;
-    (dbClient.getMatches().then(async () => {
+        await navigator.serviceWorker.ready;
+        
+        dbClient.getMatches().catch( serviceWorkerMissingResponse )
 
         let url = new URL(window.location.href);
         let teamData = emptyTeam();
         let push = false;
         let replace = false;
+        let prepop = false;
         
         console.log('url', url)
 
@@ -418,10 +429,12 @@ const loadData = async () => {
 
         if (search.has('data')) { // if URL has data param
             let data = await loadFromURL(url);
+
             if (data) {
                 teamData = data;
                 push = true;
                 replace = true;
+                prepop = false;
             }
         } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
             const compParam = search.get('comp');
@@ -457,22 +470,37 @@ const loadData = async () => {
             }
         }
 
+        teamData['alliance-role'] = teamData?.['alliance-role'] || 'none'
+        teamData['tournament-level'] = teamData['tournament-level'] || 'Practice'
+
+        prepopulateTeams(teamData.round, teamData.comp, teamData['alliance-role'] || 'none', teamData['tournament-level'] || 'Practice')
+
         console.log('data presented on load', teamData)
 
-        await presentTeamData(teamData, push);
+        await presentTeamData(teamData, push, prepop);
 
-        let sec = sessionStorage.getItem('sec');
-        let session = sessionStorage.getItem('station');
-        document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
-        document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
+        // let sec = sessionStorage.getItem('sec');
+        // let session = sessionStorage.getItem('station');
+        // document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
+        // document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
 
-        prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, session, sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
+        prepopulateTeams(document.getElementById('round').value, teamData.comp, teamData['alliance-role'] || 'none', teamData['tournament-level'] || 'Practice', undefined, false)
+        // prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, session, sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
 
-    }).catch(serviceWorkerMissingResponse))
-} catch {
-    document.getElementById('load-block').style.display='block'
-}
-document.getElementById('load-block').style.display='none'
+        if (!prepop) {
+            // sessionStorage.setItem('tournament-level', teamData['tournament-level'] ?? 'Qualification');
+            // sessionStorage.setItem('station', teamData['alliance-role'] ?? 'none');
+            // document.getElementById('team-default').value = teamData['alliance-role'].replace(' ', '') ?? 'none'
+            // document.getElementById('tourn-level').value = teamData['tournament-level'] ?? 'Qualification'
+            // document.getElementById('teams').value = getMatch()
+            // console.log(getMatch())
+            // prepopulateTeams(teamData.round, teamData.comp, teamData['alliance-role'], teamData['tournament-level'])
+        }
+    } catch {
+        document.getElementById('service-error').style.display = 'block'
+    }
+
+    document.getElementById('load-block').style.display = 'none'
 }
 
 const presentTeamData = async (teamData, push=false, excludePreGame=false, preserveMatch = false) => {
@@ -519,9 +547,13 @@ const presentTeamData = async (teamData, push=false, excludePreGame=false, prese
         }  else {
             document.getElementById('teams').value = 'select';
         }
-    } 
+
+        document.getElementById('tourn-level').value = teamData['tournament-level'] || 'none';
+        document.getElementById('team-default').value = teamData['alliance-role'] || 'Practice';
+    }
 
     console.log('presented data: ', teamData)
+    // throwError()
 }
 
 const serviceWorkerMissingResponse = () => {
@@ -957,7 +989,8 @@ const pageInit = async () => {
     onLoad();
 
     document.getElementById('minus-button').addEventListener('click', async () => {
-        const new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);
+        let new_value = Math.max(parseInt(document.getElementById('round').value) - 1, 1);
+        new_value = isNaN(new_value) ? 1: new_value
         document.getElementById('round').value = new_value;
 
         await switchMatch();
@@ -965,7 +998,8 @@ const pageInit = async () => {
     });
 
     document.getElementById('plus-button').addEventListener('click', async () => {
-        const new_value = Math.min(parseInt(document.getElementById('round').value) + 1, 90);
+        let new_value = Math.min(parseInt(document.getElementById('round').value) + 1, 90)
+        new_value = isNaN(new_value) ? 1: new_value;
         document.getElementById('round').value = new_value;
 
         await switchMatch();
