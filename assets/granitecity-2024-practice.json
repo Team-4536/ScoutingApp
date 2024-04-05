@@ -1,112 +1,151 @@
 {
   "Schedule": [
     {
-      "description": "Match 1 (R1)",
-      "startTime": "2024-03-09T13:30:00",
+      "description": "Practice 1",
+      "startTime": "2024-04-05T12:00:00",
       "matchNumber": 1,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 9745,
+          "teamNumber": 7849,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 2530,
+          "teamNumber": 1816,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 3293,
+          "teamNumber": 4239,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 4539,
+          "teamNumber": 7578,
           "station": "Blue1",
           "surrogate": false
         },
         {
-          "teamNumber": 3277,
+          "teamNumber": 8516,
           "station": "Blue2",
           "surrogate": false
         },
         {
-          "teamNumber": 5172,
+          "teamNumber": 4480,
           "station": "Blue3",
           "surrogate": false
         }
       ]
     },
     {
-      "description": "Match 2 (R1)",
-      "startTime": "2024-03-09T13:39:00",
+      "description": "Practice 2",
+      "startTime": "2024-04-05T12:09:00",
       "matchNumber": 2,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 2508,
+          "teamNumber": 7048,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 7028,
+          "teamNumber": 2227,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 4198,
+          "teamNumber": 7257,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 7257,
+          "teamNumber": 3276,
           "station": "Blue1",
           "surrogate": false
         },
         {
-          "teamNumber": 4239,
+          "teamNumber": 2549,
           "station": "Blue2",
           "surrogate": false
         },
         {
-          "teamNumber": 3134,
+          "teamNumber": 7915,
           "station": "Blue3",
           "surrogate": false
         }
       ]
     },
     {
-      "description": "Match 3 (R1)",
-      "startTime": "2024-03-09T13:48:00",
+      "description": "Practice 3",
+      "startTime": "2024-04-05T12:18:00",
       "matchNumber": 3,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 9576,
+          "teamNumber": 876,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 876,
+          "teamNumber": 6709,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 3276,
+          "teamNumber": 5541,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 2450,
+          "teamNumber": 3300,
           "station": "Blue1",
           "surrogate": false
         },
         {
-          "teamNumber": 2883,
+          "teamNumber": 6749,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4536,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 4",
+      "startTime": "2024-04-05T12:27:00",
+      "matchNumber": 4,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 8255,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3755,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2667,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3297,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3313,
           "station": "Blue2",
           "surrogate": false
         },
@@ -118,29 +157,419 @@
       ]
     },
     {
-      "description": "Match 4 (R1)",
-      "startTime": "2024-03-09T13:57:00",
-      "matchNumber": 4,
+      "description": "Practice 5",
+      "startTime": "2024-04-05T12:36:00",
+      "matchNumber": 5,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 4536,
+          "teamNumber": 8887,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 5638,
+          "teamNumber": 4674,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 6175,
+          "teamNumber": 4778,
           "station": "Red3",
           "surrogate": false
         },
         {
+          "teamNumber": 9535,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 5172,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7677,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 6",
+      "startTime": "2024-04-05T12:45:00",
+      "matchNumber": 6,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 3740,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7858,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2883,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4607,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4728,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3848,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 7",
+      "startTime": "2024-04-05T12:54:00",
+      "matchNumber": 7,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 7028,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
           "teamNumber": 8188,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3277,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8878,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4539,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3275,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 8",
+      "startTime": "2024-04-05T13:03:00",
+      "matchNumber": 8,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 2509,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3102,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6045,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7038,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6175,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4226,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 9",
+      "startTime": "2024-04-05T13:12:00",
+      "matchNumber": 9,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 2538,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3130,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3058,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6146,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8372,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3134,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 10",
+      "startTime": "2024-04-05T13:21:00",
+      "matchNumber": 10,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 6709,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4536,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3276,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2667,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 5464,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8516,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 11",
+      "startTime": "2024-04-05T13:30:00",
+      "matchNumber": 11,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 6749,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7849,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3313,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 1816,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7048,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8887,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 12",
+      "startTime": "2024-04-05T13:39:00",
+      "matchNumber": 12,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 4480,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3300,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 5172,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2549,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8255,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4607,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 13",
+      "startTime": "2024-04-05T13:48:00",
+      "matchNumber": 13,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 4239,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7915,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8188,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2883,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4778,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3297,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 14",
+      "startTime": "2024-04-05T13:57:00",
+      "matchNumber": 14,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 7677,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8878,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4728,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3102,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 876,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3755,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 15",
+      "startTime": "2024-04-05T14:06:00",
+      "matchNumber": 15,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 6045,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3134,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4674,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 5541,
           "station": "Blue1",
           "surrogate": false
         },
@@ -150,16 +579,172 @@
           "surrogate": false
         },
         {
-          "teamNumber": 4663,
+          "teamNumber": 4539,
           "station": "Blue3",
           "surrogate": false
         }
       ]
     },
     {
-      "description": "Match 5 (R2)",
-      "startTime": "2024-03-09T14:06:00",
-      "matchNumber": 5,
+      "description": "Practice 16",
+      "startTime": "2024-04-05T14:15:00",
+      "matchNumber": 16,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 4226,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2538,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7028,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7257,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3740,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7038,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 17",
+      "startTime": "2024-04-05T14:24:00",
+      "matchNumber": 17,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 3058,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3275,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7578,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3130,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2509,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7858,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 18",
+      "startTime": "2024-04-05T14:33:00",
+      "matchNumber": 18,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 8372,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3848,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 9535,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2227,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3277,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6175,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 19",
+      "startTime": "2024-04-05T14:42:00",
+      "matchNumber": 19,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 8516,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8887,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2549,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8188,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2883,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 8255,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 20",
+      "startTime": "2024-04-05T14:51:00",
+      "matchNumber": 20,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
@@ -169,17 +754,212 @@
           "surrogate": false
         },
         {
-          "teamNumber": 3277,
+          "teamNumber": 2667,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 4539,
+          "teamNumber": 6749,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 4198,
+          "teamNumber": 7915,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4480,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3102,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 21",
+      "startTime": "2024-04-05T15:00:00",
+      "matchNumber": 21,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 4778,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3276,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 876,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3134,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4607,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7849,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 22",
+      "startTime": "2024-04-05T15:09:00",
+      "matchNumber": 22,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 4539,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7677,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6709,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3313,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4239,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3740,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 23",
+      "startTime": "2024-04-05T15:18:00",
+      "matchNumber": 23,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 3275,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3297,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 6146,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4536,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7038,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7048,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 24",
+      "startTime": "2024-04-05T15:27:00",
+      "matchNumber": 24,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 6175,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 7257,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3130,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 3277,
+          "station": "Blue1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 5541,
+          "station": "Blue2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 1816,
+          "station": "Blue3",
+          "surrogate": false
+        }
+      ]
+    },
+    {
+      "description": "Practice 25",
+      "startTime": "2024-04-05T15:36:00",
+      "matchNumber": 25,
+      "field": "Primary",
+      "tournamentLevel": "Practice",
+      "teams": [
+        {
+          "teamNumber": 5464,
+          "station": "Red1",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 9535,
+          "station": "Red2",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 2509,
+          "station": "Red3",
+          "surrogate": false
+        },
+        {
+          "teamNumber": 4728,
           "station": "Blue1",
           "surrogate": false
         },
@@ -189,436 +969,85 @@
           "surrogate": false
         },
         {
-          "teamNumber": 2508,
+          "teamNumber": 8372,
           "station": "Blue3",
           "surrogate": false
         }
       ]
     },
     {
-      "description": "Match 6 (R2)",
-      "startTime": "2024-03-09T14:15:00",
-      "matchNumber": 6,
+      "description": "Practice 26",
+      "startTime": "2024-04-05T15:45:00",
+      "matchNumber": 26,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 5464,
+          "teamNumber": 3848,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 2883,
+          "teamNumber": 4226,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 2450,
+          "teamNumber": 3300,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 8188,
+          "teamNumber": 4674,
           "station": "Blue1",
           "surrogate": false
         },
         {
-          "teamNumber": 6146,
+          "teamNumber": 3058,
           "station": "Blue2",
           "surrogate": false
         },
         {
-          "teamNumber": 4663,
+          "teamNumber": 8878,
           "station": "Blue3",
           "surrogate": false
         }
       ]
     },
     {
-      "description": "Match 7 (R2)",
-      "startTime": "2024-03-09T14:24:00",
-      "matchNumber": 7,
+      "description": "Practice 27",
+      "startTime": "2024-04-05T15:54:00",
+      "matchNumber": 27,
       "field": "Primary",
       "tournamentLevel": "Practice",
       "teams": [
         {
-          "teamNumber": 9745,
+          "teamNumber": 7858,
           "station": "Red1",
           "surrogate": false
         },
         {
-          "teamNumber": 2530,
+          "teamNumber": 7578,
           "station": "Red2",
           "surrogate": false
         },
         {
-          "teamNumber": 3293,
+          "teamNumber": 2227,
           "station": "Red3",
           "surrogate": false
         },
         {
-          "teamNumber": 7257,
+          "teamNumber": 3755,
           "station": "Blue1",
           "surrogate": false
         },
         {
-          "teamNumber": 4239,
+          "teamNumber": 6045,
           "station": "Blue2",
           "surrogate": false
         },
         {
-          "teamNumber": 3134,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 8 (R2)",
-      "startTime": "2024-03-09T14:33:00",
-      "matchNumber": 8,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9576,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 876,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3276,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4536,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5638,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 6175,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 9 (R3)",
-      "startTime": "2024-03-09T14:42:00",
-      "matchNumber": 9,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 3134,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4239,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 7257,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 8188,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 6146,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4663,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 10 (R3)",
-      "startTime": "2024-03-09T14:51:00",
-      "matchNumber": 10,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 4536,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5638,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 6175,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5172,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 11 (R4)",
-      "startTime": "2024-03-09T15:03:00",
-      "matchNumber": 11,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9745,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 2530,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3293,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 9576,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 876,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3276,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 12 (R4)",
-      "startTime": "2024-03-09T15:12:00",
-      "matchNumber": 12,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 5172,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 7257,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4239,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3134,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Match 13 (R5)",
-      "startTime": "2024-03-09T15:33:00",
-      "matchNumber": 13,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9745,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 2530,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3293,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5172,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Final 1",
-      "startTime": "2024-03-09T15:54:00",
-      "matchNumber": 14,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9576,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 876,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3276,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5172,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Final 2",
-      "startTime": "2024-03-09T16:15:00",
-      "matchNumber": 15,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9576,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 876,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3276,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5172,
-          "station": "Blue3",
-          "surrogate": false
-        }
-      ]
-    },
-    {
-      "description": "Final Tiebreaker",
-      "startTime": null,
-      "matchNumber": 16,
-      "field": "Primary",
-      "tournamentLevel": "Practice",
-      "teams": [
-        {
-          "teamNumber": 9576,
-          "station": "Red1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 876,
-          "station": "Red2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3276,
-          "station": "Red3",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 4539,
-          "station": "Blue1",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 3277,
-          "station": "Blue2",
-          "surrogate": false
-        },
-        {
-          "teamNumber": 5172,
+          "teamNumber": 2538,
           "station": "Blue3",
           "surrogate": false
         }
