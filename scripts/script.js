@@ -292,71 +292,79 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
 
             let filteredMatches = arrayOfMatches.filter(obj => {
                 return obj.tournamentLevel === tournament && obj.matchNumber == match;
-            })[0].teams;
+            });
 
-            let defaultTeam = filteredMatches.filter(team => {
-                return station && team.station === station;
-            })[0]?.teamNumber;
+            if (filteredMatches && filteredMatches[0] && filteredMatches[0].teams) {
+                filteredMatches = filteredMatches[0].teams;
 
-            if (defaultTeam) {
-                setTeam(defaultTeam)
-            }
+                let defaultTeam = filteredMatches.filter(team => {
+                    return station && team.station === station;
+                })[0]?.teamNumber;
 
-            {
-                let new_select = document.createElement('select');
-                new_select.setAttribute('id', 'teams');
-                new_select.addEventListener('change', switchTeam);
+                if (defaultTeam) {
+                    setTeam(defaultTeam)
+                }
 
-                let select_team_option = document.createElement('option');
-                select_team_option.value = 'select';
-                select_team_option.textContent = 'Select team...'
-                select_team_option.selected = true;
-                new_select.appendChild(select_team_option);
+                {
+                    let new_select = document.createElement('select');
+                    new_select.setAttribute('id', 'teams');
+                    new_select.addEventListener('change', switchTeam);
 
-                let new_team_option = document.createElement('option');
-                new_team_option.value = 'new';
-                new_team_option.textContent = 'Add new team...'
-                new_team_option.selected = false;
-                new_select.appendChild(new_team_option);
+                    let select_team_option = document.createElement('option');
+                    select_team_option.value = 'select';
+                    select_team_option.textContent = 'Select team...'
+                    select_team_option.selected = true;
+                    new_select.appendChild(select_team_option);
 
-                for (let matchObject of filteredMatches) {
-                    let team_number = matchObject.teamNumber
+                    let new_team_option = document.createElement('option');
+                    new_team_option.value = 'new';
+                    new_team_option.textContent = 'Add new team...'
+                    new_team_option.selected = false;
+                    new_select.appendChild(new_team_option);
 
-                    let option = document.createElement('option');
-                    option.textContent = team_number
-                    option.setAttribute('value', [team_number, comp, match].join(','))
-                    if (sect) {
-                        openSection(sect)
-                    } else {
-                        if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
+                    for (let matchObject of filteredMatches) {
+                        let team_number = matchObject.teamNumber
+
+                        let option = document.createElement('option');
+                        option.textContent = team_number
+                        option.setAttribute('value', [team_number, comp, match].join(','))
+                        if (sect) {
+                            openSection(sect)
+                        } else {
+                            if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
+                        }
+
+                        option.selected = team_number === defaultTeam
+                        team_number === defaultTeam && setMatch(team_number, comp, match)
+
+                        new_select.appendChild(option);
                     }
 
-                    option.selected = team_number === defaultTeam
-                    team_number === defaultTeam && setMatch(team_number, comp, match)
-
-                    new_select.appendChild(option);
+                    document.getElementById('teams').replaceWith(new_select);
                 }
 
-                document.getElementById('teams').replaceWith(new_select);
-            }
+                if (defaultTeam) {
+                    let a
+                    a = await dbClient.getMatch(document.getElementById('comp').value, `${document.getElementById('round').value}`, `${defaultTeam}`);
+        
+                    if (a) {
+                        presentTeamData(a, false, false);
+                    } else {
+                        let data = emptyTeam()
+                        data.team = `${defaultTeam}`
+                        data.comp = document.getElementById('comp').value
+                        data.round = document.getElementById('round').value
 
-            if (defaultTeam) {
-                let a
-                a = await dbClient.getMatch(document.getElementById('comp').value, `${document.getElementById('round').value}`, `${defaultTeam}`);
-    
-                if (a) {
-                    presentTeamData(a, false, false);
-                } else {
-                    let data = emptyTeam()
-                    data.team = `${defaultTeam}`
-                    data.comp = document.getElementById('comp').value
-                    data.round = document.getElementById('round').value
-
-                    presentTeamData(data)
+                        presentTeamData(data)
+                    }
                 }
+        
+                await pushState(scrapeTeamData())
+            } else {
+                document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
+
+                match - 1 > 0 && prepopulateTeams(match - 1, comp, station, tournament, sect)
             }
-    
-            await pushState(scrapeTeamData())
         }
     } catch(e) {console.warn(e)}
 }
@@ -511,7 +519,6 @@ const presentTeamData = async (teamData, push=false, excludePreGame=false, prese
             await pushState(teamData);
         }
 
-        // await refreshTeams()
         if (validTeam(teamData.team)) {
             const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
