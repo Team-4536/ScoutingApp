@@ -711,9 +711,10 @@ const generateCSV = async (includeTopRow) => {
                 'Did They Disable Or Stop Moving?',
                 'Comments'
             ]);
-        } else {
-            matchList.push([]);
         }
+        // else {
+        //     matchList.push([]);
+        // }
 
         for (let match of matches.entries()) {
             match = match[1];
