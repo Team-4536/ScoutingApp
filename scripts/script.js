@@ -396,6 +396,7 @@ const loadFromURL = async (url) => {
         saveMatch(data)
         presentTeamData(data)
         setMatch(data.team, data.comp, data.match)
+        prepopulateTeams(data.round, data.comp, data['alliance-role'], 'Qualification')
     } else { // if data param could not be decoded
         console.error('unable to decode data from URL');
     }
@@ -660,9 +661,10 @@ const generateCSV = async (includeTopRow) => {
         if (statey === '1') {
             let round = document.getElementById('round').value
             let tournL = document.getElementById('tourn-level').value
+            let comp = document.getElementById('comp').value
 
             matches = matches.filter(obj => {
-                return obj.round === round && obj['tournament-level'] === tournL
+                return obj.round === round && obj['tournament-level'] === tournL && obj.comp === comp
             })
         } else if (statey === '2') {
             matches = matches.filter(obj => {
@@ -1009,7 +1011,7 @@ const pageInit = async () => {
 
     document.getElementById('scan-button').addEventListener('click',
                                                             () => beginScan(loadFromQRCode));
-    document.getElementById('download-csv').addEventListener('click', () => {downloadCSV(true)})
+    document.getElementById('download-csv').addEventListener('click', () => {downloadCSV(false)})
 
     document.getElementById('comp').addEventListener('change', switchMatch);
     document.getElementById('teams').addEventListener('change', switchTeam);
