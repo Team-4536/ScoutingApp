@@ -1,1 +1,628 @@
-{}
+{
+	"Schedule": [
+	  {
+		"description": "Match 1 (R1)",
+		"startTime": "2024-04-07T13:45:00",
+		"matchNumber": 1,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": 7028,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 3276,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 6045,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 4728,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 3297,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 6175,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 2 (R1)",
+		"startTime": "2024-04-07T13:54:00",
+		"matchNumber": 2,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": 876,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 1816,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 8188,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 2883,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 9535,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 6146,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 3 (R1)",
+		"startTime": "2024-04-07T14:03:00",
+		"matchNumber": 3,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": 4607,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 4539,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 5464,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 6709,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 6749,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 2549,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 4 (R1)",
+		"startTime": "2024-04-07T14:12:00",
+		"matchNumber": 4,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": 3277,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 7257,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 4778,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 5172,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 3130,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": 4536,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 5 (R2)",
+		"startTime": "2024-04-07T14:21:00",
+		"matchNumber": 5,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 6 (R2)",
+		"startTime": "2024-04-07T14:30:00",
+		"matchNumber": 6,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 7 (R2)",
+		"startTime": "2024-04-07T14:39:00",
+		"matchNumber": 7,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 8 (R2)",
+		"startTime": "2024-04-07T14:48:00",
+		"matchNumber": 8,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 9 (R3)",
+		"startTime": "2024-04-07T14:57:00",
+		"matchNumber": 9,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 10 (R3)",
+		"startTime": "2024-04-07T15:06:00",
+		"matchNumber": 10,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 11 (R4)",
+		"startTime": "2024-04-07T15:18:00",
+		"matchNumber": 11,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 12 (R4)",
+		"startTime": "2024-04-07T15:27:00",
+		"matchNumber": 12,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Match 13 (R5)",
+		"startTime": "2024-04-07T15:48:00",
+		"matchNumber": 13,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Final 1",
+		"startTime": "2024-04-07T16:09:00",
+		"matchNumber": 14,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Final 2",
+		"startTime": "2024-04-07T16:30:00",
+		"matchNumber": 15,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  },
+	  {
+		"description": "Final Tiebreaker",
+		"startTime": "2024-04-07T16:51:00",
+		"matchNumber": 16,
+		"field": "Primary",
+		"tournamentLevel": "Playoff",
+		"teams": [
+		  {
+			"teamNumber": null,
+			"station": "Red1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Red3",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue1",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue2",
+			"surrogate": false
+		  },
+		  {
+			"teamNumber": null,
+			"station": "Blue3",
+			"surrogate": false
+		  }
+		]
+	  }
+	]
+  }
