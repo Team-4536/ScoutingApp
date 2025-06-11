@@ -1,54 +1,54 @@
 'use strict';
 
 import { DBClient } from '../app-client.js';
-import { stringify } from "./csv-stringify.js";
-import { beginScan, closeScanner } from "../bundles/qr-scan.bundle.js";
+import { stringify } from './csv-stringify.js';
+import { beginScan, closeScanner } from '../bundles/qr-scan.bundle.js';
 
 const dbClient = new DBClient();
 let currentTeam;
 
 const dataObject = JSON.stringify({
-    'comp': '',
-    'round': '',
-    'team': '',
-    'scouter': '',
+    comp: '',
+    round: '',
+    team: '',
+    scouter: '',
     'alliance-role': '',
     'tournament-level': '',
 
-    'auto': {
+    auto: {
         'left-zone': null,
 
-        'succeeds': {},
-        'fails': {},
+        succeeds: {},
+        fails: {},
 
-        'auto-floor-intake': null
+        'auto-floor-intake': null,
     },
 
-    'teleop': {
+    teleop: {
         'e-stop': null,
         'e-reason': '',
 
-        'succeeds': {},
-        'fails': {},
+        succeeds: {},
+        fails: {},
 
         'source-intake': null,
         'teleop-floor-intake': null,
-        'climb': null,
+        climb: null,
         'climb-others': null,
-        'trap': null
+        trap: null,
     },
 
     'post-game': {
-        'defense': null,
+        defense: null,
         'forced-defence': null,
-        'break': null,
-        'disable': null,
-        'comments': ''
-    }
+        break: null,
+        disable: null,
+        comments: '',
+    },
 });
 
-const saveMatch = async (data) => {    
-    if (validTeam(data ? data.team: undefined) && data.comp && data.round) {
+const saveMatch = async (data) => {
+    if (validTeam(data ? data.team : undefined) && data.comp && data.round) {
         await dbClient.putMatch(data);
 
         // let key = [data.team, data.comp, data.round, data['tourn-round']].join(',')
@@ -62,10 +62,12 @@ const saveMatch = async (data) => {
 
 const throwError = (...logs) => {
     try {
-        console.log(...logs)
-        document.getElementById('a').style
-    } catch(e) {console.error(e)}
-}
+        console.log(...logs);
+        document.getElementById('a').style;
+    } catch (e) {
+        console.error(e);
+    }
+};
 
 const pushState = async (data, replace = false) => {
     let state;
@@ -75,19 +77,18 @@ const pushState = async (data, replace = false) => {
             state = {
                 team: data.team,
                 comp: data.comp,
-                round: data.round
+                round: data.round,
             };
         } else {
             state = {
                 team: '',
                 comp: data.comp,
-                round: data.round
+                round: data.round,
             };
         }
-        
-        const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
-            let url;
 
+        const title = `MinuteBots Scouting - Team ${data.team} - Round ${data.round}`;
+        let url;
 
         if (data.team) {
             url = `${location.origin}${location.pathname}?team=${data.team}&comp=${data.comp}&round=${data.round}`;
@@ -105,20 +106,20 @@ const pushState = async (data, replace = false) => {
 
 const setTeam = (team) => {
     currentTeam = team;
-}
+};
 
 const getTeam = () => {
     return currentTeam;
-}
+};
 
 const setMatch = (team, comp, round) => {
-    team=`${team}`
+    team = `${team}`;
     team && setTeam(team);
 
     if (comp) {
         document.getElementById('comp').value = comp;
     }
-    
+
     if (round) {
         document.getElementById('round').value = round;
     }
@@ -127,55 +128,19 @@ const setMatch = (team, comp, round) => {
 
     document.getElementById('teams').value = getMatch();
     // console.log(document.getElementById('a').style)
-}
+};
 
 const getMatch = () => {
     return [getTeam(), document.getElementById('comp').value, document.getElementById('round').value].join(',');
-}
-
-// false ? prepopulateTeams: null;
-
-// const refreshTeams = async (team = false) => {
-//     return ''
-//     const teams = document.getElementById('teams');
-//     const selectedTeam = teams.selectedIndex >= 0 ? teams.options[teams.selectedIndex].value : null
-//     const match = getMatch().split(',');
-//     const teamNumbers = await dbClient.getMatchKeys(match[1], match[2]) || [];
-//     let newSelect = document.createElement('select');
-
-//     newSelect.setAttribute('id', 'teams')
-//     {
-//         let selectOption = document.createElement('option');
-//         selectOption.value = 'select';
-//         selectOption.selected = true;
-//         selectOption.textContent = "Select team ...";
-//         newSelect.add(selectOption);
-
-//         let newOption = document.createElement('option');
-//         newOption.value = 'new';
-//         newOption.textContent = "New team ...";
-//         newSelect.add(newOption);
-//     }
-
-//     for (const team of teamNumbers) {
-//         let teamOption = document.createElement('option');
-//         teamOption.value = team;
-//         teamOption.textContent = team[0];
-//         if (team === selectedTeam) {
-//             teamOption.selected = true;
-//         }
-//         newSelect.appendChild(teamOption);
-//     }
-
-//     teams.replaceWith(newSelect);
-//     teams.value = getMatch();
-// }
-
+};
 
 const onLoad = async () => {
     const cons = ['Amp', 'Close Speaker Shot', 'Far Speaker Shot'];
 
-    for (let {table, count} of [{table:'auto', count: 3}, {table: 'teleop', count: 3}]) {
+    for (let { table, count } of [
+        { table: 'auto', count: 3 },
+        { table: 'teleop', count: 3 },
+    ]) {
         const catItems = document.querySelector(`[data-sec=${table}]`).querySelectorAll('tr');
 
         for (let i = 0; i < count; i++) {
@@ -184,7 +149,7 @@ const onLoad = async () => {
 
                 if (j === 0) {
                     th.textContent = cons[i];
-                    th.style.textAlign = 'center'
+                    th.style.textAlign = 'center';
                 } else {
                     const minus = document.createElement('button');
                     const plus = document.createElement('button');
@@ -227,8 +192,8 @@ const onLoad = async () => {
                     const cat = catItems[j].className;
 
                     let con;
-                    
-                    con = j === 0 ? cons[i]: cons[i].toLowerCase().split(' ').slice(0).join('');
+
+                    con = j === 0 ? cons[i] : cons[i].toLowerCase().split(' ').slice(0).join('');
 
                     input.setAttribute('id', [table, cat, con].join('-'));
                     input.classList.add('table-input');
@@ -239,70 +204,77 @@ const onLoad = async () => {
         }
     }
 
-    let scout = localStorage.getItem('scout') || 'none'
+    let scout = localStorage.getItem('scout') || 'none';
 
     if (scout === 'none') {
-        localStorage.setItem('scout', 'none')
-    }        
+        localStorage.setItem('scout', 'none');
+    }
 
-    document.getElementById('scouter').textContent = scout
-}
+    document.getElementById('scouter').textContent = scout;
+};
 
 const openModal = (id) => {
-    id = id.id ? id.id: id;
+    id = id.id ? id.id : id;
     const modal = document.getElementById(id);
 
     modal.style.display = 'block';
-}
+};
 
 const closeModal = (id) => {
-	if (typeof id === 'string' || id.id) {
-		id = id.id ? id.id: id;
-		const modal = document.getElementById(id);
+    if (typeof id === 'string' || id.id) {
+        id = id.id ? id.id : id;
+        const modal = document.getElementById(id);
 
         // console.log('close modal id', id)
         if (modal?.classList?.contains('modal') && id !== 'service-error') {
             modal.style.display = 'none';
         }
-	} else {
-		Array.from(document.getElementsByClassName('modal')).forEach((modal) => {
-			modal.style.display = 'none';
-		});
-	}
-}
+    } else {
+        Array.from(document.getElementsByClassName('modal')).forEach((modal) => {
+            modal.style.display = 'none';
+        });
+    }
+};
 
 // false ? refreshTeams: null;
 
-const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefined, tournament = 'qualification', sect=undefined) => {
-    const cMatch = getMatch()
+const prepopulateTeams = async (
+    match = 1,
+    comp = 'emcc',
+    station = undefined,
+    tournament = 'qualification',
+    sect = undefined,
+) => {
+    const cMatch = getMatch();
 
     if (!station || station === 'none') {
-        clearTeam()
+        clearTeam();
     }
 
     try {
-        if (comp && tournament && (comp.replace('-', '') === "grandforks" || comp.replace('-', '') === "granitecity")) {
-            let jsonFilePath = `./assets/${comp.replace('-', '')}-2024-${tournament.toLowerCase()}.json`
-            let arrayOfMatches = await fetch(jsonFilePath) 
-                .then((res) => { 
+        if (comp && tournament && comp === 'emcc') {
+            let jsonFilePath = `./assets/${comp}-2024-${tournament.toLowerCase()}.json`;
+            let arrayOfMatches = await fetch(jsonFilePath)
+                .then((res) => {
                     return res.json();
-                }).catch((e) => console.warn(e));
+                })
+                .catch((e) => console.warn(e));
 
             arrayOfMatches = arrayOfMatches.Schedule;
 
-            let filteredMatches = arrayOfMatches.filter(obj => {
+            let filteredMatches = arrayOfMatches.filter((obj) => {
                 return obj.tournamentLevel === tournament && obj.matchNumber == match;
             });
 
             if (filteredMatches && filteredMatches[0] && filteredMatches[0].teams) {
                 filteredMatches = filteredMatches[0].teams;
 
-                let defaultTeam = filteredMatches.filter(team => {
+                let defaultTeam = filteredMatches.filter((team) => {
                     return station && team.station === station;
                 })[0]?.teamNumber;
 
                 if (defaultTeam) {
-                    setTeam(defaultTeam)
+                    setTeam(defaultTeam);
                 }
 
                 {
@@ -312,30 +284,32 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
 
                     let select_team_option = document.createElement('option');
                     select_team_option.value = 'select';
-                    select_team_option.textContent = 'Select team...'
+                    select_team_option.textContent = 'Select team...';
                     select_team_option.selected = true;
                     new_select.appendChild(select_team_option);
 
                     let new_team_option = document.createElement('option');
                     new_team_option.value = 'new';
-                    new_team_option.textContent = 'Add new team...'
+                    new_team_option.textContent = 'Add new team...';
                     new_team_option.selected = false;
                     new_select.appendChild(new_team_option);
 
                     for (let matchObject of filteredMatches) {
-                        let team_number = matchObject.teamNumber
+                        let team_number = matchObject.teamNumber;
 
                         let option = document.createElement('option');
-                        option.textContent = team_number
-                        option.setAttribute('value', [team_number, comp, match].join(','))
+                        option.textContent = team_number;
+                        option.setAttribute('value', [team_number, comp, match].join(','));
                         if (sect) {
-                            openSection(sect)
+                            openSection(sect);
                         } else {
-                            if(cMatch !== [team_number, comp, match].join(',') ){ openSection('auto')}
+                            if (cMatch !== [team_number, comp, match].join(',')) {
+                                openSection('auto');
+                            }
                         }
 
-                        option.selected = team_number === defaultTeam
-                        team_number === defaultTeam && setMatch(team_number, comp, match)
+                        option.selected = team_number === defaultTeam;
+                        team_number === defaultTeam && setMatch(team_number, comp, match);
 
                         new_select.appendChild(option);
                     }
@@ -344,36 +318,42 @@ const prepopulateTeams = async (match = 1, comp = "grandforks", station = undefi
                 }
 
                 if (defaultTeam) {
-                    let a
-                    a = await dbClient.getMatch(document.getElementById('comp').value, `${document.getElementById('round').value}`, `${defaultTeam}`);
-        
+                    let a;
+                    a = await dbClient.getMatch(
+                        document.getElementById('comp').value,
+                        `${document.getElementById('round').value}`,
+                        `${defaultTeam}`,
+                    );
+
                     if (a) {
                         presentTeamData(a, false, false);
                     } else {
-                        let data = emptyTeam()
-                        data.team = `${defaultTeam}`
-                        data.comp = document.getElementById('comp').value
-                        data.round = document.getElementById('round').value
+                        let data = emptyTeam();
+                        data.team = `${defaultTeam}`;
+                        data.comp = document.getElementById('comp').value;
+                        data.round = document.getElementById('round').value;
 
-                        presentTeamData(data)
+                        presentTeamData(data);
                     }
                 }
-        
-                await pushState(scrapeTeamData())
-            } else {
-                document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1
 
-                match - 1 > 0 && prepopulateTeams(match - 1, comp, station, tournament, sect)
+                await pushState(scrapeTeamData());
+            } else {
+                document.getElementById('round').value = parseInt(document.getElementById('round').value) - 1;
+
+                match - 1 > 0 && prepopulateTeams(match - 1, comp, station, tournament, sect);
             }
         }
-    } catch(e) {console.warn(e)}
-}
+    } catch (e) {
+        console.warn(e);
+    }
+};
 
 const popState = async () => {
     loadData();
 
     console.log('popState called');
-}
+};
 
 const loadFromURL = async (url) => {
     let search = url.searchParams;
@@ -384,129 +364,154 @@ const loadFromURL = async (url) => {
     var data;
     try {
         let dataObj = JSON.parse(dataParam);
-        console.log("parsed data", dataObj);
+        console.log('parsed data', dataObj);
         //const data = await decodeData(JSON.stringify({data: dataParam}));
-        data = await decodeData(dataObj["data"]);
+        data = await decodeData(dataObj['data']);
     } catch (e) {
         console.error(e);
     }
 
-    if (data) { // if data param could be decoded
+    if (data) {
+        // if data param could be decoded
         console.log('decoded data', data);
-        saveMatch(data)
-        presentTeamData(data)
-        setMatch(data.team, data.comp, data.match)
-        prepopulateTeams(data.round, data.comp, data['alliance-role'], 'Qualification')
-    } else { // if data param could not be decoded
+        saveMatch(data);
+        presentTeamData(data);
+        setMatch(data.team, data.comp, data.match);
+        prepopulateTeams(data.round, data.comp, data['alliance-role'], 'Qualification');
+    } else {
+        // if data param could not be decoded
         console.error('unable to decode data from URL');
     }
 
     return data;
-}
+};
 
 const loadFromQRCode = (url) => {
-    console.log("LOAD FROM QR", url);
+    console.log('LOAD FROM QR', url);
     let newUrl = new URL(window.location.href);
     newUrl.search = url.search;
     window.location = newUrl;
-}
+};
 
 const loadData = async () => {
     try {
-    await navigator.serviceWorker.ready;
-    (dbClient.getMatches().then(async () => {
+        await navigator.serviceWorker.ready;
+        dbClient
+            .getMatches()
+            .then(async () => {
+                let url = new URL(window.location.href);
+                let teamData = emptyTeam();
+                let push = false;
+                let replace = false;
 
-        let url = new URL(window.location.href);
-        let teamData = emptyTeam();
-        let push = false;
-        let replace = false;
-        
-        console.log('url', url)
+                console.log('url', url);
 
-        const search = url.searchParams;
+                const search = url.searchParams;
 
-        if (search.has('data')) { // if URL has data param
-            let data = await loadFromURL(url);
-            if (data) {
-                teamData = data;
-                push = true;
-                replace = true;
-            }
-        } else if (search.has('comp') && search.has('round')) { // if URL has comp and round param
-            const compParam = search.get('comp');
-            const roundParam = search.get('round');
+                if (search.has('data')) {
+                    // if URL has data param
+                    let data = await loadFromURL(url);
+                    if (data) {
+                        teamData = data;
+                        push = true;
+                        replace = true;
+                    }
+                } else if (search.has('comp') && search.has('round')) {
+                    // if URL has comp and round param
+                    const compParam = search.get('comp');
+                    const roundParam = search.get('round');
 
-            teamData.comp = compParam;
-            teamData.round = roundParam;
+                    teamData.comp = compParam;
+                    teamData.round = roundParam;
 
-            if (search.has('team')) { // if URL has team param
-                const teamParam = search.get('team');
+                    if (search.has('team')) {
+                        // if URL has team param
+                        const teamParam = search.get('team');
 
-                console.log('has team, comp, and round params', 'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam);
+                        console.log(
+                            'has team, comp, and round params',
+                            'team=' + teamParam + ', comp=' + compParam + ', round=' + roundParam,
+                        );
 
-                const match = await dbClient.getMatch(compParam, roundParam, teamParam);
+                        const match = await dbClient.getMatch(compParam, roundParam, teamParam);
 
-                if (match) { // if match exists
-                    console.log('match exists', match);
-                    teamData.team = teamParam;
+                        if (match) {
+                            // if match exists
+                            console.log('match exists', match);
+                            teamData.team = teamParam;
 
-                    teamData = match;
-                } else { // if match does not exist
-                    console.log('match does not exist', teamParam, compParam, roundParam);
-                    teamData = emptyTeam()
-                    teamData.team=teamParam
-                    teamData.comp=compParam
-                    teamData.round=roundParam
-                    saveMatch(teamData)
-                    // confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
+                            teamData = match;
+                        } else {
+                            // if match does not exist
+                            console.log('match does not exist', teamParam, compParam, roundParam);
+                            teamData = emptyTeam();
+                            teamData.team = teamParam;
+                            teamData.comp = compParam;
+                            teamData.round = roundParam;
+                            saveMatch(teamData);
+                            // confirm('team ' + teamParam + ' does not exist with match ' + roundParam + ' of the competition ' + compParam)
+                        }
+                    } else {
+                        // if URL does not have team param
+                        console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
+                    }
                 }
 
-            } else { // if URL does not have team param
-                console.log('has comp and round params', 'comp=' + compParam + ', round=' + roundParam);
-            }
-        }
+                console.log('data presented on load', teamData);
 
-        console.log('data presented on load', teamData)
+                await presentTeamData(teamData, push);
 
-        await presentTeamData(teamData, push);
+                let sec = sessionStorage.getItem('sec');
+                let session = sessionStorage.getItem('station');
+                document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
+                document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
 
-        let sec = sessionStorage.getItem('sec');
-        let session = sessionStorage.getItem('station');
-        document.getElementById('tourn-level').value = sessionStorage.getItem('tournament-level') ?? 'Practice';
-        document.getElementById('team-default').value = sessionStorage.getItem('station') ?? 'none';
+                prepopulateTeams(
+                    document.getElementById('round').value,
+                    document.getElementById('comp').value,
+                    session,
+                    sessionStorage.getItem('tournament-level') ?? 'Practice',
+                    sec,
+                );
+            })
+            .catch(serviceWorkerMissingResponse);
+    } catch {
+        document.getElementById('load-block').style.display = 'block';
+    }
+    document.getElementById('load-block').style.display = 'none';
+};
 
-        prepopulateTeams(document.getElementById('round').value, document.getElementById('comp').value, session, sessionStorage.getItem('tournament-level') ?? 'Practice', sec)
-
-    }).catch(serviceWorkerMissingResponse))
-} catch {
-    document.getElementById('load-block').style.display='block'
-}
-document.getElementById('load-block').style.display='none'
-}
-
-const presentTeamData = async (teamData, push=false, excludePreGame=false, preserveMatch = false) => {
+const presentTeamData = async (teamData, push = false, excludePreGame = false, preserveMatch = false) => {
     if (teamData) {
         const secs = ['auto', 'teleop', 'post-game'];
 
         for (const sec of secs) {
-            Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach((input) => {
-                const inputID = input.id;
-                const id = inputID.split('-');
+            Array.from(document.getElementById(sec).nextElementSibling.getElementsByClassName('input')).forEach(
+                (input) => {
+                    const inputID = input.id;
+                    const id = inputID.split('-');
 
-                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
-                    input.value = teamData?.[id[0]]?.[id[1]]?.[id[2]] ?? '';
-                } else { // non-table element
-                    const state = input.type === 'checkbox' ? 'checked' ?? false: 'value' ?? '';
+                    if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) {
+                        // auto or teleop table element
+                        input.value = teamData?.[id[0]]?.[id[1]]?.[id[2]] ?? '';
+                    } else {
+                        // non-table element
+                        const state = input.type === 'checkbox' ? 'checked' ?? false : 'value' ?? '';
 
-                    input[state] = teamData[sec][inputID];
-                }
-            });
+                        input[state] = teamData[sec][inputID];
+                    }
+                },
+            );
         }
     }
 
     // await refreshTeams();
     if (!excludePreGame) {
-        setMatch(teamData.team || '', teamData.comp || 'granite-city', teamData.round || (preserveMatch ? document.getElementById('round').value: '1'));
+        setMatch(
+            teamData.team || '',
+            teamData.comp || 'granite-city',
+            teamData.round || (preserveMatch ? document.getElementById('round').value : '1'),
+        );
 
         if (validTeam(teamData.team)) {
             const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
@@ -524,19 +529,19 @@ const presentTeamData = async (teamData, push=false, excludePreGame=false, prese
             const selected = `${teamData.team},${teamData.comp},${teamData.round}`;
 
             document.getElementById('teams').value = selected;
-        }  else {
+        } else {
             document.getElementById('teams').value = 'select';
         }
-    } 
+    }
 
-    console.log('presented data: ', teamData)
-}
+    console.log('presented data: ', teamData);
+};
 
 const serviceWorkerMissingResponse = () => {
-    location.reload(true)
+    location.reload(true);
     // document.getElementById('service-error').style.display = 'block';
     document.getElementById('load-block').style.display = 'block';
-}
+};
 
 const scrapeTeamData = () => {
     let teamData = emptyTeam();
@@ -551,7 +556,11 @@ const scrapeTeamData = () => {
     teamData.round = document.getElementById('round').value;
     teamData.scouter = document.getElementById('scouter').textContent;
     teamData['tournament-level'] = document.getElementById('tourn-level').value;
-    teamData['alliance-role'] = document.getElementById('team-default').value.replace('1', ' 1').replace('2', ' 2').replace('3', ' 3');
+    teamData['alliance-role'] = document
+        .getElementById('team-default')
+        .value.replace('1', ' 1')
+        .replace('2', ' 2')
+        .replace('3', ' 3');
 
     const secs = ['auto', 'teleop', 'post-game'];
 
@@ -561,19 +570,21 @@ const scrapeTeamData = () => {
                 const inputID = input.id;
                 const id = inputID.split('-');
 
-                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) { // auto or teleop table element
+                if (secs.includes(id[0]) && ['fails', 'succeeds'].includes(id[1])) {
+                    // auto or teleop table element
                     teamData[id[0]][id[1]][id[2]] = input.value;
-                } else { // non-table element
-                    const state = input.type === 'checkbox' ? 'checked': 'value';
+                } else {
+                    // non-table element
+                    const state = input.type === 'checkbox' ? 'checked' : 'value';
 
                     teamData[sec][inputID] = input[state];
                 }
             }
         });
     }
-    
+
     return teamData;
-}
+};
 
 const encodeData = async (data) => {
     const stream = new Blob([JSON.stringify(data)], { type: 'application/json' }).stream();
@@ -582,18 +593,18 @@ const encodeData = async (data) => {
     const ab = await blob.arrayBuffer();
 
     return encodeURIComponent(btoa(String.fromCharCode(...new Uint8Array(ab))));
-}
+};
 
 const decodeData = async (encodedData) => {
-    console.log("encoded = ", encodedData);
+    console.log('encoded = ', encodedData);
     try {
-        const bytes = Uint8Array.from(atob(decodeURIComponent(encodedData)), c => c.charCodeAt(0));
+        const bytes = Uint8Array.from(atob(decodeURIComponent(encodedData)), (c) => c.charCodeAt(0));
         let blob = new Blob([bytes]);
         const decoder = blob.stream().pipeThrough(new DecompressionStream('gzip'));
         blob = await new Response(decoder).blob();
         const text = await blob.text();
 
-        console.log("decoded text", text);
+        console.log('decoded text', text);
         var parsed;
         try {
             parsed = JSON.parse(text);
@@ -606,72 +617,70 @@ const decodeData = async (encodedData) => {
 
         return undefined;
     }
-}
+};
 
-const formatNumber = event => {
-    if (event.target.value[0] ==='0') {
+const formatNumber = (event) => {
+    if (event.target.value[0] === '0') {
         event.target.value = event.target.value.slice(1);
     }
 
     if (parseInt(event.target.value) > 999) {
         event.target.value = event.target.value.slice(0, -1);
     }
-}
+};
 
 const generateQrcode = (teamData, length) => {
     encodeData(teamData).then((data) => {
         document.getElementById('qrcode').textContent = '';
 
-        let qrcodeDataObject = { 'ver': 2, 'data': data }
+        let qrcodeDataObject = { ver: 2, data: data };
 
-        let url = new URL("https://scouting.minutebots.org");
-        url.searchParams.set("data", JSON.stringify(qrcodeDataObject));
+        let url = new URL('https://scouting.minutebots.org');
+        url.searchParams.set('data', JSON.stringify(qrcodeDataObject));
 
         new QRCode(document.getElementById('qrcode'), {
             text: url.href,
             correctLevel: QRCode.CorrectLevel.Q,
             width: length,
-            height: length
+            height: length,
         });
 
         // console.log('encoded in a qrcode', `https://scouting.minutebots.org/?data=${JSON.stringify(qrcodeDataObject)}`)
-    })
-}
+    });
+};
 
 const generateTeamQrcode = async () => {
     const match = getMatch().split(',');
 
-    let thing = await dbClient.getMatch(match[1], match[2], match[0])
+    let thing = await dbClient.getMatch(match[1], match[2], match[0]);
 
     if (typeof thing === 'object') {
-        generateQrcode(thing,
-                    Math.min(innerHeight, innerWidth) - 45,
-                    Math.min(innerHeight, innerWidth) - 45);
+        generateQrcode(thing, Math.min(innerHeight, innerWidth) - 45, Math.min(innerHeight, innerWidth) - 45);
 
         openModal('qrcode-div');
     }
-}
+};
 
 const generateCSV = async (includeTopRow) => {
     const flattenTeams = async () => {
         let matchList = [];
         let matches = await dbClient.getMatches();
-        let statey = document.getElementById('download-opts').value
+        let statey = document.getElementById('download-opts').value;
 
         if (statey === '1') {
-            let round = document.getElementById('round').value
-            let tournL = document.getElementById('tourn-level').value
-            let comp = document.getElementById('comp').value
+            let round = document.getElementById('round').value;
+            let tournL = document.getElementById('tourn-level').value;
+            let comp = document.getElementById('comp').value;
 
-            matches = matches.filter(obj => {
-                return obj.round === round && obj['tournament-level'] === tournL && obj.comp === comp
-            })
+            matches = matches.filter((obj) => {
+                return obj.round === round && obj['tournament-level'] === tournL && obj.comp === comp;
+            });
         } else if (statey === '2') {
-            matches = matches.filter(obj => {
+            matches = matches.filter((obj) => {
                 return true;
 
-                return // code (:
-            })
+                return; // code (:
+            });
         }
 
         if (includeTopRow) {
@@ -697,7 +706,7 @@ const generateCSV = async (includeTopRow) => {
                 'Auto-Far Speaker Fail',
                 'Teleop-Far Speaker Succeed',
                 'Teleop-Far Speaker Fail',
-                
+
                 'Could They Climb?',
                 'Could They Climb With Others?',
                 'Could They Score Trap?',
@@ -709,7 +718,7 @@ const generateCSV = async (includeTopRow) => {
                 'Were They Forced To Use Defense?',
                 'Did They Break Or Loose A Part?',
                 'Did They Disable Or Stop Moving?',
-                'Comments'
+                'Comments',
             ]);
         }
         // else {
@@ -719,15 +728,15 @@ const generateCSV = async (includeTopRow) => {
         for (let match of matches.entries()) {
             match = match[1];
             const matchIndex = [];
-            
+
             [
                 match?.team ?? 'N/A',
                 match?.['alliance-role'] ?? 'N/A',
                 match?.['tournament-level'] ?? 'N/A',
                 match?.round ?? 'N/A',
                 match?.scouter ?? 'N/A',
-                match?.auto?.['left-zone'] === true ? '1': '0'
-            ].forEach(value => matchIndex.push(`${value}`));
+                match?.auto?.['left-zone'] === true ? '1' : '0',
+            ].forEach((value) => matchIndex.push(`${value}`));
 
             const cons = ['amp', 'closespeakershot', 'farspeakershot'];
             const sec = ['auto', 'auto', 'teleop', 'teleop', 'teleop'];
@@ -740,26 +749,25 @@ const generateCSV = async (includeTopRow) => {
             }
 
             [
-                match?.teleop?.climb === true ? '1': '0',
-                match?.teleop?.['climb-others'] === true ? '1': '0',
-                match?.teleop?.trap === true ? '1': '0',
-                match?.teleop?.['auto-floor-intake'] === true ? '1': '0',
-                match?.teleop?.['teleop-floor-intake'] === true ? '1': '0',
-                match?.teleop?.['source-intake'] === true ? '1': '0',
+                match?.teleop?.climb === true ? '1' : '0',
+                match?.teleop?.['climb-others'] === true ? '1' : '0',
+                match?.teleop?.trap === true ? '1' : '0',
+                match?.teleop?.['auto-floor-intake'] === true ? '1' : '0',
+                match?.teleop?.['teleop-floor-intake'] === true ? '1' : '0',
+                match?.teleop?.['source-intake'] === true ? '1' : '0',
 
-                match?.['post-game']?.defense === true ? '1': '0',
-                match?.['post-game']?.['forced-defense'] === true ? '1': '0',
-                match?.['post-game']?.break === true ? '1': '0',
-                match?.['post-game']?.disable === true ? '1': '0',
-                (match?.['post-game']?.comments ?? 'N/A') || 'None'
-            ].forEach(value => matchIndex.push(`${value}`));
-
+                match?.['post-game']?.defense === true ? '1' : '0',
+                match?.['post-game']?.['forced-defense'] === true ? '1' : '0',
+                match?.['post-game']?.break === true ? '1' : '0',
+                match?.['post-game']?.disable === true ? '1' : '0',
+                (match?.['post-game']?.comments ?? 'N/A') || 'None',
+            ].forEach((value) => matchIndex.push(`${value}`));
 
             matchList.push(matchIndex ?? []);
         }
 
         return matchList;
-    }
+    };
 
     const teamList = await flattenTeams();
     const csv = stringify(teamList);
@@ -767,7 +775,7 @@ const generateCSV = async (includeTopRow) => {
     const file = new File([blob], 'csv.csv');
 
     return file;
-}
+};
 
 const download = async (file, fileName) => {
     const a = document.createElement('a');
@@ -775,47 +783,47 @@ const download = async (file, fileName) => {
     a.setAttribute('download', fileName);
 
     a.click();
-}
+};
 
 const validTeam = (team) => {
     const teamNum = parseInt(team) ?? false;
 
     return team && teamNum && Number.isInteger(teamNum) && [3, 4].includes(team.length);
-}
+};
 
 const switchMatch = async () => {
-    const a = document.getElementById('round').value
-    const b = document.getElementById('comp').value
-    prepopulateTeams(a, b, document.getElementById('team-default').value, document.getElementById('tourn-level').value)
+    const a = document.getElementById('round').value;
+    const b = document.getElementById('comp').value;
+    prepopulateTeams(a, b, document.getElementById('team-default').value, document.getElementById('tourn-level').value);
 
-    if(a && b) {
-        await pushState({team: '', round:a, comp:b})
+    if (a && b) {
+        await pushState({ team: '', round: a, comp: b });
     } else {
-        await pushState()
+        await pushState();
     }
 
     document.getElementById('teams').value = 'select';
 
-    let team
+    let team;
 
     try {
         team = await dbClient.getMatch(currentTeam, b, a);
     } catch {
-        console.warn('Match ' + getMatch() + 'does not exist ):')
+        console.warn('Match ' + getMatch() + 'does not exist ):');
     }
 
     if (team) {
-        clearTeam()
-        closeSections();    
+        clearTeam();
+        closeSections();
 
-        presentTeamData(team)
-        openSection('auto')
+        presentTeamData(team);
+        openSection('auto');
     }
 };
 
 const emptyTeam = () => {
     return JSON.parse(dataObject);
-}
+};
 
 const clearTeam = () => {
     currentTeam = '';
@@ -825,23 +833,21 @@ const clearTeam = () => {
 const switchTeam = async (event) => {
     // console.log('switched')
     let select = event.target.value;
-    document.getElementById('team-default').value = 'none'
-    sessionStorage.setItem('station', 'none')
+    document.getElementById('team-default').value = 'none';
+    sessionStorage.setItem('station', 'none');
     // document.getElementById('tourn-level').value = 'none'
 
     if (select === 'select') {
         clearTeam();
         closeSections();
-    }
-    
-    else if (select === 'new') {
+    } else if (select === 'new') {
         const newTeam = prompt('new team');
-        
+
         if (!newTeam) {
-            document.getElementById('teams').value = 'select'
+            document.getElementById('teams').value = 'select';
         } else {
             if (validTeam(newTeam)) {
-                clearTeam()
+                clearTeam();
                 let teamData = emptyTeam();
 
                 setTeam(newTeam);
@@ -857,10 +863,10 @@ const switchTeam = async (event) => {
                 presentTeamData(teamData, true);
             } else if (newTeam.replace(/\D/g, '') !== newTeam) {
                 confirm(newTeam + ' - please enter a valid team number');
-                document.getElementById('teams').value = 'select'
+                document.getElementById('teams').value = 'select';
             } else {
                 confirm(newTeam + ' is not a valid team number');
-                document.getElementById('teams').value = 'select'
+                document.getElementById('teams').value = 'select';
             }
         }
     } else if (select !== '') {
@@ -872,35 +878,39 @@ const switchTeam = async (event) => {
         if (teamData) {
             presentTeamData(teamData, true);
         } else {
-            saveMatch(scrapeTeamData())
-            sync()
+            saveMatch(scrapeTeamData());
+            sync();
         }
     }
 
     openSection('auto');
-}
+};
 
 const downloadCSV = (includeTopRow = false) => {
     const date = new Date();
-    const currentDate = [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') + 
-                        ', ' + `${date.getHours()}.` + `${date.getMinutes()}.` + date.getSeconds();
+    const currentDate =
+        [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-') +
+        ', ' +
+        `${date.getHours()}.` +
+        `${date.getMinutes()}.` +
+        date.getSeconds();
 
     const fileName = 'teams ' + currentDate + '.csv';
 
     download(generateCSV(includeTopRow), fileName);
-}
+};
 
 const closeSections = (saveSec = '') => {
     const sections = Array.from(document.getElementsByClassName('collapsible'));
 
-    for (let s of sections.filter(secti => secti.id !== saveSec)) {
+    for (let s of sections.filter((secti) => secti.id !== saveSec)) {
         s.classList.remove('active');
         s.classList.add('inactive');
         s.nextElementSibling.style.display = 'none';
     }
 
     sessionStorage.setItem('sec', saveSec);
-}
+};
 
 const toggleQRCode = (boolean) => {
     const qrcode = document.getElementById('qrcode');
@@ -908,38 +918,38 @@ const toggleQRCode = (boolean) => {
 
     if (boolean === 'none' || boolean === 'inline-block') {
         qrcode.style.display = boolean;
-        qrcodeButton.textContent = boolean === 'none' ? 'show qrcode': 'hide qrcode';
+        qrcodeButton.textContent = boolean === 'none' ? 'show qrcode' : 'hide qrcode';
     } else if (typeof boolean === 'boolean') {
-        qrcode.style.display = boolean ? 'inline-block': 'none';
-        qrcodeButton.textContent = boolean ? 'hide qrcode': 'show qrcode';
+        qrcode.style.display = boolean ? 'inline-block' : 'none';
+        qrcodeButton.textContent = boolean ? 'hide qrcode' : 'show qrcode';
     } else {
         const none = qrcode.style.display === 'none';
 
-        qrcode.style.display = none ? 'inline-block': 'none';
-        qrcodeButton.textContent = none ? 'hide qrcode': 'show qrcode';
+        qrcode.style.display = none ? 'inline-block' : 'none';
+        qrcodeButton.textContent = none ? 'hide qrcode' : 'show qrcode';
     }
-}
+};
 
 const openSection = (id, target) => {
     const section = document.getElementById(id);
 
-    sessionStorage.setItem('sec', id)
-    console.log(id)
+    sessionStorage.setItem('sec', id);
+    console.log(id);
 
     closeSections(id);
 
-    if ((!(target?.classList?.contains('active')) || target?.classList?.contains('inactive')) && getTeam()) {
-        section.classList.remove("inactive");
-        section.classList.add("active");
-        section.nextElementSibling.style.display = "block";
+    if ((!target?.classList?.contains('active') || target?.classList?.contains('inactive')) && getTeam()) {
+        section.classList.remove('inactive');
+        section.classList.add('active');
+        section.nextElementSibling.style.display = 'block';
     } else {
-        closeSections()
+        closeSections();
     }
-}
+};
 
 const sync = async () => {
     let teamData = scrapeTeamData();
-    teamData.team = `${teamData.team}`
+    teamData.team = `${teamData.team}`;
 
     if (teamData.team.length > 2) {
         // console.log('sunc', teamData)
@@ -952,14 +962,14 @@ const callScout = () => {
 
     if (a && /[1-9a-zA-Z]/g.test(a)) {
         document.getElementById('scouter').textContent = a;
-        localStorage.setItem('scout', a)
+        localStorage.setItem('scout', a);
     } else if (a !== null && a !== '') {
-        alert('scouter name must include at least one letter or number in it.')
-        callScout()
+        alert('scouter name must include at least one letter or number in it.');
+        callScout();
     }
 
-    sync()
-}
+    sync();
+};
 
 const pageInit = async () => {
     window.addEventListener('popstate', popState);
@@ -984,8 +994,8 @@ const pageInit = async () => {
 
     document.getElementById('round').addEventListener('change', async () => {
         let new_value = parseInt(document.getElementById('round').value);
-        new_value = isNaN(new_value) ? 0: new_value;
-        new_value = Math.min(Math.max(Math.floor(new_value), 1), 90)
+        new_value = isNaN(new_value) ? 0 : new_value;
+        new_value = Math.min(Math.max(Math.floor(new_value), 1), 90);
         document.getElementById('round').value = new_value;
 
         await switchMatch();
@@ -999,8 +1009,8 @@ const pageInit = async () => {
             let station = document.getElementById('team-default').value;
             let tournamentLevel = document.getElementById('tourn-level').value;
 
-            sessionStorage.setItem('station', station)
-            sessionStorage.setItem('tournament-level', tournamentLevel)
+            sessionStorage.setItem('station', station);
+            sessionStorage.setItem('tournament-level', tournamentLevel);
 
             if (match && comp && tournamentLevel) {
                 prepopulateTeams(match, comp, station ?? undefined, tournamentLevel);
@@ -1010,15 +1020,16 @@ const pageInit = async () => {
         });
     });
 
-    document.getElementById('scan-button').addEventListener('click',
-                                                            () => beginScan(loadFromQRCode));
-    document.getElementById('download-csv').addEventListener('click', () => {downloadCSV(false)})
+    document.getElementById('scan-button').addEventListener('click', () => beginScan(loadFromQRCode));
+    document.getElementById('download-csv').addEventListener('click', () => {
+        downloadCSV(false);
+    });
 
     document.getElementById('comp').addEventListener('change', switchMatch);
     document.getElementById('teams').addEventListener('change', switchTeam);
 
     Array.from(document.getElementsByClassName('collapsible')).forEach((input) => {
-        input.addEventListener("click", (event) => openSection(event.target.id, event.target));
+        input.addEventListener('click', (event) => openSection(event.target.id, event.target));
     });
 
     Array.from(document.getElementsByClassName('input')).forEach((input) => {
@@ -1031,17 +1042,17 @@ const pageInit = async () => {
         item.addEventListener('click', closeModal);
     });
 
-    document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode)
+    document.getElementById('generate-qrcode').addEventListener('click', generateTeamQrcode);
     document.getElementById('edit-scouter').addEventListener('click', () => {
-        callScout()
-    })
+        callScout();
+    });
 
     document.getElementById('warning-label').innerHTML = `<b><u>WARNING!!</u></b><br><br>
     <u>The site could not access the Service Worker (data handler)</u><br><br>
     DO NOT TRY TO SCOUT IF THIS WARNING APPEARS WHEN THE SITE LOADS<br><br>
-    <b><u>Please try to reload</u></b>, or open a new tab if reloading does not work.`
+    <b><u>Please try to reload</u></b>, or open a new tab if reloading does not work.`;
 
-    document.querySelectorAll('input[type="text"]:not(#round)').forEach( (input) => {
+    document.querySelectorAll('input[type="text"]:not(#round)').forEach((input) => {
         input.addEventListener('input', (event) => formatNumber(event));
 
         input.addEventListener('input', (event) => {
@@ -1054,14 +1065,14 @@ const pageInit = async () => {
 
     document.getElementById('close-scanner').addEventListener('click', closeScanner);
 
-    if (document.readyState == "complete") {
-        console.log("calling loadData");
+    if (document.readyState == 'complete') {
+        console.log('calling loadData');
         loadData();
     } else {
-        console.log("adding loadData event listener");
+        console.log('adding loadData event listener');
         window.addEventListener('load', loadData);
     }
-}
+};
 
 window.beginScan = beginScan;
 window.closeScanner = closeScanner;
@@ -1090,10 +1101,10 @@ window.toggleQRCode = toggleQRCode;
 
 window.dbClient = dbClient;
 
-if (document.readyState != "loading") {
-    console.log("content is already loaded");
+if (document.readyState != 'loading') {
+    console.log('content is already loaded');
     pageInit();
 } else {
-    console.log("adding page event listener");
+    console.log('adding page event listener');
     document.addEventListener('DOMContentLoaded', pageInit);
 }
